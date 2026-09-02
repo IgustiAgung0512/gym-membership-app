@@ -1,0 +1,279 @@
+.dashboard-page {
+    width: 100%;
+}
+
+.dashboard-stats {
+    margin-bottom: 2rem;
+}
+
+.dashboard-stat-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E4E9E2;
+    border-radius: 1rem;
+    padding: 1rem;
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-2px);
+    border-color: #DCE4D9;
+    box-shadow: 0 8px 20px rgba(40, 56, 47, 0.06);
+}
+
+.dashboard-stat-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.dashboard-stat-value {
+    color: #304238 !important;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.875rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.dashboard-stat-label {
+    color: #8D9790 !important;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.dashboard-main-grid {
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E4E9E2;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(40, 56, 47, 0.025);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    border-color: #DCE4D9;
+    box-shadow: 0 6px 18px rgba(40, 56, 47, 0.045);
+}
+
+.dashboard-chart-card {
+    padding: 1.25rem;
+}
+
+.dashboard-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-card-title {
+    color: #304238 !important;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.dashboard-card-subtitle {
+    color: #9DA59F !important;
+    font-size: 0.75rem;
+}
+
+.dashboard-chart-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 250px;
+}
+
+.dashboard-revenue-card {
+    padding: 1.25rem;
+}
+
+.dashboard-revenue-value {
+    color: #789313 !important;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.875rem;
+    line-height: 1.2;
+    font-weight: 700;
+    margin-top: 0.75rem;
+}
+
+.dashboard-revenue-description {
+    color: #9DA59F !important;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.dashboard-primary-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.625rem 1rem;
+    border-radius: 0.75rem;
+    background: #D5EA4D !important;
+    color: #283414 !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.dashboard-primary-button:hover {
+    background: #C9E33E !important;
+    transform: translateY(-1px);
+}
+
+.dashboard-recent-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-recent-card {
+    padding: 1.25rem;
+}
+
+.dashboard-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dashboard-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+.dashboard-recent-avatar {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.dashboard-checkin-avatar {
+    background: rgba(198, 224, 72, 0.16) !important;
+    color: #789313 !important;
+}
+
+.dashboard-member-avatar {
+    background: rgba(233, 133, 106, 0.10) !important;
+    color: #D87A5D !important;
+}
+
+.dashboard-recent-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.dashboard-recent-name {
+    color: #304238 !important;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dashboard-recent-meta {
+    color: #9DA59F !important;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-top: 0.125rem;
+}
+
+.dashboard-recent-time {
+    color: #8D9790 !important;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.dashboard-empty {
+    color: #9DA59F !important;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 1023px) {
+    .dashboard-chart-wrapper {
+        min-height: 220px;
+    }
+}
+
+@media (max-width: 767px) {
+    .dashboard-recent-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .dashboard-chart-wrapper {
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-stat-card {
+        padding: 0.875rem;
+    }
+
+    .dashboard-stat-value {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-stat-label {
+        font-size: 0.75rem;
+    }
+
+    .dashboard-chart-card,
+    .dashboard-revenue-card,
+    .dashboard-recent-card {
+        padding: 1rem;
+    }
+}
+
+/* =========================================================
+   RFID CHECK-IN MONITOR
+========================================================= */
+
+.rfid-checkin-pulse {
+    animation: rfidCheckinPulse 0.45s ease-out;
+}
+
+@keyframes rfidCheckinPulse {
+    0% {
+        opacity: 0.5;
+        transform: translateY(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

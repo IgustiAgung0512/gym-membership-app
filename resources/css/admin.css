@@ -1,0 +1,415 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #F5F4EE !important;
+}
+
+body {
+    color: #34443A !important;
+    overflow: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F5F4EE;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #D6DCD3;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #BEC8BD;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.min-h-screen.flex {
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+aside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 16rem;
+    height: 100vh;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #2D4338 !important;
+    border-right: 1px solid #3B5146 !important;
+    box-shadow: 4px 0 20px rgba(32, 51, 42, 0.08);
+}
+
+aside > div:first-child {
+    flex-shrink: 0;
+    border-bottom-color: #40564A !important;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.025),
+            rgba(255,255,255,0)
+        );
+}
+
+aside > div:first-child .bg-volt {
+    background: linear-gradient(
+        135deg,
+        #D8EF55,
+        #C6E544
+    ) !important;
+    color: #29351C !important;
+    box-shadow: 0 5px 14px rgba(198, 229, 68, 0.16);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+aside > div:first-child .bg-volt:hover {
+    transform: rotate(-4deg) scale(1.05);
+    box-shadow: 0 7px 18px rgba(198, 229, 68, 0.24);
+}
+
+aside > div:first-child span {
+    color: #FFFFFF !important;
+    letter-spacing: -0.02em;
+}
+
+aside nav {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    color: #D9E2DB !important;
+    scrollbar-width: thin;
+    scrollbar-color: #50655A transparent;
+}
+
+aside nav::-webkit-scrollbar {
+    width: 5px;
+}
+
+aside nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+aside nav::-webkit-scrollbar-thumb {
+    background: #50655A;
+    border-radius: 10px;
+}
+
+aside nav a {
+    position: relative;
+    color: #D7E0DA !important;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+    border: 1px solid transparent;
+}
+
+aside nav a:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.075) !important;
+    border-color: rgba(255,255,255,0.045);
+    transform: translateX(2px);
+}
+
+aside nav a.bg-volt {
+    color: #283414 !important;
+    background:
+        linear-gradient(
+            135deg,
+            #D9EF56,
+            #CDE746
+        ) !important;
+    border-color: rgba(210, 233, 76, 0.35);
+    box-shadow: 0 5px 14px rgba(198, 229, 68, 0.10);
+}
+
+aside nav a.bg-volt::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    width: 3px;
+    height: 60%;
+    transform: translateY(-50%);
+    border-radius: 0 5px 5px 0;
+    background: #FFFFFF;
+}
+
+aside nav a.bg-volt:hover {
+    color: #283414 !important;
+    background:
+        linear-gradient(
+            135deg,
+            #D9EF56,
+            #CDE746
+        ) !important;
+    transform: translateX(0);
+}
+
+aside nav a svg {
+    transition: transform 0.2s ease;
+}
+
+aside nav a:hover svg {
+    transform: scale(1.08);
+}
+
+aside nav a.bg-volt svg {
+    color: #35451E !important;
+}
+
+aside > div:last-child {
+    flex-shrink: 0;
+    border-top-color: #40564A !important;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.015),
+            rgba(255,255,255,0.035)
+        );
+}
+
+aside > div:last-child .bg-volt\/20 {
+    background: rgba(198, 229, 68, 0.15) !important;
+    color: #D5EB54 !important;
+    border: 1px solid rgba(198, 229, 68, 0.10);
+}
+
+aside > div:last-child .text-white {
+    color: #FFFFFF !important;
+}
+
+aside > div:last-child .text-slate-400 {
+    color: #AEBEB4 !important;
+}
+
+aside form button {
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+aside form button:hover {
+    color: #FFB19D !important;
+    background: rgba(233, 133, 106, 0.10) !important;
+    transform: translateX(2px);
+}
+
+.flex-1.flex.flex-col.min-w-0 {
+    width: auto;
+    height: 100vh;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #F5F4EE !important;
+    overflow: hidden;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    height: 4rem;
+    z-index: 20;
+    background: rgba(245, 244, 238, 0.94) !important;
+    border-bottom-color: #E2E6DF !important;
+    box-shadow: 0 2px 12px rgba(43, 60, 50, 0.025) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+header h1 {
+    color: #304238 !important;
+    letter-spacing: -0.02em;
+}
+
+header span {
+    color: #7F8982 !important;
+    background: #FFFFFF !important;
+    border-color: #E1E6DF !important;
+}
+
+header button {
+    color: #536158 !important;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+header button:hover {
+    color: #304238 !important;
+    transform: scale(1.05);
+}
+
+main {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #F5F4EE !important;
+    scroll-behavior: smooth;
+}
+
+main::-webkit-scrollbar {
+    width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+    background: #F5F4EE;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #D6DCD3;
+    border-radius: 10px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #BEC8BD;
+}
+
+main .bg-base-card {
+    background: #FFFFFF !important;
+    border-color: #E4E9E2 !important;
+    box-shadow: 0 2px 8px rgba(40, 56, 47, 0.025);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+main .bg-base-card:hover {
+    border-color: #DCE4D9 !important;
+    box-shadow: 0 5px 18px rgba(40, 56, 47, 0.045);
+}
+
+main .text-white {
+    color: #304238 !important;
+}
+
+main .text-slate-300 {
+    color: #657169 !important;
+}
+
+main .text-slate-400 {
+    color: #8D9790 !important;
+}
+
+main .text-slate-500 {
+    color: #9DA59F !important;
+}
+
+main .text-2xl,
+main .text-3xl {
+    color: #304238 !important;
+}
+
+main .text-volt {
+    color: #789313 !important;
+}
+
+main .bg-volt {
+    background-color: #D5EA4D !important;
+}
+
+main .text-coral {
+    color: #D87A5D !important;
+}
+
+main .bg-coral\/10 {
+    background-color: rgba(233, 133, 106, 0.10) !important;
+}
+
+main .bg-volt\/10 {
+    background-color: rgba(198, 224, 72, 0.16) !important;
+}
+
+main .border-base-line {
+    border-color: #E4E9E2 !important;
+}
+
+main .border-volt\/30 {
+    border-color: rgba(145, 169, 35, 0.35) !important;
+}
+
+main .bg-volt\/10.text-volt {
+    background: #F0F5D9 !important;
+    color: #708316 !important;
+}
+
+main .rounded-2xl {
+    box-shadow: 0 2px 8px rgba(40, 56, 47, 0.025);
+}
+
+main a.bg-volt {
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+main a.bg-volt:hover {
+    background-color: #C9E33E !important;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(170, 198, 48, 0.16);
+}
+
+@media (max-width: 1023px) {
+    body {
+        overflow: hidden;
+    }
+
+    aside {
+        width: 16rem;
+        box-shadow: 8px 0 30px rgba(24, 39, 32, 0.16);
+    }
+
+    .flex-1.flex.flex-col.min-w-0 {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .fixed.inset-0.bg-black\/60 {
+        background: rgba(37, 54, 45, 0.45) !important;
+        backdrop-filter: blur(2px);
+    }
+}
+
+@media (max-width: 640px) {
+    main {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    header {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+    main {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
