@@ -73,6 +73,45 @@
     </div>
 
 
+    {{-- KARTU BELUM TERDAFTAR / MEMBER EXPIRED / MEMBER NONAKTIF --}}
+    <div
+        id="rfid-warning-state"
+        class="hidden py-8 text-center"
+    >
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-coral/10 text-coral flex items-center justify-center mb-3">
+
+            <svg
+                class="w-7 h-7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
+            </svg>
+
+        </div>
+
+        <p
+            id="rfid-warning-title"
+            class="text-coral font-semibold"
+        >
+            Kartu belum terdaftar
+        </p>
+
+        <p
+            id="rfid-warning-detail"
+            class="text-xs text-slate-500 mt-1"
+        >
+            -
+        </p>
+    </div>
+
+
     {{-- HASIL CHECK-IN --}}
     <div
         id="rfid-checkin-data"
@@ -289,7 +328,11 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const emptyState = document.getElementById('rfid-empty-state');
+    const warningState = document.getElementById('rfid-warning-state');
     const checkinData = document.getElementById('rfid-checkin-data');
+
+    const warningTitle = document.getElementById('rfid-warning-title');
+    const warningDetail = document.getElementById('rfid-warning-detail');
 
     const memberPhoto = document.getElementById('rfid-member-photo');
     const memberInitial = document.getElementById('rfid-member-initial');
@@ -309,6 +352,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let lastAttendanceId = null;
     let lastCheckoutTime = null;
+    let lastWarningKey = null;
+
+    const warningMessages = {
+        unregistered: {
+            title: 'Kartu belum terdaftar',
+            detail: (data) => 'UID ' + (data.uid ?? '-') + ' belum terhubung dengan member manapun.',
+        },
+        expired: {
+            title: 'Member sudah expired',
+            detail: (data) => (data.name ? data.name + ' (' + data.member_code + ')' : 'Member ini') + ' masa aktifnya sudah habis.',
+        },
+        inactive: {
+            title: 'Member tidak aktif',
+            detail: (data) => (data.name ? data.name + ' (' + data.member_code + ')' : 'Member ini') + ' statusnya sedang nonaktif.',
+        },
+        blocked: {
+            title: 'Kartu diblokir',
+            detail: (data) => (data.name ? data.name + ' (' + data.member_code + ')' : 'Kartu ini') + ' telah diblokir.',
+        },
+    };
+
+    function setLiveIndicator(colorClass, dotClass, text) {
+        liveIndicator.classList.remove('text-slate-500', 'text-volt', 'text-coral');
+        liveIndicator.classList.add(colorClass);
+
+        liveDot.classList.remove('bg-slate-500', 'bg-volt', 'bg-coral');
+        liveDot.classList.add(dotClass);
+
+        liveIndicator.lastChild.textContent = ' ' + text;
+    }
 
 
     async function checkLatestRfidCheckin() {
@@ -332,8 +405,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             if (!data.exists) {
+
+                if (data.reason && warningMessages[data.reason]) {
+
+                    const warningKey = data.reason + ':' + (data.uid ?? '') + ':' + (data.scan_at ?? '');
+
+                    if (lastWarningKey === warningKey) {
+                        return;
+                    }
+
+                    lastWarningKey = warningKey;
+
+                    const msg = warningMessages[data.reason];
+                    warningTitle.textContent = msg.title;
+                    warningDetail.textContent = msg.detail(data);
+
+                    emptyState.classList.add('hidden');
+                    checkinData.classList.add('hidden');
+                    warningState.classList.remove('hidden');
+
+                    setLiveIndicator('text-coral', 'bg-coral', 'Perlu perhatian');
+
+                    warningState.classList.remove('rfid-checkin-pulse');
+                    void warningState.offsetWidth;
+                    warningState.classList.add('rfid-checkin-pulse');
+                }
+
                 return;
             }
+
+
+            lastWarningKey = null;
 
 
             // Kalau state-nya (id + status checkout) masih sama persis,
@@ -409,6 +511,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // ==========================================
 
             emptyState.classList.add('hidden');
+            warningState.classList.add('hidden');
             checkinData.classList.remove('hidden');
 
 
@@ -416,13 +519,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // INDIKATOR LIVE
             // ==========================================
 
-            liveIndicator.classList.remove('text-slate-500');
-            liveIndicator.classList.add('text-volt');
-
-            liveDot.classList.remove('bg-slate-500');
-            liveDot.classList.add('bg-volt');
-
-            liveIndicator.lastChild.textContent = ' RFID terdeteksi';
+            setLiveIndicator('text-volt', 'bg-volt', 'RFID terdeteksi');
 
 
             // ==========================================

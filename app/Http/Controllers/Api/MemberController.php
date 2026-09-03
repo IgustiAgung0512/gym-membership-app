@@ -13,13 +13,16 @@ class MemberController extends Controller
 {
     public function store(Request $request)
     {
+        $request->validate([
+            'uid' => 'required|string|max:255',
+        ]);
+
         $checkUid = ScanUid::find(1);
 
         if (!$checkUid) {
-            $data = $request->validate([
-                'uid'  => 'required|string|max:255',
+            $checkUid = ScanUid::create([
+                'uid' => $request->uid,
             ]);
-            ScanUid::create($data);
         } else {
             $checkUid->update([
                 'uid' => $request->uid
@@ -34,7 +37,30 @@ class MemberController extends Controller
             ->where('uid', $uid)
             ->first();
 
+        // Kartu belum pernah didaftarkan, atau sudah didaftarkan tapi belum
+        // dihubungkan ke member manapun -> jangan buat attendance apa pun.
+        if (!$card || !$card->member) {
+            return response()->json([
+                'success' => false,
+                'reason' => 'unregistered',
+                'message' => 'Kartu belum terdaftar.',
+            ], 404);
+        }
+
         $member = $card->member;
+
+        // Member ditemukan tapi statusnya bukan aktif (expired/inactive)
+        // -> jangan catat kehadiran.
+        if ($member->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'reason' => $member->status === 'expired' ? 'expired' : 'inactive',
+                'message' => $member->status === 'expired'
+                    ? 'Member sudah expired.'
+                    : 'Member tidak aktif.',
+                'member_code' => $member->member_code,
+            ], 403);
+        }
 
         $openAttendance = Attendance::with([
             'member.user',

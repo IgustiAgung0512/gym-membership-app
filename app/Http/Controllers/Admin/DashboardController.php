@@ -67,6 +67,10 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Dipakai frontend untuk dedup polling (supaya pesan peringatan
+        // tidak "nempel" terus dan bisa reset kalau kartu yang sama di-tap ulang).
+        $scanAt = $scan->updated_at ?? $scan->created_at;
+
 
         /*
         |--------------------------------------------------------------------------
@@ -92,26 +96,16 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | UID BELUM TERDAFTAR
+        | UID BELUM TERDAFTAR / KARTU BELUM TERHUBUNG DENGAN MEMBER
         |--------------------------------------------------------------------------
         */
 
-        if (!$card) {
+        if (!$card || !$card->member) {
             return response()->json([
                 'exists' => false,
-            ]);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | KARTU BELUM TERHUBUNG DENGAN MEMBER
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$card->member) {
-            return response()->json([
-                'exists' => false,
+                'reason' => 'unregistered',
+                'uid' => $uid,
+                'scan_at' => $scanAt,
             ]);
         }
 
@@ -125,6 +119,11 @@ class DashboardController extends Controller
         if ($card->status === 'blocked') {
             return response()->json([
                 'exists' => false,
+                'reason' => 'blocked',
+                'uid' => $uid,
+                'name' => $card->member->user->name,
+                'member_code' => $card->member->member_code,
+                'scan_at' => $scanAt,
             ]);
         }
 
@@ -147,6 +146,11 @@ class DashboardController extends Controller
         if ($member->status !== 'active') {
             return response()->json([
                 'exists' => false,
+                'reason' => $member->status === 'expired' ? 'expired' : 'inactive',
+                'uid' => $uid,
+                'name' => $member->user->name,
+                'member_code' => $member->member_code,
+                'scan_at' => $scanAt,
             ]);
         }
 
@@ -201,7 +205,6 @@ class DashboardController extends Controller
         return response()->json([
             'exists' => true,
             'id' => $attendance->id,
-        
             'name' => $attendance->member->user->name,
             'member_code' => $attendance->member->member_code,
             'uid' => $attendance->rfidCard->uid ?? '-',

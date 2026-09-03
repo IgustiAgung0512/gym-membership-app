@@ -234,7 +234,49 @@ class ..., because the name is already in use".
 
 ---
 
-## Daftar Lengkap File yang Diubah/Ditambah
+## Tahap 8 — Tambah Tampilan "Kartu Belum Terdaftar" & "Member Expired" saat Check-in/Check-out
+
+**Permintaan:** kalau kartu RFID yang di-tap belum terdaftar, atau member-nya sudah
+expired, widget "Check-in Terbaru" harus menampilkan pesan yang jelas — bukan diam saja
+seperti sebelumnya.
+
+**Kondisi sebelumnya:** backend memang sudah mendeteksi kartu tidak terdaftar / member
+tidak aktif, tapi selalu membalas `{ "exists": false }` tanpa keterangan apa pun, dan
+frontend-nya hanya `if (!data.exists) { return; }` — alias diam total, tidak ada
+indikasi apa pun ke admin. Ditemukan juga bug terpisah: endpoint yang dipanggil Arduino
+(`Api\MemberController@store`) akan **crash** kalau kartu belum terdaftar, karena
+langsung memanggil `$card->member` padahal `$card` bisa `null`.
+
+### File yang diubah
+- `app/Http/Controllers/Admin/DashboardController.php`
+  - `latestRfidCheckin()` sekarang membedakan alasan gagal lewat field `reason`:
+    `unregistered` (kartu tidak dikenali/tidak terhubung member), `expired`,
+    `inactive`, atau `blocked` — masing-masing disertai info UID/nama/kode member kalau
+    tersedia, plus `scan_at` untuk keperluan dedup di frontend.
+- `app/Http/Controllers/Api/MemberController.php`
+  - Ditambah validasi di awal: kalau kartu tidak ditemukan / belum terhubung member →
+    balas `404` dengan `reason: 'unregistered'` (dulu ini bikin **crash**, sekarang aman).
+  - Kalau member ditemukan tapi status bukan `active` → balas `403` dengan
+    `reason: 'expired'` atau `'inactive'`, **tanpa mencatat attendance apa pun**.
+  - Sekalian diperbaiki bug lama: kalau `scan_uids` masih kosong, variabel `$checkUid`
+    tidak pernah di-assign ulang setelah `ScanUid::create()`, jadi baris berikutnya
+    (`$checkUid->uid`) crash. Sekarang hasil `create()` disimpan ke `$checkUid`.
+- `resources/views/admin/dashboard.blade.php`
+  - Tambah state ketiga di widget "Check-in Terbaru": **kartu belum terdaftar**,
+    dengan warna aksen merah/coral (beda dari hijau/volt untuk check-in sukses),
+    menampilkan judul + detail sesuai `reason` yang diterima.
+  - Indikator "Menunggu kartu" di pojok kanan atas widget juga ikut berubah warna
+    jadi merah dan teksnya jadi "Perlu perhatian" saat state ini aktif.
+  - Dedup polling untuk state ini memakai kombinasi `reason + uid + scan_at`, supaya
+    tap kartu yang sama berulang kali tidak memicu animasi berulang, tapi tap kartu
+    lain (atau kartu yang sama di-tap ulang di waktu berbeda) tetap terdeteksi sebagai
+    kejadian baru.
+
+> Catatan: member dengan status `inactive` juga sudah ditangani (pesan "Member tidak
+> aktif") sekalian, walau tidak diminta eksplisit — supaya konsisten dengan status
+> `expired` dan tidak ada celah member nonaktif yang tetap "berhasil" checkin diam-diam.
+
+---
 |---|---|---|
 | `app/Http/Controllers/Member/PhotoController.php` | **Baru** | Upload foto member (`update`) + serve foto member (`show`) |
 | `app/Http/Controllers/Admin/MemberController.php` | Diubah | Tambah method `photo()` + import `Storage` |
@@ -247,6 +289,7 @@ class ..., because the name is already in use".
 | `resources/views/admin/dashboard.blade.php` | Diubah | Fix widget "Check-in Terbaru" agar auto-refresh saat check-out |
 | `app/Http/Controllers/Api/MemberController.php` | Diubah | Fix logika check-in/check-out dari berbasis tanggal jadi berbasis sesi terbuka (mendukung multi-sesi per hari) |
 | `app/Http/Controllers/Admin/AttendanceController.php` | **Ditulis ulang** | Fix fatal error class duplikat + implementasi `index()` & `storeManual()` |
+| `app/Http/Controllers/Api/MemberController.php` | Diubah (lagi) | Fix crash kartu belum terdaftar + tolak checkin member expired/inactive |
 
 **Database:** tidak ada perubahan struktur tabel. Kolom `photo` di tabel `members`
 sudah tersedia sejak awal dan langsung dipakai apa adanya.
