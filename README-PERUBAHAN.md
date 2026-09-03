@@ -107,14 +107,33 @@ seperti Tahap 2).
 
 ---
 
-## Daftar Lengkap File yang Diubah/Ditambah
+## Tahap 4 — Perbaikan: Foto Tidak Tampil Saat Check-in RFID di Dashboard Admin
+
+**Masalah:** widget "Check-in Terbaru" di Dashboard admin selalu menampilkan avatar
+inisial huruf, padahal member yang tap kartu RFID sudah punya foto (dan foto itu sudah
+tampil normal di halaman **Member**).
+
+**Penyebab:** bug murni di kode — pada `Admin\DashboardController@latestRfidCheckin`,
+variabel `$photo` sudah dihitung dengan benar, tapi **tidak pernah dimasukkan** ke array
+JSON yang dikembalikan ke browser. Jadi JavaScript di dashboard tidak pernah menerima
+data foto, walau backend-nya sudah punya nilainya.
+
+### File yang diubah
+- `app/Http/Controllers/Admin/DashboardController.php`
+  - Tambah `'photo' => $photo,` ke dalam `response()->json([...])` pada method
+    `latestRfidCheckin()`.
+
+> Method serupa di `Admin\AttendanceController` (dipakai untuk halaman Absensi/Check-in
+> manual) sudah benar sejak awal — sudah mengirim field `photo` di response-nya.
+
+---
 
 | File | Status | Keterangan |
 |---|---|---|
 | `app/Http/Controllers/Member/PhotoController.php` | **Baru** | Upload foto member (`update`) + serve foto member (`show`) |
 | `app/Http/Controllers/Admin/MemberController.php` | Diubah | Tambah method `photo()` + import `Storage` |
 | `app/Http/Controllers/Admin/AttendanceController.php` | Diubah | URL foto pakai route, bukan `asset('storage/...')` |
-| `app/Http/Controllers/Admin/DashboardController.php` | Diubah | URL foto pakai route, bukan `asset('storage/...')` |
+| `app/Http/Controllers/Admin/DashboardController.php` | Diubah | URL foto pakai route + fix `photo` tidak ikut terkirim di response `latestRfidCheckin()` |
 | `routes/web.php` | Diubah | Tambah 3 route: `member.photo.update`, `member.photo.show`, `admin.members.photo` |
 | `resources/views/member/dashboard.blade.php` | Diubah | UI upload/ganti foto + alert flash |
 | `resources/views/layouts/member.blade.php` | Diubah | Tambah CSS `[x-cloak]` |

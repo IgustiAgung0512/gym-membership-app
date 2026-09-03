@@ -205,6 +205,7 @@ class DashboardController extends Controller
             'name' => $attendance->member->user->name,
             'member_code' => $attendance->member->member_code,
             'uid' => $attendance->rfidCard->uid ?? '-',
+            'photo' => $photo,
         
             'time' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('H:i:s')
