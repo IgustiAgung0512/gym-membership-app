@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <style>body{background:#0F1115}</style>
+    <style>body{background:#0F1115} [x-cloak]{display:none !important}</style>
 </head>
 <body class="font-sans text-slate-200 antialiased pb-24 lg:pb-0">
 <header class="sticky top-0 z-20 bg-base/80 backdrop-blur border-b border-base-line">

@@ -11,6 +11,7 @@ use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MemberController extends Controller
@@ -198,6 +199,19 @@ class MemberController extends Controller
         }
 
         return redirect()->route('admin.members.index')->with('success', 'Data member berhasil diperbarui.');
+    }
+
+    /**
+     * Tampilkan foto member (untuk admin) langsung dari storage,
+     * tanpa bergantung pada symlink public/storage.
+     */
+    public function photo(Member $member)
+    {
+        if (! $member->photo || ! Storage::disk('public')->exists($member->photo)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($member->photo);
     }
 
     public function destroy(Member $member)

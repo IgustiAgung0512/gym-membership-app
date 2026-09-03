@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\WhatsappLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\PasswordController as MemberPasswordController;
+use App\Http\Controllers\Member\PhotoController as MemberPhotoController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
     Route::get('/members/create', [MemberController::class, 'create'])->name('members.create');
     Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+    Route::get('/members/{member}/photo', [MemberController::class, 'photo'])->name('members.photo');
     Route::get('/members/{member}/edit', [MemberController::class, 'edit'])->name('members.edit');
     Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
     Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
@@ -71,6 +73,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/photo', [MemberPhotoController::class, 'show'])->name('photo.show');
+    Route::post('/photo', [MemberPhotoController::class, 'update'])->name('photo.update');
     Route::get('/password', [MemberPasswordController::class, 'edit'])->name('password.edit');
     Route::put('/password', [MemberPasswordController::class, 'update'])->name('password.update');
 });

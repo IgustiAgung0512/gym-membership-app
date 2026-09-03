@@ -188,9 +188,7 @@ class DashboardController extends Controller
         $photo = null;
 
         if ($attendance->member?->photo) {
-            $photo = asset(
-                'storage/' . $attendance->member->photo
-            );
+            $photo = route('admin.members.photo', $attendance->member);
         }
 
 

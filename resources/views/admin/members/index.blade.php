@@ -25,7 +25,11 @@
         <div class="bg-base-card border border-base-line rounded-2xl p-4">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-full bg-volt/10 text-volt flex items-center justify-center font-semibold shrink-0">{{ substr($m->user->name,0,1) }}</div>
+                    @if ($m->photo)
+                        <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-10 h-10 rounded-full object-cover shrink-0">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-volt/10 text-volt flex items-center justify-center font-semibold shrink-0">{{ substr($m->user->name,0,1) }}</div>
+                    @endif
                     <div class="min-w-0">
                         <p class="text-white font-medium truncate">{{ $m->user->name }}</p>
                         <p class="text-xs text-slate-500">{{ $m->member_code }} &middot; {{ $m->user->phone }}</p>
@@ -67,7 +71,11 @@
             <tr class="hover:bg-white/[0.02]">
                 <td class="px-5 py-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-volt/10 text-volt flex items-center justify-center font-semibold">{{ substr($m->user->name,0,1) }}</div>
+                        @if ($m->photo)
+                            <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0">
+                        @else
+                            <div class="w-9 h-9 rounded-full bg-volt/10 text-volt flex items-center justify-center font-semibold">{{ substr($m->user->name,0,1) }}</div>
+                        @endif
                         <div>
                             <p class="text-white font-medium">{{ $m->user->name }}</p>
                             <p class="text-xs text-slate-500">{{ $m->member_code }} &middot; {{ $m->user->phone }}</p>
