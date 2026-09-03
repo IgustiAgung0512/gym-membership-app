@@ -5,204 +5,66 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Member;
-use App\Models\Payment;
-use App\Models\RfidCard;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
-class DashboardController extends Controller
+class AttendanceController extends Controller
 {
-    public function index()
+    /**
+     * Daftar riwayat check-in (halaman "Absensi / Check-in"), difilter per tanggal.
+     */
+    public function index(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | STATISTIK DASHBOARD
-        |--------------------------------------------------------------------------
-        */
+        $date = $request->input('date', today()->format('Y-m-d'));
 
-        $totalActive = Member::where('status', 'active')->count();
-
-        $newThisMonth = Member::whereMonth('join_date', now()->month)
-            ->whereYear('join_date', now()->year)
-            ->count();
-
-        $expiringSoon = Member::where('status', 'active')
-            ->whereNotNull('expire_date')
-            ->whereBetween('expire_date', [
-                now(),
-                now()->addDays(7),
-            ])
-            ->count();
-
-        $todayCheckins = Attendance::whereDate(
-            'check_in_at',
-            today()
-        )->count();
-
-        $revenueThisMonth = Payment::whereMonth(
-                'payment_date',
-                now()->month
-            )
-            ->whereYear(
-                'payment_date',
-                now()->year
-            )
-            ->where('status', 'paid')
-            ->sum('amount');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | KUNJUNGAN 7 HARI TERAKHIR
-        |--------------------------------------------------------------------------
-        */
-
-        $attendanceLast7Days = collect(range(6, 0))->map(function ($daysAgo) {
-            $date = now()->subDays($daysAgo);
-
-            return [
-                'label' => $date->translatedFormat('D'),
-                'count' => Attendance::whereDate(
-                    'check_in_at',
-                    $date
-                )->count(),
-            ];
-        });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK-IN TERBARU
-        |--------------------------------------------------------------------------
-        */
-
-        $recentCheckins = Attendance::with([
-                'member.user',
-                'rfidCard',
-            ])
+        $attendances = Attendance::with(['member.user', 'rfidCard'])
+            ->whereDate('check_in_at', $date)
             ->latest('check_in_at')
-            ->limit(8)
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | MEMBER TERBARU
-        |--------------------------------------------------------------------------
-        */
-
-        $recentMembers = Member::with([
-                'user',
-                'package',
-            ])
-            ->latest('join_date')
-            ->limit(5)
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD VIEW
-        |--------------------------------------------------------------------------
-        */
-
-        return view('admin.dashboard', compact(
-            'totalActive',
-            'newThisMonth',
-            'expiringSoon',
-            'todayCheckins',
-            'revenueThisMonth',
-            'attendanceLast7Days',
-            'recentCheckins',
-            'recentMembers'
-        ));
+        return view('admin.attendance.index', compact('attendances'));
     }
 
-
     /**
-     * ========================================================================
-     * RFID REALTIME HANDLER (QUEUE BASED - 1 TAP = 1 AKSI)
-     * ========================================================================
+     * Catat check-in/check-out manual oleh admin (tanpa kartu RFID).
+     *
+     * Memakai pola "sesi terbuka" yang sama seperti scan RFID
+     * (lihat App\Http\Controllers\Api\MemberController@store):
+     * - Kalau member sedang punya sesi yang belum check-out -> tap/submit ini = CHECK-OUT.
+     * - Kalau tidak ada sesi terbuka -> submit ini = CHECK-IN baru.
      */
-    public function latestRfidCheckin()
+    public function storeManual(Request $request)
     {
-        // 1. Ambil data scan antrean dari ESP32
-        $scan = DB::table('scan_uids')->latest('id')->first();
+        $validated = $request->validate([
+            'member_id' => ['required', 'exists:members,id'],
+        ], [
+            'member_id.required' => 'Silakan pilih member terlebih dahulu.',
+            'member_id.exists' => 'Member tidak ditemukan.',
+        ]);
 
-        // Jika tidak ada antrean scan baru dari ESP32, hentikan proses (browser polling diam)
-        if (!$scan || empty($scan->uid)) {
-            return response()->json([
-                'exists' => false,
-            ]);
-        }
+        $member = Member::with('user')->findOrFail($validated['member_id']);
 
-        $uid = trim(strtoupper($scan->uid));
-
-        // 2. HAPUS scan dari tabel scan_uids agar polling detik berikutnya tidak memprosesnya lagi
-        DB::table('scan_uids')->where('id', $scan->id)->delete();
-
-        // 3. Cari kartu RFID & validasi member
-        $card = RfidCard::with(['member.user'])
-            ->where('uid', $uid)
-            ->first();
-
-        if (!$card || !$card->member || $card->status === 'blocked' || $card->member->status !== 'active') {
-            return response()->json([
-                'exists' => false,
-            ]);
-        }
-
-        $member = $card->member;
-
-        // 4. Cari sesi absensi terakhir member yang BELUM Check-Out
-        $activeAttendance = Attendance::with(['member.user', 'rfidCard'])
-            ->where('member_id', $member->id)
-            ->where('method', 'rfid')
+        $openAttendance = Attendance::where('member_id', $member->id)
             ->whereNull('check_out_at')
             ->latest('id')
             ->first();
 
-        // 5. Eksekusi Check-In / Check-Out
-        if ($activeAttendance) {
-            // TAP KEDUA -> LAKUKAN CHECK-OUT
-            $activeAttendance->update([
+        if ($openAttendance) {
+            $openAttendance->update([
                 'check_out_at' => now(),
             ]);
 
-            $activeAttendance->refresh();
-            $attendance = $activeAttendance;
-            $action = 'checkout';
+            $message = 'Check-out manual berhasil dicatat untuk ' . $member->user->name . '.';
         } else {
-            // TAP PERTAMA (atau sesi baru) -> LAKUKAN CHECK-IN
-            $attendance = Attendance::create([
-                'member_id'    => $member->id,
-                'rfid_card_id' => $card->id,
-                'method'       => 'rfid',
-                'check_in_at'  => now(),
-                'check_out_at' => null,
+            Attendance::create([
+                'member_id' => $member->id,
+                'method' => 'manual',
+                'check_in_at' => now(),
             ]);
 
-            $attendance->load(['member.user', 'rfidCard']);
-            $action = 'checkin';
+            $message = 'Check-in manual berhasil dicatat untuk ' . $member->user->name . '.';
         }
 
-        // 6. Siapkan foto member
-        $photo = null;
-        if ($attendance->member?->photo) {
-            $photo = route('admin.members.photo', $attendance->member);
-        }
-
-        // 7. Response JSON ke Dashboard
-        return response()->json([
-            'exists'        => true,
-            'id'            => $attendance->id,
-            'name'          => $attendance->member->user->name ?? '-',
-            'member_code'   => $attendance->member->member_code ?? '-',
-            'uid'           => $attendance->rfidCard->uid ?? '-',
-            'photo'         => $photo,
-            'time'          => $attendance->check_in_at ? $attendance->check_in_at->format('H:i:s') : '-',
-            'checkout_time' => $attendance->check_out_at ? $attendance->check_out_at->format('H:i:s') : null,
-            'date'          => $attendance->check_in_at ? $attendance->check_in_at->format('d M Y') : '-',
-            'action'        => $action,
-        ]);
+        return back()->with('success', $message);
     }
 }

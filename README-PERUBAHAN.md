@@ -128,7 +128,113 @@ data foto, walau backend-nya sudah punya nilainya.
 
 ---
 
-| File | Status | Keterangan |
+## Tahap 5 — Perbaikan: Widget "Check-in Terbaru" Tidak Auto-Refresh Saat Check-out
+
+**Masalah:** saat member check-in, widget di Dashboard admin langsung ter-update otomatis.
+Tapi saat member check-out, widget **tidak berubah** sampai halaman di-refresh manual.
+
+**Penyebab:** widget ini mem-polling endpoint setiap 1 detik lewat JavaScript, lalu
+membandingkan `id` attendance yang diterima dengan `id` terakhir yang sudah ditampilkan
+(`lastAttendanceId`) untuk tahu apakah perlu render ulang. Saat **check-in**, sebuah baris
+attendance **baru** dibuat → `id` berubah → widget ter-update. Saat **check-out**, baris
+yang **sama** hanya di-update kolom `check_out_at`-nya → `id` tidak berubah → JS
+menyimpulkan "tidak ada yang baru" dan skip render, padahal datanya sudah berubah.
+
+### File yang diubah
+- `resources/views/admin/dashboard.blade.php`
+  - Key pembanding diubah dari `data.id` saja menjadi gabungan `data.id + ':' + data.checkout_time`.
+    Dengan begitu, perubahan `checkout_time` (dari `null` jadi terisi) ikut dianggap
+    sebagai perubahan state, sehingga widget otomatis re-render tanpa perlu refresh manual.
+
+---
+
+## Tahap 6 — Perbaikan: Member Tidak Bisa Check-in Lagi Setelah Check-out di Hari yang Sama
+
+**Masalah:** kalau member check-in pagi lalu check-out siang, dia **tidak bisa** check-in
+lagi di hari yang sama (misalnya sore) — tap kartu RFID seperti tidak bereaksi.
+
+**Penyebab (root cause sebenarnya):** endpoint yang benar-benar dipanggil oleh **script
+Arduino/ESP32** untuk RFID scan adalah `POST /api/members/add` →
+`App\Http\Controllers\Api\MemberController@store` — **bukan** kode di
+`Admin\AttendanceController` atau `Admin\DashboardController` seperti dugaan awal (dua
+controller itu ternyata sebagian besar cuma dipakai untuk *menampilkan* data ke Dashboard
+admin, bukan yang men-*generate* data check-in/check-out).
+
+Logika lama di `Api\MemberController@store` mencari attendance **hari ini saja**
+(`whereDate('check_in_at', today())`). Begitu member sudah check-in **dan** check-out
+di hari yang sama, baris attendance "hari ini" itu tetap ditemukan lagi saat tap
+berikutnya, tapi karena `check_out_at`-nya sudah terisi, kode masuk ke percabangan yang
+**tidak melakukan apa pun** (silent no-op) — bukan membuat sesi check-in baru.
+
+### File yang diubah
+- `app/Http/Controllers/Api/MemberController.php`
+  - Logika pencarian attendance diganti dari **berbasis tanggal** (`whereDate('check_in_at', today())`)
+    menjadi **berbasis sesi terbuka** (`whereNull('check_out_at')`):
+    - Kalau member punya sesi yang **masih terbuka** (belum check-out) → tap berikutnya
+      dianggap **check-out**.
+    - Kalau **tidak ada** sesi terbuka → tap berikutnya **selalu** dianggap **check-in baru**,
+      tidak peduli sudah berapa kali dia check-in/check-out di hari itu.
+  - Dengan perubahan ini, member bebas check-in & check-out berkali-kali dalam sehari
+    (pagi, siang, sore, dst), selama setiap sesi ditutup (check-out) dulu sebelum
+    sesi berikutnya dibuka.
+
+> Catatan: query yang dipakai widget "Check-in Terbaru" di Dashboard admin
+> (`Admin\DashboardController::latestRfidCheckin()`) tidak perlu diubah — query itu
+> sudah otomatis mengambil sesi **terbaru** hari ini (`latest('id')`), jadi akan tetap
+> menampilkan sesi yang paling baru walau member sudah check-in/check-out beberapa kali.
+
+---
+
+## Tahap 7 — Perbaikan: Halaman Absensi / Check-in Admin Error (Fatal Error)
+
+**Masalah:** membuka menu **Absensi / Check-in** di sidebar admin menampilkan Internal
+Server Error:
+
+```
+Symfony\Component\ErrorHandler\Error\FatalError
+Cannot declare class App\Http\Controllers\Admin\DashboardController,
+because the name is already in use
+```
+
+**Penyebab:** ini bug bawaan dari zip awal (bukan dari perubahan-perubahan sebelumnya).
+File `app/Http/Controllers/Admin/AttendanceController.php` isinya salah — di dalamnya
+class-nya bernama `DashboardController`, persis sama dengan class yang ada di
+`app/Http/Controllers/Admin/DashboardController.php`. Begitu Laravel butuh me-load
+`Admin\AttendanceController` (untuk route `/admin/attendance`), file yang di-load memang
+benar filenya, tapi isinya mendeklarasikan class `DashboardController` yang **sudah pernah
+dideklarasikan** oleh file lain di request yang sama → PHP fatal error "Cannot declare
+class ..., because the name is already in use".
+
+### File yang diubah
+- `app/Http/Controllers/Admin/AttendanceController.php` — **ditulis ulang total**:
+  - Class diubah jadi `AttendanceController` (sesuai nama file, sesuai standar PSR-4
+    Laravel).
+  - `index(Request $request)` — menampilkan daftar check-in per tanggal (sesuai kebutuhan
+    `resources/views/admin/attendance/index.blade.php` yang sudah ada: filter tanggal,
+    pagination, relasi `member.user` dan `rfidCard`).
+  - `storeManual(Request $request)` — method baru untuk mencatat check-in/check-out manual
+    oleh admin (dipakai route `POST /admin/attendance/manual` yang sebelumnya tidak
+    punya implementasi sama sekali). Memakai pola **sesi terbuka** yang sama seperti
+    Tahap 6, supaya konsisten: kalau member sedang punya sesi terbuka → dicatat sebagai
+    check-out, kalau tidak → dicatat sebagai check-in baru (`method` disimpan sebagai
+    `'manual'`).
+
+> Sudah dicek juga: tidak ada file controller lain di project yang punya masalah nama
+> class serupa (nama file vs nama class di dalamnya sudah cocok semua).
+
+> Catatan: ada 1 file lagi yang ditemukan saat penelusuran ini,
+> `resources/views/admin/attendance/live.blade.php` — sebuah halaman "mode live/kiosk"
+> (layar besar yang menampilkan wajah member begitu tap kartu) yang sepertinya belum
+> selesai dibangun: dia memanggil route `admin.attendance.poll` yang **belum ada** di
+> `routes/web.php`, dan tidak ada menu/link di sidebar yang mengarah ke halaman ini. Karena
+> tidak dipakai/tidak di-link dari mana pun, halaman ini **tidak error** dan aman diabaikan
+> untuk sekarang — tapi kalau kamu memang berencana memakai fitur "layar live check-in" ini,
+> kabari saya supaya saya bantu selesaikan (perlu dibuatkan route `admin.attendance.poll`
+> yang mengembalikan JSON check-in terbaru).
+
+---
+
+## Daftar Lengkap File yang Diubah/Ditambah
 |---|---|---|
 | `app/Http/Controllers/Member/PhotoController.php` | **Baru** | Upload foto member (`update`) + serve foto member (`show`) |
 | `app/Http/Controllers/Admin/MemberController.php` | Diubah | Tambah method `photo()` + import `Storage` |
@@ -138,6 +244,9 @@ data foto, walau backend-nya sudah punya nilainya.
 | `resources/views/member/dashboard.blade.php` | Diubah | UI upload/ganti foto + alert flash |
 | `resources/views/layouts/member.blade.php` | Diubah | Tambah CSS `[x-cloak]` |
 | `resources/views/admin/members/index.blade.php` | Diubah | Tampilkan foto member (mobile & desktop) |
+| `resources/views/admin/dashboard.blade.php` | Diubah | Fix widget "Check-in Terbaru" agar auto-refresh saat check-out |
+| `app/Http/Controllers/Api/MemberController.php` | Diubah | Fix logika check-in/check-out dari berbasis tanggal jadi berbasis sesi terbuka (mendukung multi-sesi per hari) |
+| `app/Http/Controllers/Admin/AttendanceController.php` | **Ditulis ulang** | Fix fatal error class duplikat + implementasi `index()` & `storeManual()` |
 
 **Database:** tidak ada perubahan struktur tabel. Kolom `photo` di tabel `members`
 sudah tersedia sejak awal dan langsung dipakai apa adanya.

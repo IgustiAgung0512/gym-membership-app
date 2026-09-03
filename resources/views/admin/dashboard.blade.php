@@ -336,15 +336,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            // Kalau masih check-in yang sama,
-            // tidak perlu render ulang.
-            
-            if (lastAttendanceId === data.id ) {
+            // Kalau state-nya (id + status checkout) masih sama persis,
+            // tidak perlu render ulang. Menyertakan checkout_time di key
+            // supaya event CHECK-OUT (yang meng-update baris attendance
+            // yang SAMA, bukan membuat baris baru) tetap terdeteksi sebagai
+            // perubahan dan widget ikut ter-refresh otomatis.
+
+            const stateKey = data.id + ':' + (data.checkout_time ?? '');
+
+            if (lastAttendanceId === stateKey) {
                 return;
             }
 
 
-            lastAttendanceId = data.id;
+            lastAttendanceId = stateKey;
             lastCheckoutTime = data.checkout_time;
 
 

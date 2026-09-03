@@ -36,18 +36,31 @@ class MemberController extends Controller
 
         $member = $card->member;
 
-        $attendance = Attendance::with([
+        $openAttendance = Attendance::with([
             'member.user',
             'rfidCard',
         ])
             ->where('member_id', $member->id)
             ->where('rfid_card_id', $card->id)
             ->where('method', 'rfid')
-            ->whereDate('check_in_at', today())
+            ->whereNull('check_out_at')
             ->latest('id')
             ->first();
 
-        if (!$attendance) {
+        if ($openAttendance) {
+            // Ada sesi yang masih terbuka (belum checkout) -> tap ini = CHECK-OUT.
+            $openAttendance->update([
+                'check_out_at' => now(),
+            ]);
+
+            $attendance = $openAttendance->fresh([
+                'member.user',
+                'rfidCard',
+            ]);
+        } else {
+            // Tidak ada sesi terbuka -> tap ini = CHECK-IN baru.
+            // Tidak dibatasi tanggal, jadi member boleh checkin/checkout
+            // berkali-kali dalam sehari (misal pagi & sore).
             $attendance = Attendance::create([
                 'member_id' => $member->id,
                 'rfid_card_id' => $card->id,
@@ -58,13 +71,6 @@ class MemberController extends Controller
                 'member.user',
                 'rfidCard',
             ]);
-        } else {
-            $attendance = Attendance::find($attendance->id);
-            if (is_null($attendance->check_out_at)) {
-                $attendance->update([
-                    'check_out_at' => now() // Shortcut Laravel untuk Carbon::now()
-                ]);
-            }
         }
 
         return response()->json([
