@@ -4,52 +4,56 @@
 @section('content')
 <div class="max-w-md mx-auto">
     @if ($forceChange)
-        <div class="mb-4 rounded-xl border border-coral/30 bg-coral/10 px-4 py-3 text-sm text-coral">
-            Ini pertama kalinya kamu masuk. Demi keamanan, silakan ganti password sementara yang diberikan admin sebelum melanjutkan.
+        <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm flex items-start gap-2">
+            <span class="text-amber-600 font-bold">⚠️</span>
+            <span>Ini pertama kalinya Anda masuk. Demi keamanan akun, silakan perbarui password sementara yang diberikan admin sebelum melanjutkan.</span>
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="mb-4 rounded-xl border border-coral/30 bg-coral/10 px-4 py-3 text-sm text-coral">
-            {{ $errors->first() }}
+        <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 shadow-sm flex items-start gap-2">
+            <span class="text-rose-600 font-bold">!</span>
+            <span>{{ $errors->first() }}</span>
         </div>
     @endif
 
-    <div class="bg-base-card border border-base-line rounded-2xl p-6">
-        <h2 class="font-display font-semibold text-white text-lg mb-1">Ganti Password</h2>
-        <p class="text-sm text-slate-400 mb-6">Gunakan password yang mudah kamu ingat tapi sulit ditebak orang lain.</p>
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-sm">
+        <h2 class="font-display font-bold text-slate-900 text-xl mb-1">Ganti Password</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mb-6">Gunakan password yang kuat dengan kombinasi huruf dan angka.</p>
 
         <form method="POST" action="{{ route('member.password.update') }}" class="space-y-4">
             @csrf
             @method('PUT')
 
             @unless ($forceChange)
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1.5">Password Saat Ini</label>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-slate-700">Password Saat Ini</label>
                     <input type="password" name="current_password" required
-                           class="w-full rounded-xl bg-base border border-base-line px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-volt/50">
+                           class="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-lime-600 focus:ring-2 focus:ring-lime-100">
                 </div>
             @endunless
 
-            <div>
-                <label class="block text-sm text-slate-400 mb-1.5">Password Baru</label>
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold text-slate-700">Password Baru</label>
                 <input type="password" name="password" required minlength="6"
-                       class="w-full rounded-xl bg-base border border-base-line px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-volt/50">
-                <p class="text-xs text-slate-500 mt-1">Minimal 6 karakter.</p>
+                       class="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-lime-600 focus:ring-2 focus:ring-lime-100">
+                <p class="text-[11px] text-slate-400">Minimal 6 karakter.</p>
             </div>
 
-            <div>
-                <label class="block text-sm text-slate-400 mb-1.5">Konfirmasi Password Baru</label>
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold text-slate-700">Konfirmasi Password Baru</label>
                 <input type="password" name="password_confirmation" required minlength="6"
-                       class="w-full rounded-xl bg-base border border-base-line px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-volt/50">
+                       class="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-lime-600 focus:ring-2 focus:ring-lime-100">
             </div>
 
-            <button type="submit" class="w-full rounded-xl bg-volt text-base font-semibold py-2.5 hover:brightness-95 transition">
+            <button type="submit" class="w-full rounded-xl bg-slate-900 text-white font-display font-bold text-sm py-3 hover:bg-slate-800 transition shadow-sm mt-2">
                 Simpan Password Baru
             </button>
 
             @unless ($forceChange)
-                <a href="{{ route('member.dashboard') }}" class="block text-center text-sm text-slate-400 hover:text-slate-200 transition">Batal, kembali ke dashboard</a>
+                <a href="{{ route('member.dashboard') }}" class="block text-center text-xs font-medium text-slate-500 hover:text-slate-800 transition pt-1">
+                    ← Batal, kembali ke dashboard
+                </a>
             @endunless
         </form>
     </div>

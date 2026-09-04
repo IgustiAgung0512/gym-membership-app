@@ -1,0 +1,283 @@
+/* ==========================================================================
+   GymPulse - Clean Athletic Light Design System
+   ========================================================================== */
+
+:root {
+    --gp-bg: #F8FAFC;
+    --gp-bg-subtle: #F1F5F9;
+    --gp-white: #FFFFFF;
+    --gp-card: #FFFFFF;
+    --gp-card-elevated: #FFFFFF;
+    --gp-border: #E2E8F0;
+    --gp-border-hover: #CBD5E1;
+    
+    --gp-primary: #0F172A;
+    --gp-primary-soft: #1E293B;
+    
+    --gp-lime: #84CC16;
+    --gp-lime-dark: #65A30D;
+    --gp-lime-soft: #ECFCCB;
+    
+    --gp-emerald: #10B981;
+    --gp-emerald-soft: #D1FAE5;
+    
+    --gp-coral: #EF4444;
+    --gp-coral-soft: #FEE2E2;
+
+    --gp-text: #0F172A;
+    --gp-text-muted: #64748B;
+    --gp-text-light: #94A3B8;
+}
+
+/* Base & Typography */
+html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+}
+
+body.landing-page {
+    background-color: var(--gp-bg);
+    color: var(--gp-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--gp-primary);
+}
+
+/* Crisp Clean Panels */
+.clean-panel {
+    background: var(--gp-white);
+    border: 1px solid var(--gp-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+.clean-panel-interactive {
+    background: var(--gp-white);
+    border: 1px solid var(--gp-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clean-panel-interactive:hover {
+    border-color: var(--gp-border-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+/* Light Action Buttons */
+.btn-primary-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    border-radius: 12px;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.btn-primary-action:hover {
+    background: #1E293B;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+    color: #FFFFFF;
+}
+
+.btn-lime-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #65A30D;
+    color: #FFFFFF;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    border-radius: 12px;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(101, 163, 13, 0.25);
+}
+
+.btn-lime-action:hover {
+    background: #4D7C0F;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(101, 163, 13, 0.35);
+    color: #FFFFFF;
+}
+
+.btn-secondary-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    background: #FFFFFF;
+    color: #334155;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border-radius: 12px;
+    border: 1px solid var(--gp-border);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-secondary-action:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #0F172A;
+    transform: translateY(-1px);
+}
+
+/* Badges */
+.badge-clean {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-green-clean {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    background: #ECFCCB;
+    border: 1px solid #D9F99D;
+    color: #4D7C0F;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Clean RFID Scanner Box */
+.rfid-box-clean {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 1.5rem;
+    padding: 24px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+}
+
+.rfid-card-clean {
+    width: 260px;
+    height: 155px;
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+    border-radius: 14px;
+    padding: 18px;
+    color: #FFFFFF;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rfid-card-clean:hover {
+    transform: rotate(1deg) scale(1.03);
+    box-shadow: 0 14px 30px -5px rgba(15, 23, 42, 0.4);
+}
+
+/* Pricing Card Popular */
+.pricing-card-clean.popular {
+    border-color: #84CC16;
+    background: #FFFFFF;
+    box-shadow: 0 12px 30px -8px rgba(132, 204, 22, 0.25), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+    position: relative;
+}
+
+/* FAQ Clean */
+.faq-clean-item {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.faq-clean-item.active {
+    border-color: #CBD5E1;
+    box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
+.faq-clean-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    color: #0F172A;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.faq-clean-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.faq-clean-item.active .faq-clean-icon {
+    transform: rotate(180deg);
+    background: #0F172A;
+    color: #FFFFFF;
+}
+
+.faq-clean-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 20px;
+    color: #475569;
+    font-size: 0.875rem;
+    line-height: 1.65;
+}
+
+.faq-clean-item.active .faq-clean-content {
+    max-height: 300px;
+    padding: 0 20px 18px 20px;
+}

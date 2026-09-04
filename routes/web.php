@@ -15,11 +15,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect(Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard'));
+    $packages = collect();
+    try {
+        $packages = \App\Models\MembershipPackage::where('is_active', true)->orderBy('price', 'asc')->get();
+    } catch (\Throwable $e) {
+        $packages = collect();
     }
-    return redirect()->route('login');
-});
+
+    return view('welcome', compact('packages'));
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -55,6 +59,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/attendance/manual', [AttendanceController::class, 'storeManual'])->name('attendance.manual');
 
     Route::get('/whatsapp-logs', [WhatsappLogController::class, 'index'])->name('whatsapp.index');
+    Route::delete('/whatsapp-logs/clear-sent', [WhatsappLogController::class, 'clearSent'])->name('whatsapp.clear-sent');
+    Route::delete('/whatsapp-logs/clear-all', [WhatsappLogController::class, 'clearAll'])->name('whatsapp.clear-all');
+    Route::delete('/whatsapp-logs/{log}', [WhatsappLogController::class, 'destroy'])->name('whatsapp.destroy');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');

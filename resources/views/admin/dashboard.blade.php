@@ -11,322 +11,249 @@
 ========================================================= --}}
 <div
     id="rfid-checkin-monitor"
-    class="bg-base-card border border-base-line rounded-2xl p-5 lg:p-6 mb-8"
+    class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 mb-8 shadow-sm relative overflow-hidden"
 >
     <div class="flex items-center justify-between mb-5">
-
         <div>
-            <h2 class="font-display font-semibold text-white">
-                Check-in Terbaru
+            <h2 class="font-display font-bold text-lg text-slate-900">
+                Monitor Check-in RFID Real-Time
             </h2>
-
-            <p class="text-xs text-slate-500 mt-1">
-                Informasi member dari tap kartu RFID
+            <p class="text-xs text-slate-500 mt-0.5">
+                Informasi member saat menempelkan kartu pada alat reader
             </p>
         </div>
 
         <div
             id="rfid-live-indicator"
-            class="flex items-center gap-2 text-xs text-slate-500"
+            class="flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600"
         >
             <span
                 id="rfid-live-dot"
-                class="w-2 h-2 rounded-full bg-slate-500"
+                class="w-2 h-2 rounded-full bg-slate-400"
             ></span>
-
             Menunggu kartu
         </div>
-
     </div>
-
 
     {{-- BELUM ADA CHECK-IN --}}
     <div
         id="rfid-empty-state"
-        class="py-8 text-center"
+        class="py-10 text-center bg-slate-50/70 border border-dashed border-slate-200 rounded-xl"
     >
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-volt/10 text-volt flex items-center justify-center mb-3">
-
-            <svg
-                class="w-7 h-7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M8 7V5a4 4 0 018 0v2m-9 4h10m-8 4h6m-9-8h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z"
-                />
+        <div class="w-12 h-12 mx-auto rounded-xl bg-lime-100 text-lime-700 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5a4 4 0 018 0v2m-9 4h10m-8 4h6m-9-8h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z" />
             </svg>
-
         </div>
-
-        <p class="text-white font-medium">
-            Menunggu kartu RFID
+        <p class="text-slate-900 font-bold text-sm">
+            Menunggu Tap Kartu RFID
         </p>
-
         <p class="text-xs text-slate-500 mt-1">
-            Silakan tap kartu member pada reader.
+            Silakan tempelkan kartu RFID member pada reader untuk memproses check-in.
         </p>
     </div>
 
-
-    {{-- KARTU BELUM TERDAFTAR / MEMBER EXPIRED / MEMBER NONAKTIF --}}
+    {{-- KARTU BELUM TERDAFTAR / EXPIRED / NONAKTIF --}}
     <div
         id="rfid-warning-state"
-        class="hidden py-8 text-center"
+        class="hidden py-8 text-center bg-rose-50 border border-rose-200 rounded-xl"
     >
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-coral/10 text-coral flex items-center justify-center mb-3">
-
-            <svg
-                class="w-7 h-7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
+        <div class="w-12 h-12 mx-auto rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-
         </div>
-
-        <p
-            id="rfid-warning-title"
-            class="text-coral font-semibold"
-        >
+        <p id="rfid-warning-title" class="text-rose-700 font-bold text-base">
             Kartu belum terdaftar
         </p>
-
-        <p
-            id="rfid-warning-detail"
-            class="text-xs text-slate-500 mt-1"
-        >
+        <p id="rfid-warning-detail" class="text-xs text-rose-600 mt-1">
             -
         </p>
     </div>
 
-
     {{-- HASIL CHECK-IN --}}
     <div
         id="rfid-checkin-data"
-        class="hidden"
+        class="hidden p-4 rounded-xl bg-slate-50 border border-slate-200"
     >
-
         <div class="flex flex-col sm:flex-row sm:items-center gap-5">
-
             {{-- FOTO --}}
             <div class="shrink-0">
-
                 <div
                     id="rfid-member-photo-wrapper"
-                    class="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden bg-volt/10 text-volt flex items-center justify-center"
+                    class="w-20 h-20 rounded-2xl overflow-hidden bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-700 shadow-sm"
                 >
-
                     <img
                         id="rfid-member-photo"
                         src=""
                         alt="Foto Member"
                         class="hidden w-full h-full object-cover"
                     >
-
                     <span
                         id="rfid-member-initial"
-                        class="text-3xl lg:text-4xl font-bold"
+                        class="text-3xl font-display font-bold text-slate-700"
                     >
                         -
                     </span>
-
                 </div>
-
             </div>
-
 
             {{-- INFO MEMBER --}}
             <div class="min-w-0 flex-1">
-
                 <div class="flex flex-wrap items-center gap-2 mb-1">
-
                     <h3
                         id="rfid-member-name"
-                        class="font-display text-xl lg:text-2xl font-bold text-white"
+                        class="font-display text-xl font-bold text-slate-900"
                     >
                         -
                     </h3>
-
-                    <span
-                        class="text-xs px-2 py-1 rounded-full bg-volt/10 text-volt"
-                    >
-                        RFID
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-lime-100 text-lime-800">
+                        RFID TAP
                     </span>
-
                 </div>
 
-                <p
-                    id="rfid-member-code"
-                    class="text-sm text-slate-400"
-                >
+                <p id="rfid-member-code" class="text-xs text-slate-500 font-mono">
                     -
                 </p>
 
-                <div class="flex flex-wrap gap-x-6 gap-y-2 mt-4">
-
+                <div class="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-xs">
                     <div>
-                        <p class="text-[11px] uppercase tracking-wide text-slate-500">
-                            UID Kartu
-                        </p>
-
-                        <p
-                            id="rfid-member-uid"
-                            class="font-mono text-sm text-slate-300 mt-0.5"
-                        >
-                            -
-                        </p>
+                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">UID Kartu</p>
+                        <p id="rfid-member-uid" class="font-mono font-bold text-slate-800 mt-0.5">-</p>
                     </div>
-
                     <div>
-                        <p class="text-[11px] uppercase tracking-wide text-slate-500">
-                            Waktu Check-in
-                        </p>
-                    
-                        <p
-                            id="rfid-member-time"
-                            class="text-sm text-white font-semibold mt-0.5"
-                        >
-                            -
-                        </p>
+                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-In</p>
+                        <p id="rfid-member-time" class="font-semibold text-slate-900 mt-0.5">-</p>
                     </div>
-                    
                     <div>
-                        <p class="text-[11px] uppercase tracking-wide text-slate-500">
-                            Waktu Check-out
-                        </p>
-                    
-                        <p
-                            id="rfid-member-checkout-time"
-                            class="text-sm text-white font-semibold mt-0.5"
-                        >
-                            -
-                        </p>
+                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-Out</p>
+                        <p id="rfid-member-checkout-time" class="font-semibold text-slate-900 mt-0.5">-</p>
                     </div>
-
                 </div>
-
             </div>
-
 
             {{-- STATUS --}}
-            <div class="sm:ml-auto shrink-0">
-
-                <div class="flex items-center gap-2 text-volt">
-
-                    <span class="w-2.5 h-2.5 rounded-full bg-volt"></span>
-
-                    <span
-                        id="rfid-status-text"
-                        class="text-sm font-semibold"
-                    >
-                        Check-in berhasil
-                    </span>
-
+            <div class="sm:ml-auto shrink-0 text-left sm:text-right">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="rfid-status-text">Check-in berhasil</span>
                 </div>
-
-                <p
-                    id="rfid-member-date"
-                    class="text-xs text-slate-500 mt-1 text-left sm:text-right"
-                >
+                <p id="rfid-member-date" class="text-xs text-slate-400 mt-1">
                     -
                 </p>
-
             </div>
-
         </div>
-
     </div>
 </div>
+
+{{-- STATS GRID --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     @php
         $stats = [
-            ['label' => 'Member Aktif', 'value' => $totalActive, 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z', 'accent' => 'volt'],
-            ['label' => 'Member Baru Bulan Ini', 'value' => $newThisMonth, 'icon' => 'M12 4v16m8-8H4', 'accent' => 'coral'],
-            ['label' => 'Check-in Hari Ini', 'value' => $todayCheckins, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'accent' => 'volt'],
-            ['label' => 'Segera Berakhir (7hr)', 'value' => $expiringSoon, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'accent' => 'coral'],
+            ['label' => 'Member Aktif', 'value' => $totalActive, 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700'],
+            ['label' => 'Member Baru Bulan Ini', 'value' => $newThisMonth, 'icon' => 'M12 4v16m8-8H4', 'bg' => 'bg-blue-50', 'text' => 'text-blue-700'],
+            ['label' => 'Check-in Hari Ini', 'value' => $todayCheckins, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-lime-50', 'text' => 'text-lime-700'],
+            ['label' => 'Segera Berakhir (7hr)', 'value' => $expiringSoon, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-rose-50', 'text' => 'text-rose-700'],
         ];
     @endphp
     @foreach ($stats as $s)
-        <div class="bg-base-card border border-base-line rounded-2xl p-4 lg:p-5">
-            <div class="w-9 h-9 rounded-lg bg-{{ $s['accent'] }}/10 text-{{ $s['accent'] }} flex items-center justify-center mb-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/></svg>
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div class="w-10 h-10 rounded-xl {{ $s['bg'] }} {{ $s['text'] }} flex items-center justify-center mb-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/>
+                </svg>
             </div>
-            <p class="text-2xl lg:text-3xl font-display font-bold text-white">{{ $s['value'] }}</p>
-            <p class="text-xs lg:text-sm text-slate-400 mt-1">{{ $s['label'] }}</p>
+            <p class="text-2xl lg:text-3xl font-display font-extrabold text-slate-900">{{ $s['value'] }}</p>
+            <p class="text-xs text-slate-500 font-medium mt-1">{{ $s['label'] }}</p>
         </div>
     @endforeach
 </div>
 
+{{-- CHART & REVENUE --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <div class="lg:col-span-2 bg-base-card border border-base-line rounded-2xl p-5 lg:p-6">
+    <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="font-display font-semibold text-white">Kunjungan 7 Hari Terakhir</h2>
-            <span class="text-xs text-slate-500">via RFID check-in</span>
+            <div>
+                <h2 class="font-display font-bold text-base text-slate-900">Kunjungan 7 Hari Terakhir</h2>
+                <p class="text-xs text-slate-500">Frekuensi check-in member via RFID</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">RFID Tap</span>
         </div>
         <canvas id="attendanceChart" height="130"></canvas>
     </div>
-    <div class="bg-base-card border border-base-line rounded-2xl p-5 lg:p-6">
-        <h2 class="font-display font-semibold text-white mb-1">Pendapatan Bulan Ini</h2>
-        <p class="font-display text-3xl font-bold text-volt mt-3">Rp{{ number_format($revenueThisMonth, 0, ',', '.') }}</p>
-        <p class="text-xs text-slate-500 mt-2">Total dari pembayaran paket & perpanjangan.</p>
-        <a href="{{ route('admin.members.create') }}" class="mt-5 flex items-center justify-center gap-2 w-full rounded-xl bg-volt text-base text-sm font-semibold py-2.5 hover:brightness-95 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Daftarkan Member Baru
-        </a>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm flex flex-col justify-between">
+        <div>
+            <h2 class="font-display font-bold text-base text-slate-900 mb-1">Pendapatan Bulan Ini</h2>
+            <p class="text-xs text-slate-500">Total dari pembayaran paket & perpanjangan.</p>
+            <p class="font-display text-3xl font-extrabold text-lime-700 mt-4">
+                Rp{{ number_format($revenueThisMonth, 0, ',', '.') }}
+            </p>
+        </div>
+        <div class="pt-6">
+            <a href="{{ route('admin.members.create') }}" class="flex items-center justify-center gap-2 w-full rounded-xl bg-slate-900 text-white text-sm font-bold py-3 hover:bg-slate-800 transition shadow-sm">
+                <svg class="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Daftarkan Member Baru</span>
+            </a>
+        </div>
     </div>
 </div>
 
+{{-- RECENT CHECK-INS & RECENT MEMBERS --}}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="bg-base-card border border-base-line rounded-2xl p-5 lg:p-6">
-        <h2 class="font-display font-semibold text-white mb-4">Check-in Terbaru</h2>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
+        <h2 class="font-display font-bold text-base text-slate-900 mb-4 flex items-center justify-between">
+            <span>Check-in Terbaru</span>
+            <span class="text-xs font-normal text-slate-400">Hari ini</span>
+        </h2>
         <div class="space-y-3">
             @forelse ($recentCheckins as $a)
-                <div class="flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 rounded-full bg-volt/10 text-volt flex items-center justify-center font-semibold shrink-0">{{ substr($a->member->user->name,0,1) }}</div>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-white truncate">{{ $a->member->user->name }}</p>
-                        <p class="text-xs text-slate-500">{{ $a->member->member_code }}</p>
+                <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
+                    <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
+                        {{ substr($a->member->user->name, 0, 1) }}
                     </div>
-                    <span class="text-xs text-slate-400 shrink-0">{{ $a->check_in_at->format('H:i') }}</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-slate-900 font-semibold truncate">{{ $a->member->user->name }}</p>
+                        <p class="text-xs text-slate-400 font-mono">{{ $a->member->member_code }}</p>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-md shrink-0">
+                        {{ $a->check_in_at->format('H:i') }} WIB
+                    </span>
                 </div>
             @empty
-                <p class="text-sm text-slate-500">Belum ada aktivitas check-in.</p>
+                <p class="text-sm text-slate-400 py-4 text-center">Belum ada aktivitas check-in hari ini.</p>
             @endforelse
         </div>
     </div>
-    <div class="bg-base-card border border-base-line rounded-2xl p-5 lg:p-6">
-        <h2 class="font-display font-semibold text-white mb-4">Member Terbaru</h2>
+
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
+        <h2 class="font-display font-bold text-base text-slate-900 mb-4 flex items-center justify-between">
+            <span>Member Terbaru</span>
+            <span class="text-xs font-normal text-slate-400">Baru Bergabung</span>
+        </h2>
         <div class="space-y-3">
             @forelse ($recentMembers as $m)
-                <div class="flex items-center gap-3 text-sm">
-                    <div class="w-8 h-8 rounded-full bg-coral/10 text-coral flex items-center justify-center font-semibold shrink-0">{{ substr($m->user->name,0,1) }}</div>
+                <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm shrink-0">
+                        {{ substr($m->user->name, 0, 1) }}
+                    </div>
                     <div class="min-w-0 flex-1">
-                        <p class="text-white truncate">{{ $m->user->name }}</p>
+                        <p class="text-slate-900 font-semibold truncate">{{ $m->user->name }}</p>
                         <p class="text-xs text-slate-500">{{ $m->package->name ?? '-' }}</p>
                     </div>
-                    <span class="text-xs text-slate-400 shrink-0">{{ $m->join_date->format('d M') }}</span>
+                    <span class="text-xs text-slate-400 shrink-0">{{ $m->join_date->format('d M Y') }}</span>
                 </div>
             @empty
-                <p class="text-sm text-slate-500">Belum ada member.</p>
+                <p class="text-sm text-slate-400 py-4 text-center">Belum ada member terdaftar.</p>
             @endforelse
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
     const emptyState = document.getElementById('rfid-empty-state');
     const warningState = document.getElementById('rfid-warning-state');
     const checkinData = document.getElementById('rfid-checkin-data');
@@ -345,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const memberDate = document.getElementById('rfid-member-date');
 
     const statusText = document.getElementById('rfid-status-text');
-
 
     const liveIndicator = document.getElementById('rfid-live-indicator');
     const liveDot = document.getElementById('rfid-live-dot');
@@ -374,46 +300,24 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function setLiveIndicator(colorClass, dotClass, text) {
-        liveIndicator.classList.remove('text-slate-500', 'text-volt', 'text-coral');
-        liveIndicator.classList.add(colorClass);
-
-        liveDot.classList.remove('bg-slate-500', 'bg-volt', 'bg-coral');
-        liveDot.classList.add(dotClass);
-
+        liveIndicator.className = 'flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full ' + colorClass;
+        liveDot.className = 'w-2 h-2 rounded-full ' + dotClass;
         liveIndicator.lastChild.textContent = ' ' + text;
     }
 
-
     async function checkLatestRfidCheckin() {
-
         try {
+            const response = await fetch('{{ route('admin.dashboard.latest-rfid-checkin') }}', {
+                headers: { 'Accept': 'application/json' }
+            });
 
-            const response = await fetch(
-                '{{ route('admin.dashboard.latest-rfid-checkin') }}',
-                {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('Gagal mengambil data check-in.');
-            }
-
+            if (!response.ok) throw new Error('Gagal mengambil data check-in.');
             const data = await response.json();
 
-
             if (!data.exists) {
-
                 if (data.reason && warningMessages[data.reason]) {
-
                     const warningKey = data.reason + ':' + (data.uid ?? '') + ':' + (data.scan_at ?? '');
-
-                    if (lastWarningKey === warningKey) {
-                        return;
-                    }
-
+                    if (lastWarningKey === warningKey) return;
                     lastWarningKey = warningKey;
 
                     const msg = warningMessages[data.reason];
@@ -424,40 +328,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     checkinData.classList.add('hidden');
                     warningState.classList.remove('hidden');
 
-                    setLiveIndicator('text-coral', 'bg-coral', 'Perlu perhatian');
-
-                    warningState.classList.remove('rfid-checkin-pulse');
-                    void warningState.offsetWidth;
-                    warningState.classList.add('rfid-checkin-pulse');
+                    setLiveIndicator('bg-rose-100 text-rose-800 border border-rose-200', 'bg-rose-500', 'Perlu perhatian');
                 }
-
                 return;
             }
-
 
             lastWarningKey = null;
-
-
-            // Kalau state-nya (id + status checkout) masih sama persis,
-            // tidak perlu render ulang. Menyertakan checkout_time di key
-            // supaya event CHECK-OUT (yang meng-update baris attendance
-            // yang SAMA, bukan membuat baris baru) tetap terdeteksi sebagai
-            // perubahan dan widget ikut ter-refresh otomatis.
-
             const stateKey = data.id + ':' + (data.checkout_time ?? '');
-
-            if (lastAttendanceId === stateKey) {
-                return;
-            }
-
+            if (lastAttendanceId === stateKey) return;
 
             lastAttendanceId = stateKey;
             lastCheckoutTime = data.checkout_time;
-
-
-            // ==========================================
-            // UPDATE DATA MEMBER
-            // ==========================================
 
             memberName.textContent = data.name;
             memberCode.textContent = data.member_code;
@@ -467,89 +348,42 @@ document.addEventListener('DOMContentLoaded', function () {
             memberDate.textContent = data.date;
 
             if (data.action === 'checkin') {
-
                 statusText.textContent = 'Check-in berhasil';
-
-                } else if (data.action === 'checkout') {
-
+            } else if (data.action === 'checkout') {
                 statusText.textContent = 'Check-out berhasil';
+            } else if (data.action === 'completed') {
+                statusText.textContent = 'Sudah check-in hari ini';
+            }
 
-                } else if (data.action === 'completed') {
-
-                statusText.textContent =
-                    'Check-in sudah dilakukan hari ini';
-                }
-
-            // ==========================================
-            // FOTO MEMBER
-            // ==========================================
-
-            const initial = data.name
-                ? data.name.charAt(0).toUpperCase()
-                : '-';
-
+            const initial = data.name ? data.name.charAt(0).toUpperCase() : '-';
             memberInitial.textContent = initial;
 
-
             if (data.photo) {
-
                 memberPhoto.src = data.photo;
                 memberPhoto.classList.remove('hidden');
                 memberInitial.classList.add('hidden');
-
             } else {
-
                 memberPhoto.src = '';
                 memberPhoto.classList.add('hidden');
                 memberInitial.classList.remove('hidden');
-
             }
-
-
-            // ==========================================
-            // TAMPILKAN DATA
-            // ==========================================
 
             emptyState.classList.add('hidden');
             warningState.classList.add('hidden');
             checkinData.classList.remove('hidden');
 
-
-            // ==========================================
-            // INDIKATOR LIVE
-            // ==========================================
-
-            setLiveIndicator('text-volt', 'bg-volt', 'RFID terdeteksi');
-
-
-            // ==========================================
-            // EFEK SAAT KARTU BARU DITAP
-            // ==========================================
-
-            checkinData.classList.remove('rfid-checkin-pulse');
-
-            void checkinData.offsetWidth;
-
-            checkinData.classList.add('rfid-checkin-pulse');
-
+            setLiveIndicator('bg-emerald-100 text-emerald-800 border border-emerald-200', 'bg-emerald-500', 'RFID Terdeteksi');
 
         } catch (error) {
-
             console.error('RFID Dashboard Error:', error);
-
         }
-
     }
 
-
-    // Cek setiap 1 detik
     setInterval(checkLatestRfidCheckin, 1000);
-
-    // Cek langsung saat dashboard dibuka
     checkLatestRfidCheckin();
-
 });
 </script>
+
 <script>
     const ctx = document.getElementById('attendanceChart');
     new Chart(ctx, {
@@ -558,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: @json($attendanceLast7Days->pluck('label')),
             datasets: [{
                 data: @json($attendanceLast7Days->pluck('count')),
-                backgroundColor: '#C6FF3D',
+                backgroundColor: '#84CC16',
                 borderRadius: 8,
                 maxBarThickness: 36,
             }]
@@ -566,8 +400,8 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             plugins: { legend: { display: false } },
             scales: {
-                x: { grid: { display: false }, ticks: { color: '#94A3B8' } },
-                y: { beginAtZero: true, ticks: { color: '#94A3B8', precision: 0 }, grid: { color: '#262A34' } },
+                x: { grid: { display: false }, ticks: { color: '#64748B' } },
+                y: { beginAtZero: true, ticks: { color: '#64748B', precision: 0 }, grid: { color: '#E2E8F0' } },
             }
         }
     });
