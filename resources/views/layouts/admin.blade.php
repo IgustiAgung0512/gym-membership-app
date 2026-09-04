@@ -46,7 +46,7 @@
     {{-- SIDEBAR --}}
     <aside
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-        class="fixed z-40 inset-y-0 left-0 w-64 bg-[#0F172A] border-r border-slate-800 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 flex flex-col shadow-lg"
+        class="fixed z-40 inset-y-0 left-0 w-64 bg-[#0F172A] border-r border-slate-800 transform transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 flex flex-col shadow-lg"
     >
         {{-- LOGO --}}
         <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800 bg-slate-950/40">

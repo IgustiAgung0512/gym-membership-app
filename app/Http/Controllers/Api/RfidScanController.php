@@ -35,6 +35,11 @@ class RfidScanController extends Controller
             'uid' => ['required', 'string', 'max:50'],
         ]);
 
+        \App\Models\ScanUid::updateOrCreate(
+            ['id' => 1],
+            ['uid' => trim($data['uid'])]
+        );
+
         $card = RfidCard::with('member.user')->where('uid', $data['uid'])->first();
 
         if (! $card) {

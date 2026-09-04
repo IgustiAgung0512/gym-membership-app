@@ -306,6 +306,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function checkLatestRfidCheckin() {
+        if (document.hidden) return;
+
         try {
             const response = await fetch('{{ route('admin.dashboard.latest-rfid-checkin') }}', {
                 headers: { 'Accept': 'application/json' }

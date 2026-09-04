@@ -51,6 +51,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
     Route::get('/rfid', [RfidController::class, 'index'])->name('rfid.index');
+    Route::get('/rfid/latest', [RfidController::class, 'latest'])->name('rfid.latest');
+    Route::get('/rfid/check', [RfidController::class, 'check'])->name('rfid.check');
     Route::post('/rfid', [RfidController::class, 'store'])->name('rfid.store');
     Route::post('/rfid/{card}/toggle-block', [RfidController::class, 'toggleBlock'])->name('rfid.toggle-block');
     Route::delete('/rfid/{card}', [RfidController::class, 'destroy'])->name('rfid.destroy');

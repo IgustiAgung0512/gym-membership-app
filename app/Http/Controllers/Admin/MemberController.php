@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
@@ -52,36 +53,54 @@ class MemberController extends Controller
     }
 
     public function checkRfid(Request $request)
-{
-    $uid = trim($request->uid);
+    {
+        $uid = trim($request->uid);
+        $memberId = $request->member_id;
 
-    if (!$uid) {
+        if (!$uid) {
+            return response()->json([
+                'valid' => true,
+                'exists' => false,
+                'message' => 'UID RFID belum terdeteksi.'
+            ]);
+        }
+
+        $card = RfidCard::with('member.user')
+            ->where('uid', $uid)
+            ->first();
+
+        if ($card) {
+            if ($memberId && $card->member_id == $memberId) {
+                return response()->json([
+                    'valid' => true,
+                    'is_current' => true,
+                    'message' => "Kartu {$uid} adalah kartu aktif milik member ini."
+                ]);
+            }
+
+            if (!$card->member_id) {
+                return response()->json([
+                    'valid' => true,
+                    'status' => 'unassigned',
+                    'message' => "Kartu {$uid} berstatus Unassigned (tersedia untuk digunakan)."
+                ]);
+            }
+
+            $memberName = $card->member?->user?->name ?? 'member lain';
+
+            return response()->json([
+                'valid' => false,
+                'exists' => true,
+                'message' => "UID {$uid} sudah digunakan oleh member {$memberName}."
+            ]);
+        }
+
         return response()->json([
-            'exists' => false,
-            'message' => 'UID RFID belum terdeteksi.'
+            'valid' => true,
+            'status' => 'new',
+            'message' => "Kartu RFID baru tersedia: {$uid}"
         ]);
     }
-
-    $card = RfidCard::with('member.user')
-        ->where('uid', $uid)
-        ->first();
-
-    if ($card) {
-        $memberName = $card->member?->user?->name;
-
-        return response()->json([
-            'exists' => true,
-            'message' => $memberName
-                ? "UID {$uid} sudah digunakan oleh member {$memberName}."
-                : "UID {$uid} sudah terdaftar pada kartu RFID lain."
-        ]);
-    }
-
-    return response()->json([
-        'exists' => false,
-        'message' => "Kartu RFID tersedia: {$uid}"
-    ]);
-}
 
     public function store(Request $request)
     {
@@ -159,7 +178,11 @@ class MemberController extends Controller
     {
         $member->load('user', 'rfidCard');
         $packages = MembershipPackage::where('is_active', true)->get();
-        $unassignedCards = RfidCard::where('status', 'unassigned')->orWhere('member_id', $member->id)->get();
+        $unassignedCards = RfidCard::where('status', 'unassigned')
+            ->orWhere('member_id', $member->id)
+            ->orWhere('uid', $member->rfid_uid)
+            ->orderBy('uid', 'asc')
+            ->get();
 
         return view('admin.members.edit', compact('member', 'packages', 'unassignedCards'));
     }
@@ -176,7 +199,7 @@ class MemberController extends Controller
                 'nullable',
                 'string',
                 'max:50',
-                'unique:members,rfid_uid',
+                Rule::unique('members', 'rfid_uid')->ignore($member->id),
             ],
             'expire_date' => ['nullable', 'date'],
         ]);
@@ -187,15 +210,28 @@ class MemberController extends Controller
             'membership_package_id' => $data['membership_package_id'],
             'address' => $data['address'] ?? null,
             'status' => $data['status'],
+            'rfid_uid' => $data['rfid_uid'] ?? null,
             'expire_date' => $data['expire_date'] ?? $member->expire_date,
         ]);
 
         if (! empty($data['rfid_uid'])) {
-            RfidCard::where('member_id', $member->id)->update(['member_id' => null, 'status' => 'unassigned']);
+            // Lepaskan kartu lama yang sebelumnya terhubung ke member ini jika berbeda
+            RfidCard::where('member_id', $member->id)
+                ->where('uid', '!=', $data['rfid_uid'])
+                ->update(['member_id' => null, 'status' => 'unassigned', 'assigned_at' => null]);
+
+            // Tautkan kartu baru yang dipilih
             RfidCard::updateOrCreate(
                 ['uid' => $data['rfid_uid']],
                 ['member_id' => $member->id, 'status' => 'assigned', 'assigned_at' => now()]
             );
+        } else {
+            // Jika dikosongkan (lepas kartu)
+            RfidCard::where('member_id', $member->id)->update([
+                'member_id' => null,
+                'status' => 'unassigned',
+                'assigned_at' => null,
+            ]);
         }
 
         return redirect()->route('admin.members.index')->with('success', 'Data member berhasil diperbarui.');
