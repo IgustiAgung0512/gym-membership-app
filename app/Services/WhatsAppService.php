@@ -27,15 +27,38 @@ class WhatsAppService
     {
         $expire = $member->expire_date?->translatedFormat('d M Y') ?? '-';
 
+        $loginInfo = '';
+        if (!empty($member->temp_password)) {
+            $loginInfo = "\n🔑 *Akun Login Portal Member:*\n"
+                . "• Email: *{$member->user->email}*\n"
+                . "• Password Sementara: *{$member->temp_password}*\n"
+                . "• Link Login: " . url('/login') . "\n";
+        }
+
         $message = "Halo *{$member->user->name}* 👋\n\n"
-            . "Pendaftaran membership GYM kamu berhasil! 🎉\n\n"
+            . "Pendaftaran membership GymPulse kamu berhasil! 🎉\n\n"
             . "Kode Member: *{$member->member_code}*\n"
             . "Paket: *" . ($member->package->name ?? '-') . "*\n"
-            . "Aktif sampai: *{$expire}*\n\n"
+            . "Aktif sampai: *{$expire}*\n"
+            . $loginInfo . "\n"
             . "Tunjukkan kartu RFID kamu di pintu masuk untuk check-in. "
             . "Sampai jumpa di gym! 💪";
 
         return $this->send($member, $member->user->phone, $message, 'registration');
+    }
+
+    public function sendPasswordResetNotice(Member $member, string $tempPassword): bool
+    {
+        $message = "Halo *{$member->user->name}* 👋\n\n"
+            . "Password akun portal member GymPulse kamu telah direset oleh Admin.\n\n"
+            . "🔑 *Detail Login Akun:*\n"
+            . "• Email: *{$member->user->email}*\n"
+            . "• Password Sementara: *{$tempPassword}*\n"
+            . "• Link Login: " . url('/login') . "\n\n"
+            . "⚠️ _Silakan login dan kamu akan diminta untuk membuat password baru yang aman._\n\n"
+            . "Sampai jumpa di gym! 💪";
+
+        return $this->send($member, $member->user->phone, $message, 'password_reset');
     }
 
     public function sendCheckInNotice(Member $member): bool

@@ -260,9 +260,10 @@ class MemberController extends Controller
 
     /**
      * Admin mereset password member ke password sementara baru,
+     * mengirimkan notifikasi password baru via WhatsApp ke member,
      * dan menandai must_change_password = true supaya member wajib menggantinya saat login berikutnya.
      */
-    public function resetPassword(Member $member)
+    public function resetPassword(Member $member, WhatsAppService $whatsapp)
     {
         $tempPassword = Str::password(10, symbols: false);
 
@@ -271,8 +272,14 @@ class MemberController extends Controller
             'must_change_password' => true,
         ]);
 
+        try {
+            $whatsapp->sendPasswordResetNotice($member->load('user'), $tempPassword);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal kirim WhatsApp reset password: ' . $e->getMessage());
+        }
+
         return back()
-            ->with('success', 'Password member berhasil direset.')
+            ->with('success', "Password member {$member->user->name} berhasil direset dan dikirimkan ke WhatsApp ({$member->user->phone}).")
             ->with('temp_password', ['name' => $member->user->name, 'password' => $tempPassword]);
     }
 
