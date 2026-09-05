@@ -11,23 +11,37 @@
     RINGKASAN CEPAT
 ========================================================= --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    @php
-        $quickStats = [
-            ['label' => 'Total Member', 'value' => $totalMembers, 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700'],
-            ['label' => 'Member Aktif', 'value' => $activeMembers, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-lime-50', 'text' => 'text-lime-700'],
-            ['label' => 'Pendapatan Bulan Ini', 'value' => 'Rp' . number_format($revenueThisMonth, 0, ',', '.'), 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 10v2m9-8a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-blue-50', 'text' => 'text-blue-700'],
-            ['label' => 'Segera Berakhir (7hr)', 'value' => $expiringSoonCount, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-rose-50', 'text' => 'text-rose-700'],
-        ];
-    @endphp
-    @foreach ($quickStats as $s)
-        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <div class="w-10 h-10 rounded-xl {{ $s['bg'] }} {{ $s['text'] }} flex items-center justify-center mb-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/></svg>
-            </div>
-            <p class="text-xl lg:text-2xl font-display font-extrabold text-slate-900">{{ $s['value'] }}</p>
-            <p class="text-xs lg:text-sm text-slate-500 mt-1 font-medium">{{ $s['label'] }}</p>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         </div>
-    @endforeach
+        <p class="text-xl lg:text-2xl font-display font-extrabold text-slate-900">{{ $activeMembers }} <span class="text-xs font-normal text-slate-400">/ {{ $totalMembers }}</span></p>
+        <p class="text-xs lg:text-sm text-slate-500 mt-1 font-medium">Member Aktif</p>
+    </div>
+
+    <div class="bg-white border border-blue-200/80 rounded-2xl p-5 shadow-sm bg-gradient-to-b from-blue-50/30 to-transparent">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 10v2m9-8a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-lg lg:text-xl font-display font-extrabold text-blue-900">Rp{{ number_format($revenueThisMonth, 0, ',', '.') }}</p>
+        <p class="text-xs text-blue-600 mt-1 font-medium">Pendapatan Membership (Bln Ini)</p>
+    </div>
+
+    <div class="bg-white border border-violet-200/80 rounded-2xl p-5 shadow-sm bg-gradient-to-b from-violet-50/30 to-transparent">
+        <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        </div>
+        <p class="text-lg lg:text-xl font-display font-extrabold text-violet-900">Rp{{ number_format($storeRevenueThisMonth, 0, ',', '.') }}</p>
+        <p class="text-xs text-violet-600 mt-1 font-medium">Omzet Toko & POS (Bln Ini)</p>
+    </div>
+
+    <div class="bg-white border border-emerald-200/80 rounded-2xl p-5 shadow-sm bg-gradient-to-b from-emerald-50/30 to-transparent">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-lg lg:text-xl font-display font-extrabold text-emerald-700">+Rp{{ number_format($storeProfitThisMonth, 0, ',', '.') }}</p>
+        <p class="text-xs text-emerald-600 mt-1 font-medium">Laba Bersih Toko (Bln Ini)</p>
+    </div>
 </div>
 
 {{-- =========================================================
@@ -102,18 +116,40 @@
         </form>
     </div>
 
-    {{-- Laporan Pendapatan --}}
+    {{-- Laporan Pendapatan Membership --}}
     <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
         <div class="flex items-start gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 10v2m9-8a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-                <h3 class="font-display font-bold text-slate-900">Laporan Pendapatan</h3>
+                <h3 class="font-display font-bold text-slate-900">Laporan Pendapatan Membership</h3>
                 <p class="text-xs text-slate-500 mt-0.5">Rekap pembayaran pendaftaran & perpanjangan, plus total.</p>
             </div>
         </div>
         <form method="GET" action="{{ route('admin.reports.revenue.pdf') }}" target="_blank" class="flex flex-wrap items-center gap-2">
+            <input type="date" name="from" x-model="from" class="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500">
+            <span class="text-slate-400 text-xs">s/d</span>
+            <input type="date" name="to" x-model="to" class="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500">
+            <button type="submit" class="flex items-center gap-2 rounded-xl bg-slate-900 text-white text-sm font-bold px-4 py-2 hover:bg-slate-800 transition ml-auto shadow-sm">
+                <svg class="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Unduh PDF
+            </button>
+        </form>
+    </div>
+
+    {{-- Laporan Penjualan Produk (Gym Store / POS) --}}
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
+        <div class="flex items-start gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-800 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <div>
+                <h3 class="font-display font-bold text-slate-900">Laporan Penjualan Produk (Store & POS)</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Rekap penjualan suplemen, minuman & aksesoris, omzet & laba bersih.</p>
+            </div>
+        </div>
+        <form method="GET" action="{{ route('admin.reports.orders.pdf') }}" target="_blank" class="flex flex-wrap items-center gap-2">
             <input type="date" name="from" x-model="from" class="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500">
             <span class="text-slate-400 text-xs">s/d</span>
             <input type="date" name="to" x-model="to" class="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500">
@@ -174,25 +210,55 @@
 </div>
 
 <script>
-    // Grafik tren pendapatan
+    // Grafik tren pendapatan: Membership vs Produk Toko vs Laba Bersih
     const revenueCtx = document.getElementById('revenueTrendChart');
     new Chart(revenueCtx, {
         type: 'bar',
         data: {
             labels: @json($revenueLast6Months->pluck('label')),
-            datasets: [{
-                data: @json($revenueLast6Months->pluck('total')),
-                backgroundColor: '#84CC16',
-                borderRadius: 8,
-                maxBarThickness: 40,
-            }]
+            datasets: [
+                {
+                    label: 'Membership',
+                    data: @json($revenueLast6Months->pluck('membership')),
+                    backgroundColor: '#3B82F6',
+                    borderRadius: 6,
+                    maxBarThickness: 24,
+                },
+                {
+                    label: 'Omzet Toko',
+                    data: @json($revenueLast6Months->pluck('store')),
+                    backgroundColor: '#8B5CF6',
+                    borderRadius: 6,
+                    maxBarThickness: 24,
+                },
+                {
+                    label: 'Laba Toko',
+                    data: @json($revenueLast6Months->pluck('store_profit')),
+                    backgroundColor: '#84CC16',
+                    borderRadius: 6,
+                    maxBarThickness: 24,
+                }
+            ]
         },
         options: {
+            responsive: true,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: { size: 11, weight: 'bold' },
+                        color: '#475569'
+                    }
+                },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => 'Rp' + ctx.parsed.y.toLocaleString('id-ID')
+                        label: (ctx) => `${ctx.dataset.label}: Rp${ctx.parsed.y.toLocaleString('id-ID')}`
                     }
                 }
             },
@@ -204,7 +270,7 @@
                         color: '#64748B',
                         callback: (v) => 'Rp' + (v / 1000) + 'rb'
                     },
-                    grid: { color: '#E2E8F0' }
+                    grid: { color: '#F1F5F9' }
                 },
             }
         }

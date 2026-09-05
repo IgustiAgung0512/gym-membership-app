@@ -24,23 +24,46 @@ class ReportController extends Controller
             ->whereYear('payment_date', now()->year)
             ->where('status', 'paid')
             ->sum('amount');
+        
+        $storeOrdersThisMonth = \App\Models\Order::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->where('payment_status', 'paid')
+            ->get();
+
+        $storeRevenueThisMonth = $storeOrdersThisMonth->sum('total_amount');
+        $storeCostThisMonth = $storeOrdersThisMonth->sum('cost_total');
+        $storeProfitThisMonth = $storeRevenueThisMonth - $storeCostThisMonth;
+
+        $totalCombinedRevenue = $revenueThisMonth + $storeRevenueThisMonth;
+
         $expiringSoonCount = Member::where('status', 'active')
             ->whereNotNull('expire_date')
             ->whereBetween('expire_date', [now()->startOfDay(), now()->addDays(7)->endOfDay()])
             ->count();
 
-        // Tren pendapatan 6 bulan terakhir, untuk grafik batang.
+        // Tren pendapatan 6 bulan terakhir: Perbandingan Membership vs Penjualan Toko vs Laba Toko
         $revenueLast6Months = collect(range(5, 0))->map(function ($monthsAgo) {
             $date = now()->subMonths($monthsAgo);
 
-            $total = Payment::whereMonth('payment_date', $date->month)
+            $membershipTotal = Payment::whereMonth('payment_date', $date->month)
                 ->whereYear('payment_date', $date->year)
                 ->where('status', 'paid')
                 ->sum('amount');
 
+            $storeOrders = \App\Models\Order::whereMonth('created_at', $date->month)
+                ->whereYear('created_at', $date->year)
+                ->where('payment_status', 'paid')
+                ->get();
+
+            $storeTotal = $storeOrders->sum('total_amount');
+            $storeProfit = $storeTotal - $storeOrders->sum('cost_total');
+
             return [
                 'label' => $date->translatedFormat('M Y'),
-                'total' => (float) $total,
+                'membership' => (float) $membershipTotal,
+                'store' => (float) $storeTotal,
+                'store_profit' => (float) $storeProfit,
+                'total' => (float) ($membershipTotal + $storeTotal),
             ];
         });
 
@@ -57,6 +80,9 @@ class ReportController extends Controller
             'totalMembers' => $totalMembers,
             'activeMembers' => $activeMembers,
             'revenueThisMonth' => $revenueThisMonth,
+            'storeRevenueThisMonth' => $storeRevenueThisMonth,
+            'storeProfitThisMonth' => $storeProfitThisMonth,
+            'totalCombinedRevenue' => $totalCombinedRevenue,
             'expiringSoonCount' => $expiringSoonCount,
             'revenueLast6Months' => $revenueLast6Months,
             'memberStatusCounts' => $memberStatusCounts,
@@ -130,6 +156,36 @@ class ReportController extends Controller
         ])->setPaper('a4', 'portrait');
 
         return $pdf->download('laporan-pendapatan-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf');
+    }
+
+    /**
+     * Laporan Penjualan Produk (Gym Store / POS) — rekap transaksi penjualan toko
+     * dalam rentang tanggal, lengkap dengan omzet dan laba bersih.
+     */
+    public function ordersPdf(Request $request)
+    {
+        [$from, $to] = $this->resolveDateRange($request);
+
+        $orders = \App\Models\Order::with(['items', 'cashier', 'member.user'])
+            ->whereBetween('created_at', [$from->copy()->startOfDay(), $to->copy()->endOfDay()])
+            ->where('payment_status', 'paid')
+            ->orderBy('created_at')
+            ->get();
+
+        $totalRevenue = $orders->sum('total_amount');
+        $totalCost = $orders->sum('cost_total');
+        $totalProfit = $totalRevenue - $totalCost;
+
+        $pdf = Pdf::loadView('admin.reports.pdf.orders', [
+            'orders' => $orders,
+            'totalRevenue' => $totalRevenue,
+            'totalProfit' => $totalProfit,
+            'from' => $from,
+            'to' => $to,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('laporan-penjualan-toko-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.pdf');
     }
 
     /**

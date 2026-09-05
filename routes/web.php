@@ -3,14 +3,22 @@
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\PosController;
+use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RfidController;
 use App\Http\Controllers\Admin\WhatsappLogController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Cashier\AttendanceController as CashierAttendanceController;
+use App\Http\Controllers\Cashier\MemberController as CashierMemberController;
+use App\Http\Controllers\Cashier\OrderController as CashierOrderController;
+use App\Http\Controllers\Cashier\PosController as CashierPosController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\PasswordController as MemberPasswordController;
 use App\Http\Controllers\Member\PhotoController as MemberPhotoController;
+use App\Http\Controllers\Member\StoreController as MemberStoreController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -65,11 +73,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/whatsapp-logs/clear-all', [WhatsappLogController::class, 'clearAll'])->name('whatsapp.clear-all');
     Route::delete('/whatsapp-logs/{log}', [WhatsappLogController::class, 'destroy'])->name('whatsapp.destroy');
 
+    // --- GYM STORE & POS ---
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+    Route::get('/pos/receipt/{order}', [PosController::class, 'receipt'])->name('pos.receipt');
+
+    Route::resource('products', ProductController::class)->except(['create', 'show', 'edit']);
+    Route::post('/products/{product}/restock', [ProductController::class, 'restock'])->name('products.restock');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/members/pdf', [ReportController::class, 'membersPdf'])->name('members.pdf');
         Route::get('/attendance/pdf', [ReportController::class, 'attendancePdf'])->name('attendance.pdf');
         Route::get('/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('revenue.pdf');
+        Route::get('/orders/pdf', [ReportController::class, 'ordersPdf'])->name('orders.pdf');
         Route::get('/expiring/pdf', [ReportController::class, 'expiringPdf'])->name('expiring.pdf');
         Route::get('/whatsapp/pdf', [ReportController::class, 'whatsappPdf'])->name('whatsapp.pdf');
     });
@@ -80,8 +101,29 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     )->name('dashboard.latest-rfid-checkin');
 });
 
+// --- CASHIER WORKSTATION (Direct entry to POS) ---
+Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cashier.')->group(function () {
+    Route::get('/', [CashierPosController::class, 'index'])->name('dashboard'); // Direct entry into POS!
+    Route::get('/pos', [CashierPosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/checkout', [CashierPosController::class, 'checkout'])->name('pos.checkout');
+    Route::get('/pos/receipt/{order}', [CashierPosController::class, 'receipt'])->name('pos.receipt');
+
+    Route::get('/orders', [CashierOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [CashierOrderController::class, 'show'])->name('orders.show');
+
+    Route::get('/members', [CashierMemberController::class, 'index'])->name('members.index');
+    Route::get('/members/create', [CashierMemberController::class, 'create'])->name('members.create');
+    Route::post('/members', [CashierMemberController::class, 'store'])->name('members.store');
+    Route::post('/members/{member}/renew', [CashierMemberController::class, 'renew'])->name('members.renew');
+
+    Route::get('/attendance', [CashierAttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('/attendance/manual', [CashierAttendanceController::class, 'storeManual'])->name('attendance.manual');
+});
+
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/renew', [MemberDashboardController::class, 'renew'])->name('renew');
+    Route::get('/store', [MemberStoreController::class, 'index'])->name('store.index');
     Route::get('/photo', [MemberPhotoController::class, 'show'])->name('photo.show');
     Route::post('/photo', [MemberPhotoController::class, 'update'])->name('photo.update');
     Route::get('/password', [MemberPasswordController::class, 'edit'])->name('password.edit');

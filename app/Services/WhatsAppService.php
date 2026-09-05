@@ -47,6 +47,42 @@ class WhatsAppService
         return $this->send($member, $member->user->phone, $message, 'registration');
     }
 
+    public function sendRegistrationSuccess(Member $member, ?string $rawPassword = null): bool
+    {
+        $expire = $member->expire_date?->translatedFormat('d M Y') ?? '-';
+        $loginInfo = '';
+        if ($rawPassword) {
+            $loginInfo = "\n🔑 *Akun Login Portal Member:*\n"
+                . "• Email: *{$member->user->email}*\n"
+                . "• Password: *{$rawPassword}*\n"
+                . "• Link Login: " . url('/login') . "\n";
+        }
+
+        $message = "Halo *{$member->user->name}* 👋\n\n"
+            . "Pendaftaran membership GymPulse kamu berhasil! 🎉\n\n"
+            . "Kode Member: *{$member->member_code}*\n"
+            . "Paket: *" . ($member->package->name ?? '-') . "*\n"
+            . "Aktif sampai: *{$expire}*\n"
+            . $loginInfo . "\n"
+            . "Tunjukkan kartu RFID kamu di pintu masuk untuk check-in. "
+            . "Sampai jumpa di gym! 💪";
+
+        return $this->send($member, $member->user->phone, $message, 'registration');
+    }
+
+    public function sendRenewalSuccess(Member $member): bool
+    {
+        $expire = $member->expire_date?->translatedFormat('d M Y') ?? '-';
+        $message = "Halo *{$member->user->name}* 👋\n\n"
+            . "Pembayaran perpanjangan membership GymPulse kamu telah berhasil dikonfirmasi! 🎉\n\n"
+            . "Paket: *" . ($member->package->name ?? '-') . "*\n"
+            . "Masa Aktif Baru: *{$expire}*\n"
+            . "Status: *Aktif* ✅\n\n"
+            . "Terima kasih telah memperpanjang membership kamu. Selamat berlatih kembali! 💪";
+
+        return $this->send($member, $member->user->phone, $message, 'renewal');
+    }
+
     public function sendPasswordResetNotice(Member $member, string $tempPassword): bool
     {
         $message = "Halo *{$member->user->name}* 👋\n\n"

@@ -25,6 +25,27 @@ class DashboardController extends Controller
             ->whereYear('payment_date', now()->year)
             ->where('status', 'paid')
             ->sum('amount');
+        $membershipTransactionsCount = Payment::whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->where('status', 'paid')
+            ->count();
+
+        $storeOrdersThisMonth = \App\Models\Order::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->where('payment_status', 'paid')
+            ->get();
+
+        $storeRevenueThisMonth = $storeOrdersThisMonth->sum('total_amount');
+        $storeCostThisMonth = $storeOrdersThisMonth->sum('cost_total');
+        $storeProfitThisMonth = $storeRevenueThisMonth - $storeCostThisMonth;
+        $storeOrdersCount = $storeOrdersThisMonth->count();
+        $storeProfitMargin = $storeRevenueThisMonth > 0 ? round(($storeProfitThisMonth / $storeRevenueThisMonth) * 100, 1) : 0;
+
+        $totalCombinedRevenue = $revenueThisMonth + $storeRevenueThisMonth;
+        $totalCombinedProfit = $revenueThisMonth + $storeProfitThisMonth; // Membership 100% gross + Store Net Profit
+
+        $lowStockCount = \App\Models\Product::whereRaw('stock <= min_stock_alert')->count();
+        $recentOrders = \App\Models\Order::with('items')->latest()->take(5)->get();
 
         $attendanceLast7Days = collect(range(6, 0))->map(function ($daysAgo) {
             $date = now()->subDays($daysAgo);
@@ -39,7 +60,10 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalActive', 'newThisMonth', 'expiringSoon', 'todayCheckins',
-            'revenueThisMonth', 'attendanceLast7Days', 'recentCheckins', 'recentMembers'
+            'revenueThisMonth', 'membershipTransactionsCount',
+            'storeRevenueThisMonth', 'storeCostThisMonth', 'storeProfitThisMonth', 'storeProfitMargin', 'storeOrdersCount',
+            'totalCombinedRevenue', 'totalCombinedProfit', 'lowStockCount',
+            'attendanceLast7Days', 'recentCheckins', 'recentMembers', 'recentOrders'
         ));
     }
     public function latestRfidCheckin()

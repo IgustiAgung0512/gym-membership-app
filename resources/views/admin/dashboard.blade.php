@@ -184,18 +184,63 @@
 
     <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm flex flex-col justify-between">
         <div>
-            <h2 class="font-display font-bold text-base text-slate-900 mb-1">Pendapatan Bulan Ini</h2>
-            <p class="text-xs text-slate-500">Total dari pembayaran paket & perpanjangan.</p>
-            <p class="font-display text-3xl font-extrabold text-lime-700 mt-4">
-                Rp{{ number_format($revenueThisMonth, 0, ',', '.') }}
+            <div class="flex items-center justify-between">
+                <h2 class="font-display font-bold text-base text-slate-900">Performa Keuangan Bulan Ini</h2>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-lime-100 text-lime-800">Ringkasan</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Total Omzet Gabungan</p>
+            
+            <p class="font-display text-2xl lg:text-3xl font-extrabold text-slate-900 mt-2">
+                Rp{{ number_format($totalCombinedRevenue, 0, ',', '.') }}
             </p>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-3 text-xs">
+                {{-- Membership Revenue --}}
+                <div class="p-2.5 rounded-xl bg-blue-50/70 border border-blue-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-blue-950 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            Pendapatan Membership
+                        </span>
+                        <span class="text-[10px] text-blue-700 font-semibold bg-blue-100/80 px-1.5 py-0.5 rounded">
+                            {{ $membershipTransactionsCount }} Transaksi
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-baseline">
+                        <span class="text-slate-500 text-[11px]">Total Omzet Jasa:</span>
+                        <strong class="font-mono font-bold text-slate-900">Rp{{ number_format($revenueThisMonth, 0, ',', '.') }}</strong>
+                    </div>
+                </div>
+
+                {{-- Store / POS Revenue & Profit --}}
+                <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-emerald-950 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Penjualan Produk (Toko & POS)
+                        </span>
+                        <span class="text-[10px] text-emerald-700 font-semibold bg-emerald-100/80 px-1.5 py-0.5 rounded">
+                            {{ $storeOrdersCount }} Transaksi
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-slate-500 text-[11px]">Omzet Penjualan:</span>
+                        <strong class="font-mono font-bold text-slate-900">Rp{{ number_format($storeRevenueThisMonth, 0, ',', '.') }}</strong>
+                    </div>
+                    <div class="flex justify-between items-baseline pt-1 border-t border-emerald-200/60">
+                        <span class="text-emerald-800 font-semibold text-[11px]">Laba Bersih Toko ({{ $storeProfitMargin }}%):</span>
+                        <strong class="font-mono font-bold text-emerald-700">+Rp{{ number_format($storeProfitThisMonth, 0, ',', '.') }}</strong>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="pt-6">
-            <a href="{{ route('admin.members.create') }}" class="flex items-center justify-center gap-2 w-full rounded-xl bg-slate-900 text-white text-sm font-bold py-3 hover:bg-slate-800 transition shadow-sm">
-                <svg class="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Daftarkan Member Baru</span>
+
+        <div class="pt-4 grid grid-cols-2 gap-2">
+            <a href="{{ route('admin.pos.index') }}" class="flex items-center justify-center gap-1.5 rounded-xl bg-lime-500 text-slate-950 text-xs font-bold py-2.5 hover:bg-lime-400 transition shadow-sm">
+                <span>🛒 Kasir POS</span>
+            </a>
+            <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold py-2.5 hover:bg-slate-800 transition shadow-sm">
+                <span>📋 Riwayat Toko</span>
             </a>
         </div>
     </div>

@@ -28,7 +28,14 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard'));
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard'));
+        } elseif ($user->role === 'cashier') {
+            return redirect()->intended(route('cashier.pos.index'));
+        } else {
+            return redirect()->intended(route('member.dashboard'));
+        }
     }
 
     public function destroy(Request $request)

@@ -137,11 +137,15 @@
         </a>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <a href="{{ route('home') }}" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition font-medium hidden sm:inline-flex">
-                Beranda
+            <a href="{{ route('member.dashboard') }}" class="text-xs px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.dashboard') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium">
+                Dashboard
             </a>
 
-            <a href="{{ route('member.password.edit') }}" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 transition font-medium">
+            <a href="{{ route('member.store.index') }}" class="text-xs px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.store.*') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium inline-flex items-center gap-1.5">
+                <span>🛒 Gym Store</span>
+            </a>
+
+            <a href="{{ route('member.password.edit') }}" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 transition font-medium hidden sm:inline-flex">
                 Ganti Password
             </a>
 

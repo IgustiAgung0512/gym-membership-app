@@ -58,6 +58,17 @@
 
 <div x-data="{ 
     invoiceModal: false, 
+    renewModal: false,
+    selectedPackageId: '{{ $packages->first()->id ?? '' }}',
+    selectedPackagePrice: {{ $packages->first()->price ?? 150000 }},
+    selectedPackageName: '{{ $packages->first()->name ?? '' }}',
+    onlinePaymentMethod: 'qris',
+    packagesList: {{ Js::from($packages) }},
+    setPackage(id, price, name) {
+        this.selectedPackageId = id;
+        this.selectedPackagePrice = price;
+        this.selectedPackageName = name;
+    },
     classTab: 'today',
     nutritionTab: 'tips',
     nutritionCategory: 'all',
@@ -101,6 +112,44 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
             <span class="font-medium">{{ $errors->first() }}</span>
+        </div>
+    @endif
+
+    {{-- EXPIRING SOON / EXPIRED ALERT BANNER --}}
+    @if ($expiringSoon || $member->status !== 'active')
+        <div class="rounded-3xl p-5 sm:p-6 {{ $member->status === 'active' ? 'bg-gradient-to-r from-amber-500/15 via-amber-50 to-orange-50 border-2 border-amber-300' : 'bg-gradient-to-r from-rose-500/15 via-rose-50 to-red-50 border-2 border-rose-300' }} shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl {{ $member->status === 'active' ? 'bg-amber-400 text-slate-950' : 'bg-rose-500 text-white' }} flex items-center justify-center font-black text-xl shrink-0 shadow-sm">
+                    {{ $member->status === 'active' ? '⏳' : '⚠️' }}
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded {{ $member->status === 'active' ? 'bg-amber-200/80 text-amber-900' : 'bg-rose-200/80 text-rose-900' }}">
+                            {{ $member->status === 'active' ? 'Pemberitahuan Masa Aktif' : 'Peringatan Keanggotaan' }}
+                        </span>
+                    </div>
+                    <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900">
+                        @if ($member->status === 'active')
+                            Masa Aktif Membership Segera Berakhir! (Sisa {{ $days }} Hari)
+                        @else
+                            Masa Aktif Membership Telah Berakhir!
+                        @endif
+                    </h3>
+                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                        Masa berlaku berakhir pada <strong class="text-slate-900">{{ optional($member->expire_date)->translatedFormat('d F Y') }}</strong>. Perpanjang sekarang secara online agar kartu RFID gate Anda tetap aktif.
+                    </p>
+                </div>
+            </div>
+
+            <button 
+                type="button" 
+                @click="renewModal = true"
+                class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-display font-bold shadow-lg hover:shadow-xl transition whitespace-nowrap self-stretch md:self-auto justify-center"
+            >
+                <span class="text-lime-400 font-bold">⚡</span>
+                <span>Perpanjang Online Sekarang</span>
+                <svg class="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
         </div>
     @endif
 
@@ -206,14 +255,19 @@
                 <span>Tempelkan kartu fisik RFID Anda pada alat scanner gate saat tiba.</span>
             </div>
 
-            <div class="flex items-center gap-2.5 ml-auto">
+            <div class="flex items-center gap-2.5 ml-auto flex-wrap">
                 <button @click="invoiceModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-bold border border-slate-700 transition">
                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Bukti Keanggotaan</span>
                 </button>
 
-                <a href="{{ $whatsappRenewUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
-                    <span>Perpanjang via WA</span>
+                <button @click="renewModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
+                    <span class="text-sm">⚡</span>
+                    <span>Perpanjang Online</span>
+                </button>
+
+                <a href="{{ $whatsappRenewUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                    <span>Chat WA</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
             </div>
@@ -988,6 +1042,181 @@
                     🖨️ Cetak / Simpan PDF
                 </button>
             </div>
+        </div>
+    </div>
+
+    {{-- =========================================================
+        MODAL: PERPANJANGAN MEMBERSHIP ONLINE (QRIS / TRANSFER)
+    ========================================================= --}}
+    <div 
+        x-show="renewModal" 
+        x-cloak 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm overflow-y-auto"
+        @keydown.escape.window="renewModal = false"
+    >
+        <div 
+            @click.outside="renewModal = false" 
+            class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative my-8 max-h-[90vh] overflow-y-auto"
+        >
+            <button @click="renewModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 text-lg font-bold" title="Tutup">
+                ✕
+            </button>
+
+            {{-- Header Modal --}}
+            <div class="pb-4 border-b border-slate-100">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-lime-700 bg-lime-100 px-2.5 py-0.5 rounded-md inline-flex items-center gap-1">
+                    <span>⚡</span>
+                    <span>PERPANJANGAN ONLINE OTOMATIS</span>
+                </span>
+                <h3 class="font-display font-extrabold text-xl text-slate-900 mt-1.5">Perpanjang Membership Gym</h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Pilih paket dan selesaikan pembayaran online. Akses RFID gate otomatis aktif seketika!
+                </p>
+            </div>
+
+            <form method="POST" action="{{ route('member.renew') }}" class="mt-5 space-y-5">
+                @csrf
+
+                {{-- 1. PILIH PAKET MEMBERSHIP --}}
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5">
+                        1. Pilih Paket Membership
+                    </label>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        @foreach ($packages as $pkg)
+                            <div 
+                                @click="setPackage({{ $pkg->id }}, {{ $pkg->price }}, '{{ $pkg->name }}')"
+                                :class="selectedPackageId == {{ $pkg->id }} ? 'border-lime-500 bg-lime-50/40 shadow-sm ring-2 ring-lime-500/20' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'"
+                                class="border-2 rounded-2xl p-3 cursor-pointer transition flex flex-col justify-between select-none relative"
+                            >
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ $pkg->duration_months }} Bulan</span>
+                                        <span x-show="selectedPackageId == {{ $pkg->id }}" class="w-4 h-4 rounded-full bg-lime-500 text-slate-950 flex items-center justify-center text-[10px] font-black">✓</span>
+                                    </div>
+                                    <h4 class="font-display font-bold text-xs text-slate-900">{{ $pkg->name }}</h4>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-200/60">
+                                    <p class="font-mono font-extrabold text-xs text-lime-700">Rp{{ number_format($pkg->price, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <input type="hidden" name="membership_package_id" :value="selectedPackageId">
+                </div>
+
+                {{-- 2. PILIH METODE PEMBAYARAN ONLINE --}}
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2.5">
+                        2. Metode Pembayaran Online
+                    </label>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button 
+                            type="button" 
+                            @click="onlinePaymentMethod = 'qris'"
+                            :class="onlinePaymentMethod === 'qris' ? 'border-lime-500 bg-lime-50/50 ring-2 ring-lime-500/20 text-slate-950 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                            class="border-2 rounded-2xl p-3 text-xs flex items-center gap-2.5 transition text-left"
+                        >
+                            <span class="text-2xl">📱</span>
+                            <div>
+                                <p class="font-bold">QRIS Dinamis</p>
+                                <p class="text-[10px] text-slate-400 font-normal">GoPay, OVO, Dana, BCA, dll</p>
+                            </div>
+                        </button>
+
+                        <button 
+                            type="button" 
+                            @click="onlinePaymentMethod = 'transfer'"
+                            :class="onlinePaymentMethod === 'transfer' ? 'border-lime-500 bg-lime-50/50 ring-2 ring-lime-500/20 text-slate-950 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+                            class="border-2 rounded-2xl p-3 text-xs flex items-center gap-2.5 transition text-left"
+                        >
+                            <span class="text-2xl">🏦</span>
+                            <div>
+                                <p class="font-bold">Transfer Bank</p>
+                                <p class="text-[10px] text-slate-400 font-normal">BCA & Mandiri GymPulse</p>
+                            </div>
+                        </button>
+                    </div>
+                    <input type="hidden" name="payment_method" :value="onlinePaymentMethod">
+                </div>
+
+                {{-- 3. DETAIL PEMBAYARAN: QRIS / TRANSFER --}}
+                <div x-show="onlinePaymentMethod === 'qris'" class="p-4 rounded-2xl bg-slate-900 text-white space-y-3 text-center">
+                    <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[11px] text-lime-400 font-bold">
+                        <span>QRIS Terverifikasi Otomatis</span>
+                    </div>
+
+                    {{-- QRIS Simulation Box --}}
+                    <div class="w-44 h-44 mx-auto bg-white p-3 rounded-2xl shadow-md flex flex-col items-center justify-center">
+                        <div class="w-full h-full border-2 border-slate-900 rounded-xl flex flex-col items-center justify-center bg-slate-50 p-2 relative overflow-hidden">
+                            <span class="text-4xl mb-1">📱</span>
+                            <span class="font-mono text-[9px] font-bold text-slate-800 text-center uppercase tracking-tighter">NMID: ID102003892019</span>
+                            <span class="font-bold text-[10px] text-slate-900 mt-1">GymPulse Fitness</span>
+                            <div class="absolute inset-x-0 bottom-0 bg-lime-400 text-slate-950 text-[8px] font-black py-0.5 text-center uppercase">
+                                Scan Bebas Biaya Admin
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-xs space-y-1">
+                        <p class="text-slate-400">Total Tagihan:</p>
+                        <p class="font-display font-black text-2xl text-lime-400">
+                            Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
+                        </p>
+                        <p class="text-[11px] text-slate-400">Buka aplikasi m-Banking atau E-Wallet apa saja & scan kode QR di atas.</p>
+                    </div>
+                </div>
+
+                <div x-show="onlinePaymentMethod === 'transfer'" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                    <p class="font-bold text-slate-800">Silakan transfer persis ke rekening resmi gym:</p>
+
+                    <div class="space-y-2">
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-blue-900 block">Bank BCA</span>
+                                <span class="font-mono font-extrabold text-sm text-slate-900">8271-9928-1120</span>
+                                <span class="text-[10px] text-slate-400 block">a.n. GymPulse Indonesia</span>
+                            </div>
+                            <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">BCA</span>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-indigo-900 block">Bank Mandiri</span>
+                                <span class="font-mono font-extrabold text-sm text-slate-900">1370-0099-2811-2</span>
+                                <span class="text-[10px] text-slate-400 block">a.n. GymPulse Indonesia</span>
+                            </div>
+                            <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">Mandiri</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200">
+                        <span class="text-slate-500 font-medium">Nominal Transfer:</span>
+                        <strong class="font-mono text-sm text-slate-900">Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span></strong>
+                    </div>
+                </div>
+
+                {{-- SUBMIT BUTTON --}}
+                <div class="pt-3 border-t border-slate-100 flex gap-3">
+                    <button 
+                        type="button" 
+                        @click="renewModal = false" 
+                        class="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="flex-1 py-3 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-display font-extrabold text-xs transition shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <span>Konfirmasi Pembayaran</span>
+                        <span class="font-mono">(Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>)</span>
+                    </button>
+                </div>
+
+            </form>
         </div>
     </div>
 

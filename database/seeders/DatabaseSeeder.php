@@ -22,6 +22,14 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
+        $cashier = User::create([
+            'name' => 'Staff Kasir Front Desk',
+            'email' => 'kasir@gym.test',
+            'phone' => '081234567899',
+            'password' => Hash::make('password'),
+            'role' => 'cashier',
+        ]);
+
         $bulanan = MembershipPackage::create([
             'name' => 'Paket Bulanan',
             'duration_months' => 1,
@@ -77,7 +85,137 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // --- SEED PRODUK GYM STORE ---
+        $products = [
+            [
+                'name' => 'Whey Protein Isolate (1 Scoop)',
+                'sku' => 'SUP-WHEY-01',
+                'category' => 'supplements',
+                'price' => 20000,
+                'cost_price' => 12000,
+                'stock' => 50,
+                'min_stock_alert' => 10,
+                'unit' => 'scoop',
+                'description' => '25g protein murni, rendah lemak & gula. Diseduh dingin setelah latihan.',
+            ],
+            [
+                'name' => 'Creatine Monohydrate (1 Scoop / 5g)',
+                'sku' => 'SUP-CREA-01',
+                'category' => 'supplements',
+                'price' => 10000,
+                'cost_price' => 5000,
+                'stock' => 60,
+                'min_stock_alert' => 15,
+                'unit' => 'scoop',
+                'description' => 'Meningkatkan tenaga eksplosif dan volume massa otot.',
+            ],
+            [
+                'name' => 'Pre-Workout Energy Drink (Cup)',
+                'sku' => 'SUP-PREW-01',
+                'category' => 'supplements',
+                'price' => 25000,
+                'cost_price' => 15000,
+                'stock' => 30,
+                'min_stock_alert' => 5,
+                'unit' => 'cup',
+                'description' => 'Booster energi & fokus maksimal sebelum angkat beban berat.',
+            ],
+            [
+                'name' => 'Air Mineral Dingin 600ml',
+                'sku' => 'DRK-AQ600',
+                'category' => 'drinks',
+                'price' => 5000,
+                'cost_price' => 2800,
+                'stock' => 100,
+                'min_stock_alert' => 20,
+                'unit' => 'botol',
+                'description' => 'Air mineral segar dingin untuk hidrasi selama berolahraga.',
+            ],
+            [
+                'name' => 'Pocari Sweat Isotonik 500ml',
+                'sku' => 'DRK-POC500',
+                'category' => 'drinks',
+                'price' => 10000,
+                'cost_price' => 7000,
+                'stock' => 45,
+                'min_stock_alert' => 10,
+                'unit' => 'botol',
+                'description' => 'Mengganti ion tubuh dan cairan yang hilang melalui keringat.',
+            ],
+            [
+                'name' => 'Hydro Coco Air Kelapa 330ml',
+                'sku' => 'DRK-HYD330',
+                'category' => 'drinks',
+                'price' => 12000,
+                'cost_price' => 8500,
+                'stock' => 35,
+                'min_stock_alert' => 8,
+                'unit' => 'botol',
+                'description' => 'Elektrolit alami dari air kelapa asli tanpa pemanis buatan.',
+            ],
+            [
+                'name' => 'Protein Bar Cokelat (Fitbar / L-Men)',
+                'sku' => 'SNK-PBAR01',
+                'category' => 'snacks',
+                'price' => 18000,
+                'cost_price' => 12000,
+                'stock' => 40,
+                'min_stock_alert' => 10,
+                'unit' => 'pack',
+                'description' => 'Camilan praktis tinggi protein & serat, pas untuk pengganjal lapar.',
+            ],
+            [
+                'name' => 'Telur Rebus Organik (Pack isi 2)',
+                'sku' => 'SNK-EGG02',
+                'category' => 'snacks',
+                'price' => 8000,
+                'cost_price' => 4000,
+                'stock' => 25,
+                'min_stock_alert' => 5,
+                'unit' => 'pack',
+                'description' => 'Sumber protein alami 12g tanpa minyak, siap disantap langsung.',
+            ],
+            [
+                'name' => 'Shaker Bottle GymPulse 700ml',
+                'sku' => 'GER-SHK700',
+                'category' => 'gear',
+                'price' => 65000,
+                'cost_price' => 38000,
+                'stock' => 20,
+                'min_stock_alert' => 5,
+                'unit' => 'pcs',
+                'description' => 'Botol shaker BPA-Free dengan bola pengocok stainless steel anti-gumpal.',
+            ],
+            [
+                'name' => 'Lifting Straps GymPulse (Pair)',
+                'sku' => 'GER-STRP01',
+                'category' => 'gear',
+                'price' => 45000,
+                'cost_price' => 25000,
+                'stock' => 15,
+                'min_stock_alert' => 3,
+                'unit' => 'pcs',
+                'description' => 'Membantu cengkraman grip saat deadlift dan pull latihan punggung berat.',
+            ],
+            [
+                'name' => 'Gym Towel / Handuk Gym Microfiber',
+                'sku' => 'GER-TWL01',
+                'category' => 'gear',
+                'price' => 35000,
+                'cost_price' => 18000,
+                'stock' => 25,
+                'min_stock_alert' => 5,
+                'unit' => 'pcs',
+                'description' => 'Handuk cepat kering, anti-bakteri, dan lembut untuk menyeka keringat.',
+            ],
+        ];
+
+        foreach ($products as $p) {
+            \App\Models\Product::create($p);
+        }
+
         $this->command->info('Admin login  : admin@gym.test / password');
         $this->command->info('Member login : budi@gym.test / password');
+        $this->command->info('Products seeded successfully!');
     }
 }
