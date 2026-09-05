@@ -16,9 +16,11 @@ return new class extends Migration
                 ->constrained('scan_uids')
                 ->nullOnDelete();
 
-            $table->dateTime('check_out_at')
-                ->nullable()
-                ->after('check_in_at');
+            if (!Schema::hasColumn('attendances', 'check_out_at')) {
+                $table->dateTime('check_out_at')
+                    ->nullable()
+                    ->after('check_in_at');
+            }
         });
     }
 
@@ -30,10 +32,11 @@ return new class extends Migration
                 'scan_uid_id'
             ]);
 
-            $table->dropColumn([
-                'scan_uid_id',
-                'check_out_at',
-            ]);
+            $table->dropColumn('scan_uid_id');
+
+            if (Schema::hasColumn('attendances', 'check_out_at')) {
+                $table->dropColumn('check_out_at');
+            }
         });
     }
 };

@@ -35,12 +35,93 @@
     <style>
         body { background: #F8FAFC; color: #0F172A; }
         [x-cloak] { display: none !important; }
+
+        @media print {
+            @page {
+                size: auto;
+                margin: 0;
+            }
+
+            /* Sembunyikan SEMUA header navigasi, navbar, tombol, footer, dan elemen no-print */
+            header,
+            header *,
+            nav,
+            nav *,
+            footer,
+            footer *,
+            .no-print,
+            .no-print *,
+            .print\:hidden,
+            [class*="print:hidden"],
+            [class*="no-print"] {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                max-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                opacity: 0 !important;
+            }
+
+            body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            main {
+                max-width: 100% !important;
+                padding: 20px 0 !important;
+                margin: 0 auto !important;
+            }
+
+            /* Saat modal bukti keanggotaan dicetak */
+            .print-hide-on-modal,
+            .print-hide-on-modal * {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .invoice-modal-overlay {
+                position: static !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
+            }
+
+            .invoice-card {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 16px !important;
+                margin: 20px auto !important;
+                max-width: 480px !important;
+                width: 100% !important;
+                padding: 24px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Pastikan warna teks & badge tetap jelas */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 <body class="font-sans text-slate-800 bg-[#F8FAFC] antialiased pb-24 lg:pb-12">
 
 {{-- MEMBER HEADER BAR --}}
-<header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
+<header class="print:hidden no-print sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-4xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
         
         <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2.5">

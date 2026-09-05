@@ -56,9 +56,36 @@
     $whatsappRenewUrl = "https://wa.me/?text=" . urlencode("Halo Admin GymPulse, saya ingin memperpanjang membership atas nama " . $member->user->name . " (Kode: " . $member->member_code . ", Paket: " . ($member->package->name ?? '-') . "). Mohon info langkah selanjutnya. Terima kasih!");
 @endphp
 
-<div x-data="{ invoiceModal: false, classTab: 'today' }" class="space-y-6">
+<div x-data="{ 
+    invoiceModal: false, 
+    classTab: 'today',
+    nutritionTab: 'tips',
+    nutritionCategory: 'all',
+    weight: 65,
+    dietGoal: 'fatloss',
+    calcCalories() {
+        let base = Number(this.weight) * 24 * 1.35;
+        if (this.dietGoal === 'fatloss') return Math.round(base - 400);
+        if (this.dietGoal === 'muscle') return Math.round(base + 350);
+        return Math.round(base);
+    },
+    calcProtein() {
+        let mult = this.dietGoal === 'muscle' ? 1.8 : (this.dietGoal === 'fatloss' ? 1.6 : 1.4);
+        return Math.round(Number(this.weight) * mult);
+    },
+    calcWater() {
+        return (Number(this.weight) * 0.04).toFixed(1);
+    },
+    calcEggs() {
+        return Math.round(this.calcProtein() / 6);
+    },
+    calcChicken() {
+        return Math.round((this.calcProtein() / 31) * 100);
+    }
+}" class="space-y-6">
 
-    {{-- FLASH MESSAGES --}}
+    <div class="print-hide-on-modal space-y-6">
+        {{-- FLASH MESSAGES --}}
     @if (session('success'))
         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex items-center gap-2 shadow-sm">
             <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -367,11 +394,542 @@
     </div>
 
     {{-- =========================================================
+        3. GYMPULSE NUTRITION & HEALTH HUB (PANDUAN MAKANAN SEHAT & DIET)
+    ========================================================= --}}
+    <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm">
+        
+        {{-- Section Header --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            <div>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-lime-100 text-lime-800 uppercase tracking-wider mb-1.5">
+                    <span>🥗</span>
+                    <span>Nutrition & Diet Hub</span>
+                </div>
+                <h3 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight">
+                    Panduan Makanan Diet & Pola Hidup Sehat
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Optimalkan hasil latihan gym dengan nutrisi seimbang, defisit/surplus terukur, dan pola makan tepat.
+                </p>
+            </div>
+
+            {{-- Tab Navigation Buttons --}}
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl shrink-0 text-xs font-bold">
+                <button 
+                    @click="nutritionTab = 'tips'" 
+                    :class="nutritionTab === 'tips' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl transition whitespace-nowrap text-center"
+                >
+                    💡 Tips Makanan
+                </button>
+                <button 
+                    @click="nutritionTab = 'calculator'" 
+                    :class="nutritionTab === 'calculator' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl transition whitespace-nowrap text-center"
+                >
+                    🧮 Kalkulator Gizi
+                </button>
+                <button 
+                    @click="nutritionTab = 'mealplan'" 
+                    :class="nutritionTab === 'mealplan' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl transition whitespace-nowrap text-center"
+                >
+                    🍱 Menu 1 Hari
+                </button>
+                <button 
+                    @click="nutritionTab = 'myths'" 
+                    :class="nutritionTab === 'myths' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl transition whitespace-nowrap text-center"
+                >
+                    ❓ Mitos vs Fakta
+                </button>
+            </div>
+        </div>
+
+        {{-- =========================================================
+            TAB 1: TIPS & PILIHAN MAKANAN SEHAT
+        ========================================================= --}}
+        <div x-show="nutritionTab === 'tips'" class="pt-6 space-y-6">
+            
+            {{-- Category Filter Chips --}}
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                <button 
+                    @click="nutritionCategory = 'all'"
+                    :class="nutritionCategory === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    class="px-3 py-1.5 rounded-xl transition shrink-0"
+                >
+                    Semua Kategori
+                </button>
+                <button 
+                    @click="nutritionCategory = 'fatloss'"
+                    :class="nutritionCategory === 'fatloss' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    class="px-3 py-1.5 rounded-xl transition shrink-0"
+                >
+                    🥗 Fat Loss & Defisit
+                </button>
+                <button 
+                    @click="nutritionCategory = 'muscle'"
+                    :class="nutritionCategory === 'muscle' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    class="px-3 py-1.5 rounded-xl transition shrink-0"
+                >
+                    💪 Tinggi Protein & Otot
+                </button>
+                <button 
+                    @click="nutritionCategory = 'workout'"
+                    :class="nutritionCategory === 'workout' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    class="px-3 py-1.5 rounded-xl transition shrink-0"
+                >
+                    ⚡ Pre & Post Workout
+                </button>
+                <button 
+                    @click="nutritionCategory = 'snacks'"
+                    :class="nutritionCategory === 'snacks' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    class="px-3 py-1.5 rounded-xl transition shrink-0"
+                >
+                    🥑 Camilan & Hidrasi
+                </button>
+            </div>
+
+            {{-- Grid of Nutrition Cards --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                {{-- Card 1: Protein Juara --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'muscle'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🍗</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Tinggi Protein</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Sumber Protein Harian</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Protein adalah pondasi utama pembentukan otot dan rasa kenyang tahan lama.
+                        </p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <div class="flex justify-between">
+                                <span>• Dada Ayam Fillet (100g)</span>
+                                <strong class="text-slate-900">~31g Protein</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Telur Utuh (1 butir)</span>
+                                <strong class="text-slate-900">~6g Protein</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Tempe Lokal (100g)</span>
+                                <strong class="text-slate-900">~19g Protein</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Ikan Kembung / Tongkol (100g)</span>
+                                <strong class="text-slate-900">~22g Protein</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 <strong>Tips:</strong> Utamakan teknik rebus, panggang, atau kukus daripada deep-frying.
+                    </p>
+                </div>
+
+                {{-- Card 2: Defisit Kalori & Volume Eating --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'fatloss'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🥗</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800">Fat Loss</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Trik Defisit Tanpa Kelaparan</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Kunci sukses diet bukan makan sesedikit mungkin, melainkan menerapkan metode <em>Volume Eating</em>.
+                        </p>
+                        <div class="mt-3 space-y-2 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <p>🥦 <strong>Perbanyak Sayuran Serat:</strong> Brokoli, bayam, selada, dan kubis memberi volume besar di lambung dengan kalori sangat rendah.</p>
+                            <p>🥣 <strong>Sup Bening & Kuah:</strong> Memulai makan dengan kuah bening menekan nafsu makan berlebih.</p>
+                            <p>🚫 <strong>Hindari Kalori Cair:</strong> Kurangi boba, soda manis, dan kopi susu kental manis (penyumbang kalori tersembunyi).</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 <strong>Defisit Ideal:</strong> 300 - 500 kkal di bawah kebutuhan harian agar lemak turun bertahap tanpa kehilangan massa otot.
+                    </p>
+                </div>
+
+                {{-- Card 3: Pre & Post Workout Fuel --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'workout'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">⚡</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-100 text-blue-800">Timing Latihan</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Nutrisi Sebelum & Sesudah Gym</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Beri bahan bakar pada otot saat berjuang dan nutrisi recovery saat selesai.
+                        </p>
+                        <div class="mt-3 space-y-2 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <div>
+                                <span class="font-bold text-slate-900">⏰ 1-2 Jam Sebelum Latihan (Pre-Workout):</span>
+                                <p class="text-slate-600 mt-0.5">Pisang + 1 sdm selai kacang / Oatmeal + Kopi hitam (tanpa gula) untuk tenaga & fokus.</p>
+                            </div>
+                            <div class="pt-1.5 border-t border-slate-100">
+                                <span class="font-bold text-slate-900">⏰ 30-60 Menit Sesudah Latihan (Post-Workout):</span>
+                                <p class="text-slate-600 mt-0.5">Dada ayam / 2-3 butir telur + Nasi hangat / Pisang untuk regenerasi serat otot yang lelah.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 <strong>Catatan:</strong> Jangan berolahraga dengan perut terlalu penuh agar tidak mual.
+                    </p>
+                </div>
+
+                {{-- Card 4: Karbohidrat Pintar (Kompleks vs Sederhana) --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'fatloss' || nutritionCategory === 'muscle'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🍠</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-100 text-purple-800">Energi Bersih</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Pilihan Karbohidrat Sehat</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Karbohidrat adalah bensin utama tubuh untuk mengangkat beban berat.
+                        </p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <div class="flex justify-between">
+                                <span>• Beras Merah / Beras Cokelat</span>
+                                <span class="text-emerald-700 font-bold">Kaya Serat</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Ubi Jalar / Singkong Rebus</span>
+                                <span class="text-emerald-700 font-bold">Low GI</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Oatmeal / Roti Gandum Utuh</span>
+                                <span class="text-emerald-700 font-bold">Kenyang Lama</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>• Kentang Rebus (dengan kulit)</span>
+                                <span class="text-emerald-700 font-bold">Tinggi Kalium</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 Nasi putih tetap aman dikonsumsi asalkan porsinya terkontrol sesuai target kalori.
+                    </p>
+                </div>
+
+                {{-- Card 5: Camilan Sehat & Bebas Rasa Bersalah --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'snacks'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">🥑</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-lime-100 text-lime-800">Healthy Snacks</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Camilan Saat Lapar Menyerang</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Ganti gorengan dan keripik olahan dengan camilan bernutrisi tinggi.
+                        </p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <p>🥜 <strong>Edamame Rebus:</strong> Camilan kaya protein nabati dan serat.</p>
+                            <p>🥚 <strong>Telur Rebus:</strong> Praktis, murah, dan padat asam amino esensial.</p>
+                            <p>🥣 <strong>Greek Yogurt + Buah:</strong> Probiotik baik untuk pencernaan dan tinggi kasein.</p>
+                            <p>🌰 <strong>Kacang Almond / Kenari:</strong> Lemak sehat omega-3 (cukup 10-15 butir).</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 <strong>Tips:</strong> Siapkan rebusan telur atau edamame di kulkas sebagai stok praktis.
+                    </p>
+                </div>
+
+                {{-- Card 6: Hidrasi & Elektrolit --}}
+                <div x-show="nutritionCategory === 'all' || nutritionCategory === 'snacks'" class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition shadow-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl">💧</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-100 text-cyan-800">Hidrasi</span>
+                        </div>
+                        <h4 class="font-display font-bold text-base text-slate-900">Kunci Hidrasi & Elektrolit</h4>
+                        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                            Dehidrasi sebesar 2% saja sudah menurunkan kekuatan angkatan gym hingga 15%!
+                        </p>
+                        <div class="mt-3 space-y-1.5 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200/80">
+                            <p>• <strong>Sebelum Latihan:</strong> Minum 300-500 ml air 30 menit sebelum sesi gym.</p>
+                            <p>• <strong>Saat Latihan:</strong> Teguk 100-150 ml air setiap jeda istirahat set.</p>
+                            <p>• <strong>Tambahan Alami:</strong> Sedikit garam Himalaya atau air kelapa murni untuk mengganti elektrolit yang keluar lewat keringat.</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-3 italic">
+                        💡 Indikator hidrasi baik: Warna urin bening atau kuning sangat muda.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- =========================================================
+            TAB 2: KALKULATOR KEBUTUHAN GIZI INTERAKTIF
+        ========================================================= --}}
+        <div x-show="nutritionTab === 'calculator'" class="pt-6 space-y-6">
+            <div class="p-5 sm:p-6 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-xl">
+                <div class="max-w-2xl">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-lime-400">PERSONAL NUTRITION CALCULATOR</span>
+                    <h4 class="font-display font-extrabold text-xl sm:text-2xl text-white mt-1">
+                        Hitung Kebutuhan Kalori & Protein Pribadi Anda
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Sesuaikan berat badan dan tujuan latihan untuk mendapatkan rekomendasi nutrisi harian secara instan.
+                    </p>
+                </div>
+
+                {{-- Interactive Controls --}}
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 border-t border-slate-800">
+                    
+                    {{-- Weight Input Slider --}}
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-slate-300">Berat Badan Anda</label>
+                            <span class="font-display font-extrabold text-lime-400 text-lg">
+                                <span x-text="weight"></span> kg
+                            </span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="40" 
+                            max="130" 
+                            step="1" 
+                            x-model="weight" 
+                            class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-lime-400"
+                        >
+                        <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                            <span>40 kg</span>
+                            <span>85 kg</span>
+                            <span>130 kg</span>
+                        </div>
+                    </div>
+
+                    {{-- Goal Selection --}}
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2">Tujuan Kebugaran Saat Ini</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button 
+                                type="button"
+                                @click="dietGoal = 'fatloss'"
+                                :class="dietGoal === 'fatloss' ? 'bg-lime-500 text-slate-950 font-bold border-lime-400' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-750'"
+                                class="p-2 rounded-xl text-xs border transition text-center"
+                            >
+                                🔻 Turun Lemak
+                            </button>
+                            <button 
+                                type="button"
+                                @click="dietGoal = 'maintain'"
+                                :class="dietGoal === 'maintain' ? 'bg-lime-500 text-slate-950 font-bold border-lime-400' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-750'"
+                                class="p-2 rounded-xl text-xs border transition text-center"
+                            >
+                                ⚖️ Jaga Stamina
+                            </button>
+                            <button 
+                                type="button"
+                                @click="dietGoal = 'muscle'"
+                                :class="dietGoal === 'muscle' ? 'bg-lime-500 text-slate-950 font-bold border-lime-400' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-750'"
+                                class="p-2 rounded-xl text-xs border transition text-center"
+                            >
+                                🔺 Tambah Otot
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                {{-- Live Results Matrix --}}
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    
+                    {{-- Kalori Harian --}}
+                    <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estimasi Kalori Harian</span>
+                        <p class="font-display text-3xl font-extrabold text-white mt-1">
+                            <span x-text="calcCalories()"></span>
+                            <span class="text-xs font-sans text-slate-400 font-normal">kkal</span>
+                        </p>
+                        <p class="text-[11px] text-lime-400 mt-1">
+                            <template x-if="dietGoal === 'fatloss'"><span>Defisit ~400 kkal untuk bakar lemak</span></template>
+                            <template x-if="dietGoal === 'maintain'"><span>Keseimbangan energi tubuh stabil</span></template>
+                            <template x-if="dietGoal === 'muscle'"><span>Surplus ~350 kkal untuk hipertrofi otot</span></template>
+                        </p>
+                    </div>
+
+                    {{-- Target Protein --}}
+                    <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Target Protein Harian</span>
+                        <p class="font-display text-3xl font-extrabold text-lime-400 mt-1">
+                            <span x-text="calcProtein()"></span>
+                            <span class="text-xs font-sans text-slate-400 font-normal">gram</span>
+                        </p>
+                        <p class="text-[11px] text-slate-300 mt-1">
+                            Setara <strong><span x-text="calcChicken()"></span>g dada ayam</strong> atau <strong><span x-text="calcEggs()"></span> butir telur</strong>
+                        </p>
+                    </div>
+
+                    {{-- Target Air --}}
+                    <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-4 text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kebutuhan Air Putih</span>
+                        <p class="font-display text-3xl font-extrabold text-cyan-400 mt-1">
+                            <span x-text="calcWater()"></span>
+                            <span class="text-xs font-sans text-slate-400 font-normal">Liter</span>
+                        </p>
+                        <p class="text-[11px] text-slate-300 mt-1">
+                            Minimal 8 - 12 gelas air per hari
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        {{-- =========================================================
+            TAB 3: CONTOH MENU HARIAN (MEAL PLAN LOKAL)
+        ========================================================= --}}
+        <div x-show="nutritionTab === 'mealplan'" class="pt-6 space-y-4">
+            <div class="p-4 rounded-2xl bg-lime-50 border border-lime-200 text-xs text-lime-900 flex items-start gap-2.5">
+                <span class="text-lg">🍱</span>
+                <div>
+                    <strong class="font-bold">Contoh Pola Makan Harian Bergizi, Sehat, & Terjangkau (Indonesia):</strong>
+                    <p class="mt-0.5 text-lime-800">Menu ini dirancang seimbang dengan total ~1.700 - 1.900 kkal dan ~110-130g protein. Anda dapat menyesuaikan porsi sesuai kebutuhan.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {{-- Sarapan --}}
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                        🌅
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 text-sm">07:00 WIB · Sarapan Pagi</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">~380 kkal · 22g Protein</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 mt-2 space-y-1">
+                            <li>• 4-5 sdm Oatmeal diseduh air hangat / 2 lembar Roti Gandum</li>
+                            <li>• 2 Butir Telur Rebus (1 utuh + 1 putih telur)</li>
+                            <li>• 1 Buah Pisang atau Pepaya iris</li>
+                            <li>• 1 Cangkir Kopi Hitam / Teh Hijau (tanpa gula)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {{-- Makan Siang --}}
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                        ☀️
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 text-sm">12:30 WIB · Makan Siang</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">~480 kkal · 42g Protein</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 mt-2 space-y-1">
+                            <li>• 1 Centong Nasi Merah atau Nasi Putih (~100-120g)</li>
+                            <li>• 150g Dada Ayam Panggang Teplon / Pepes Ikan Nila</li>
+                            <li>• 1 Mangkuk Sayur Bening Bayam Jagung / Tumis Buncis</li>
+                            <li>• 1 Gelas Air Putih (500ml)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {{-- Snack Pre-Workout --}}
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                        🌤️
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 text-sm">16:30 WIB · Snack Pre-Workout</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">~150 kkal · 6g Protein</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 mt-2 space-y-1">
+                            <li>• 1 Buah Pisang Cavendish + 1 sdt Selai Kacang</li>
+                            <li>• Secangkir Kopi Hitam (opsional sebagai pre-workout alami)</li>
+                            <li>• 1 Gelas Air Putih 300ml</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {{-- Makan Malam --}}
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center shrink-0 font-bold text-lg">
+                        🌙
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-900 text-sm">19:30 WIB · Makan Malam Recovery</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">~420 kkal · 34g Protein</span>
+                        </div>
+                        <ul class="text-xs text-slate-600 mt-2 space-y-1">
+                            <li>• 1 Potong Ubi Jalar Kukus / 1 Centong Nasi</li>
+                            <li>• 2 Potong Tempe & Tahu Bacem / Panggang</li>
+                            <li>• 100g Daging Cincang Tanpa Lemak / Telur Dadar Jamur</li>
+                            <li>• Lalapan Selada, Timun, dan Tomat Segar</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- =========================================================
+            TAB 4: MITOS VS FAKTA DIET FITNESS
+        ========================================================= --}}
+        <div x-show="nutritionTab === 'myths'" class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-600">
+                    <span>❌ Mitos:</span>
+                    <span>Makan malam di atas jam 7 otomatis jadi lemak.</span>
+                </div>
+                <div class="mt-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <strong>✅ Fakta:</strong> Tubuh membakar kalori sepanjang 24 jam. Yang menentukan berat badan adalah <em>total asupan kalori harian</em>, bukan jam saat makanan masuk. Pastikan ada jeda 2 jam sebelum tidur agar lambung nyaman.
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-600">
+                    <span>❌ Mitos:</span>
+                    <span>Kuning telur berbahaya dan wajib dibuang.</span>
+                </div>
+                <div class="mt-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <strong>✅ Fakta:</strong> Kuning telur mengandung nutrisi penting seperti Kolin, Vitamin D, dan asam lemak baik untuk pembentukan hormon. Mengonsumsi 2-3 butir telur utuh setiap hari sangat aman bagi orang yang aktif berolahraga.
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-600">
+                    <span>❌ Mitos:</span>
+                    <span>Wajib minum suplemen mahal agar badan berotot.</span>
+                </div>
+                <div class="mt-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <strong>✅ Fakta:</strong> Suplemen hanya pembantu 5-10%. Pondasi 90% hasil fisik berasal dari makanan utuh (*whole food*) seperti dada ayam, tempe, telur, sayur, serta istirahat tidur yang cukup.
+                </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-600">
+                    <span>❌ Mitos:</span>
+                    <span>Minum air es membuat perut buncit dan membekukan lemak.</span>
+                </div>
+                <div class="mt-2 text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                    <strong>✅ Fakta:</strong> Air putih dingin memiliki 0 kalori dan suhunya akan segera dinetralkan oleh suhu tubuh (37°C) di dalam lambung. Perut buncit terjadi karena surplus kalori dan makanan manis, bukan suhu air.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    </div>
+
+    {{-- =========================================================
         MODAL: BUKTI / INVOICE MEMBERSHIP
     ========================================================= --}}
-    <div x-show="invoiceModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm" @keydown.escape.window="invoiceModal = false">
-        <div @click.outside="invoiceModal = false" class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl relative">
-            <button @click="invoiceModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1">
+    <div x-show="invoiceModal" x-cloak class="invoice-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm" @keydown.escape.window="invoiceModal = false">
+        <div @click.outside="invoiceModal = false" class="invoice-card bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl relative">
+            <button @click="invoiceModal = false" class="no-print print:hidden absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1" title="Tutup">
                 ✕
             </button>
 
@@ -426,7 +984,7 @@
                         Rp{{ number_format($member->package->price ?? 0, 0, ',', '.') }}
                     </p>
                 </div>
-                <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition">
+                <button onclick="window.print()" class="no-print print:hidden px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition">
                     🖨️ Cetak / Simpan PDF
                 </button>
             </div>
