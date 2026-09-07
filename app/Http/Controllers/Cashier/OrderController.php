@@ -11,8 +11,12 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with(['items', 'cashier', 'member.user'])
-            ->where('created_by', Auth::id());
+        $query = Order::with(['items', 'cashier', 'member.user']);
+
+        // Filter: Hanya transaksi kasir saya atau semua transaksi (termasuk pesanan member)
+        if ($request->filled('view') && $request->view === 'mine') {
+            $query->where('created_by', Auth::id());
+        }
 
         // Default: hari ini, atau sesuai filter tanggal
         if ($request->filled('from') && $request->filled('to')) {
@@ -28,11 +32,14 @@ class OrderController extends Controller
             $query->where('payment_method', $request->payment_method);
         }
 
+        if ($request->filled('pickup_status')) {
+            $query->where('pickup_status', $request->pickup_status);
+        }
+
         $orders = $query->latest()->paginate(15)->withQueryString();
 
-        // Rekap kas shift hari ini
-        $todayOrders = Order::where('created_by', Auth::id())
-            ->whereDate('created_at', today())
+        // Rekap kas shift hari ini (transaksi yang ditangani/lunas hari ini)
+        $todayOrders = Order::whereDate('created_at', today())
             ->where('payment_status', 'paid')
             ->get();
 

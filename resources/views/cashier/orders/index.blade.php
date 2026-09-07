@@ -100,7 +100,7 @@
                     @forelse ($orders as $o)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3 px-4 font-mono font-bold text-slate-900">
-                                {{ $o->order_number }}
+                                {{ $o->invoice_number }}
                             </td>
                             <td class="py-3 px-4 text-slate-500">
                                 {{ $o->created_at->format('d/m/Y H:i') }}

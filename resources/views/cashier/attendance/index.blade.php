@@ -95,11 +95,10 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-slate-500">
-                                @if ($a->check_out_at)
-                                    {{ $a->check_in_at->diffInMinutes($a->check_out_at) }} Menit
-                                @else
-                                    {{ $a->check_in_at->diffForHumans(now(), true) }}
+                            <td class="py-3 px-4 font-medium text-slate-700">
+                                <span class="font-semibold text-slate-900">{{ $a->duration_formatted }}</span>
+                                @if (!$a->check_out_at)
+                                    <span class="text-[10px] text-emerald-600 font-bold ml-1">(Berjalan)</span>
                                 @endif
                             </td>
                         </tr>

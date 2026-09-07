@@ -7,9 +7,11 @@ use App\Models\Member;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\QrisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PosController extends Controller
 {
@@ -101,11 +103,13 @@ class PosController extends Controller
                 ], 422);
             }
 
-            // 4. Generate Invoice Number
+            // 4. Generate Invoice Number: POS-YYMMDD-XXXX
             $todayCount = Order::whereDate('created_at', today())->count() + 1;
             $invoiceNumber = 'POS-' . now()->format('ymd') . '-' . str_pad($todayCount, 4, '0', STR_PAD_LEFT);
 
-            // 5. Buat Record Order
+            $initialPaymentStatus = $request->payment_method === 'qris' ? 'pending' : 'paid';
+
+            // 5. Simpan Order
             $order = Order::create([
                 'invoice_number' => $invoiceNumber,
                 'member_id' => $request->member_id,
@@ -117,12 +121,12 @@ class PosController extends Controller
                 'payment_method' => $request->payment_method,
                 'cash_received' => $cashReceived,
                 'cash_change' => $cashChange,
-                'payment_status' => 'paid',
+                'payment_status' => $initialPaymentStatus,
                 'notes' => $request->notes,
                 'created_by' => Auth::id(),
             ]);
 
-            // 6. Buat Order Items & Kurangi Stok
+            // 6. Simpan Items & Potong Stok
             foreach ($itemsData as $data) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -134,22 +138,164 @@ class PosController extends Controller
                     'subtotal' => $data['subtotal'],
                 ]);
 
-                // Kurangi stok
                 $data['product']->decrement('stock', $data['quantity']);
+            }
+
+            if ($request->payment_method === 'qris') {
+                $qrisData = QrisService::generate($order);
+
+                return response()->json([
+                    'success' => true,
+                    'is_qris' => true,
+                    'message' => 'QRIS Dinamis berhasil dibuat. Menunggu pembayaran...',
+                    'order' => $order->load('items'),
+                    'qris' => $qrisData,
+                    'status_url' => route('admin.pos.order-status', $order->id),
+                    'simulate_url' => route('admin.pos.simulate-qris', $order->id),
+                    'cancel_url' => route('admin.pos.cancel-order', $order->id),
+                    'receipt_url' => route('admin.pos.receipt', $order->id),
+                ]);
             }
 
             return response()->json([
                 'success' => true,
+                'is_qris' => false,
                 'message' => 'Transaksi berhasil diproses!',
-                'order' => $order->load('items', 'cashier'),
+                'order' => $order->load('items'),
                 'receipt_url' => route('admin.pos.receipt', $order->id),
             ]);
         });
+    }
+
+    public function orderStatus(Order $order)
+    {
+        return response()->json([
+            'success' => true,
+            'order_id' => $order->id,
+            'invoice_number' => $order->invoice_number,
+            'payment_status' => $order->payment_status,
+            'total_amount' => $order->total_amount,
+            'is_paid' => $order->payment_status === 'paid',
+            'order' => $order->load('items'),
+            'receipt_url' => route('admin.pos.receipt', $order->id),
+        ]);
+    }
+
+    public function simulateQris(Order $order)
+    {
+        if (app()->isProduction() || config('services.midtrans.is_production', false)) {
+            Log::warning("Blocked Admin POS simulation attempt in production for Order: {$order->invoice_number}");
+            return response()->json([
+                'success' => false,
+                'message' => 'Mode simulasi kasir dinonaktifkan di lingkungan produksi (Production).',
+            ], 403);
+        }
+
+        if ($order->payment_status === 'pending') {
+            $order->update([
+                'payment_status' => 'paid',
+                'cash_received' => $order->total_amount,
+                'cash_change' => 0,
+            ]);
+
+            Log::info("Admin simulated QRIS payment for Order {$order->invoice_number}");
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pembayaran QRIS berhasil diselesaikan oleh pembeli!',
+            'order' => $order->fresh()->load('items'),
+            'receipt_url' => route('admin.pos.receipt', $order->id),
+        ]);
+    }
+
+    public function cancelOrder(Order $order)
+    {
+        if ($order->payment_status === 'pending') {
+            DB::transaction(function () use ($order) {
+                foreach ($order->items as $item) {
+                    if ($item->product_id) {
+                        Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                    }
+                }
+                $order->update(['payment_status' => 'cancelled']);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan QRIS berhasil dibatalkan dan stok dikembalikan.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Pesanan ini tidak dapat dibatalkan.',
+        ], 400);
     }
 
     public function receipt(Order $order)
     {
         $order->load(['items', 'cashier', 'member.user']);
         return view('admin.pos.receipt', compact('order'));
+    }
+
+    /**
+     * Get member orders ready for pickup / handed over
+     */
+    public function getMemberPickups(Request $request)
+    {
+        $query = Order::with(['items.product', 'member.user', 'picker'])
+            ->where('payment_status', 'paid');
+
+        if ($request->filled('status')) {
+            if ($request->status === 'ready') {
+                $query->where('pickup_status', 'ready_for_pickup');
+            } elseif ($request->status === 'picked_up') {
+                $query->where('pickup_status', 'picked_up');
+            }
+        } else {
+            // Default: show ready_for_pickup or today's orders
+            $query->where(function ($q) {
+                $q->where('pickup_status', 'ready_for_pickup')
+                  ->orWhereDate('created_at', today());
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                  ->orWhere('customer_name', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = $query->latest()->take(30)->get();
+        $pendingCount = Order::where('payment_status', 'paid')
+            ->where('pickup_status', 'ready_for_pickup')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'pending_count' => $pendingCount,
+            'orders' => $orders,
+        ]);
+    }
+
+    /**
+     * Mark member order as picked up by member
+     */
+    public function markAsPickedUp(Order $order)
+    {
+        $order->update([
+            'pickup_status' => 'picked_up',
+            'picked_up_at' => now(),
+            'picked_up_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pesanan {$order->invoice_number} berhasil diserahkan kepada member.",
+            'order' => $order->fresh()->load(['items.product', 'member.user', 'picker']),
+        ]);
     }
 }

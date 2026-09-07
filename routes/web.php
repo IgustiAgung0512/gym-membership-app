@@ -77,6 +77,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
     Route::get('/pos/receipt/{order}', [PosController::class, 'receipt'])->name('pos.receipt');
+    Route::get('/pos/orders/{order}/status', [PosController::class, 'orderStatus'])->name('pos.order-status');
+    Route::post('/pos/orders/{order}/simulate-qris', [PosController::class, 'simulateQris'])->name('pos.simulate-qris');
+    Route::post('/pos/orders/{order}/cancel', [PosController::class, 'cancelOrder'])->name('pos.cancel-order');
+    Route::get('/pos/member-pickups', [PosController::class, 'getMemberPickups'])->name('pos.member-pickups');
+    Route::post('/pos/orders/{order}/pickup', [PosController::class, 'markAsPickedUp'])->name('pos.mark-picked-up');
 
     Route::resource('products', ProductController::class)->except(['create', 'show', 'edit']);
     Route::post('/products/{product}/restock', [ProductController::class, 'restock'])->name('products.restock');
@@ -107,6 +112,11 @@ Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cash
     Route::get('/pos', [CashierPosController::class, 'index'])->name('pos.index');
     Route::post('/pos/checkout', [CashierPosController::class, 'checkout'])->name('pos.checkout');
     Route::get('/pos/receipt/{order}', [CashierPosController::class, 'receipt'])->name('pos.receipt');
+    Route::get('/pos/orders/{order}/status', [CashierPosController::class, 'orderStatus'])->name('pos.order-status');
+    Route::post('/pos/orders/{order}/simulate-qris', [CashierPosController::class, 'simulateQris'])->name('pos.simulate-qris');
+    Route::post('/pos/orders/{order}/cancel', [CashierPosController::class, 'cancelOrder'])->name('pos.cancel-order');
+    Route::get('/pos/member-pickups', [CashierPosController::class, 'getMemberPickups'])->name('pos.member-pickups');
+    Route::post('/pos/orders/{order}/pickup', [CashierPosController::class, 'markAsPickedUp'])->name('pos.mark-picked-up');
 
     Route::get('/orders', [CashierOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [CashierOrderController::class, 'show'])->name('orders.show');
@@ -124,17 +134,26 @@ Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('mem
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
     Route::post('/renew', [MemberDashboardController::class, 'renew'])->name('renew');
     Route::get('/store', [MemberStoreController::class, 'index'])->name('store.index');
+    Route::post('/store/checkout', [MemberStoreController::class, 'checkout'])->name('store.checkout')->middleware('throttle:checkout');
+    Route::get('/store/orders/{order}/status', [MemberStoreController::class, 'orderStatus'])->name('store.order-status');
+    Route::post('/store/orders/{order}/simulate', [MemberStoreController::class, 'simulateQris'])->name('store.simulate-qris');
+    Route::post('/store/orders/{order}/cancel', [MemberStoreController::class, 'cancelOrder'])->name('store.cancel-order');
+    Route::get('/store/receipt/{order}', [MemberStoreController::class, 'receipt'])->name('store.receipt');
+    Route::get('/store/my-orders', [MemberStoreController::class, 'myOrders'])->name('store.my-orders');
     Route::get('/photo', [MemberPhotoController::class, 'show'])->name('photo.show');
     Route::post('/photo', [MemberPhotoController::class, 'update'])->name('photo.update');
     Route::get('/password', [MemberPasswordController::class, 'edit'])->name('password.edit');
     Route::put('/password', [MemberPasswordController::class, 'update'])->name('password.update');
 });
 
-Route::get('/members/latest-rfid', [MemberController::class, 'latestRfid'])
-    ->name('admin.members.latest-rfid');
+// Helper AJAX RFID untuk pendaftaran/edit member (hanya bisa diakses oleh Admin & Kasir yang login)
+Route::middleware(['auth', 'role:admin,cashier'])->group(function () {
+    Route::get('/members/latest-rfid', [MemberController::class, 'latestRfid'])
+        ->name('admin.members.latest-rfid');
 
-Route::get('/admin/members/check-rfid', 
-    [MemberController::class, 'checkRfid']
-)->name('admin.members.check-rfid');
+    Route::get('/admin/members/check-rfid', 
+        [MemberController::class, 'checkRfid']
+    )->name('admin.members.check-rfid');
+});
 
 

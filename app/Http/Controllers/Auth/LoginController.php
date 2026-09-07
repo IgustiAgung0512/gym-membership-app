@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -20,11 +22,32 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
+
+        // Proteksi Brute-Force: Cek apakah melebihi batas 5x percobaan gagal
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
             return back()->withErrors([
-                'email' => 'Email atau password salah.',
+                'email' => "Terlalu banyak percobaan login gagal. Silakan tunggu {$seconds} detik sebelum mencoba kembali.",
             ])->onlyInput('email');
         }
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Tambahkan hit kegagalan
+            RateLimiter::hit($throttleKey, 60);
+
+            $remaining = RateLimiter::retriesLeft($throttleKey, 5);
+            $warning = $remaining > 0
+                ? "Email atau password salah. (Sisa percobaan: {$remaining})"
+                : "Email atau password salah. Batas percobaan habis, akun terkunci sementara selama 1 menit.";
+
+            return back()->withErrors([
+                'email' => $warning,
+            ])->onlyInput('email');
+        }
+
+        // Reset rate limiter setelah login berhasil
+        RateLimiter::clear($throttleKey);
 
         $request->session()->regenerate();
 

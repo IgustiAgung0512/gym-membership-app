@@ -2,8 +2,13 @@
 @section('title', 'Kasir POS (Point of Sale)')
 
 @section('content')
-<div 
-    x-data="{
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('cashierPosApp', cashierPosApp);
+});
+
+function cashierPosApp() {
+    return {
         search: '',
         category: 'all',
         cart: [],
@@ -14,13 +19,38 @@
         cashReceived: '',
         notes: '',
         checkoutModal: false,
+        qrisModal: false,
         successModal: false,
         lastOrder: null,
         loading: false,
         errorMessage: '',
 
-        products: {{ Js::from($products) }},
-        members: {{ Js::from($members) }},
+        // QRIS Dinamis & Real-time Listener state
+        qrisData: null,
+        qrisOrderId: null,
+        qrisTimerSeconds: 300,
+        qrisTimerInterval: null,
+        qrisPollInterval: null,
+        qrisSimulating: false,
+        qrisExpired: false,
+
+        // Member Pickups state
+        pickupModal: false,
+        pickupOrders: [],
+        pickupSearch: '',
+        pickupFilter: 'ready',
+        pickupPendingCount: 0,
+        pickupLoading: false,
+        pickupHandingOver: null,
+        pickupPollInterval: null,
+
+        products: @json($products),
+        members: @json($members),
+
+        init() {
+            this.loadPickups();
+            this.pickupPollInterval = setInterval(() => this.loadPickups(), 10000);
+        },
 
         get filteredProducts() {
             return this.products.filter(p => {
@@ -64,6 +94,15 @@
             if (c.startsWith('snack')) return '🍫';
             if (c.startsWith('gear') || c.startsWith('appar')) return '🎽';
             return '📦';
+        },
+
+        getProductImage(p) {
+            if (!p) return '';
+            let img = p.image_url || p.image;
+            if (!img) return '';
+            if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('/')) return img;
+            if (img.startsWith('storage/')) return '/' + img;
+            return '/storage/' + img;
         },
 
         addToCart(product) {
@@ -150,7 +189,7 @@
             this.memberId = mId;
             if (mId) {
                 const found = this.members.find(m => m.id == mId);
-                this.customerName = found ? found.user.name + ' (' + found.member_code + ')' : 'Member';
+                this.customerName = (found && found.user) ? found.user.name + ' (' + found.member_code + ')' : 'Member';
             } else {
                 this.customerName = 'Tamu / Walk-in';
             }
@@ -189,20 +228,24 @@
             .then(res => {
                 this.loading = false;
                 if (res.status === 200 && res.body.success) {
-                    this.lastOrder = res.body.order;
-                    this.lastOrder.receipt_url = res.body.receipt_url;
-                    
-                    // Kurangi stok di UI lokal
-                    this.cart.forEach(item => {
-                        const prod = this.products.find(p => p.id === item.product_id);
-                        if (prod) prod.stock -= item.quantity;
-                    });
+                    if (res.body.is_qris) {
+                        this.startQrisFlow(res.body);
+                    } else {
+                        this.lastOrder = res.body.order;
+                        this.lastOrder.receipt_url = res.body.receipt_url;
+                        
+                        // Kurangi stok di UI lokal
+                        this.cart.forEach(item => {
+                            const prod = this.products.find(p => p.id === item.product_id);
+                            if (prod) prod.stock -= item.quantity;
+                        });
 
-                    this.cart = [];
-                    this.discount = 0;
-                    this.notes = '';
-                    this.checkoutModal = false;
-                    this.successModal = true;
+                        this.cart = [];
+                        this.discount = 0;
+                        this.notes = '';
+                        this.checkoutModal = false;
+                        this.successModal = true;
+                    }
                 } else {
                     this.errorMessage = res.body.message || 'Terjadi kesalahan saat memproses transaksi.';
                 }
@@ -214,13 +257,179 @@
             });
         },
 
+        startQrisFlow(data) {
+            this.qrisData = data.qris;
+            this.qrisOrderId = data.order.id;
+            this.lastOrder = data.order;
+            this.lastOrder.receipt_url = data.receipt_url;
+            this.checkoutModal = false;
+            this.qrisModal = true;
+            this.qrisExpired = false;
+            this.qrisTimerSeconds = 300;
+
+            // Timer countdown
+            clearInterval(this.qrisTimerInterval);
+            this.qrisTimerInterval = setInterval(() => {
+                if (this.qrisTimerSeconds > 0) {
+                    this.qrisTimerSeconds--;
+                } else {
+                    this.qrisExpired = true;
+                    this.stopQrisPolling();
+                }
+            }, 1000);
+
+            // Polling realtime status every 2 seconds
+            clearInterval(this.qrisPollInterval);
+            this.qrisPollInterval = setInterval(() => {
+                this.checkQrisStatus(data.status_url);
+            }, 2000);
+        },
+
+        get qrisFormattedTimer() {
+            const mins = Math.floor(this.qrisTimerSeconds / 60);
+            const secs = this.qrisTimerSeconds % 60;
+            return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        },
+
+        checkQrisStatus(url) {
+            if (!url || this.qrisExpired || !this.qrisModal) return;
+
+            fetch(url, {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success && res.payment_status === 'paid') {
+                    this.handleQrisSuccess(res.order, res.receipt_url);
+                }
+            })
+            .catch(err => console.error('Status check error:', err));
+        },
+
+        simulateQrisPayment() {
+            if (!this.qrisOrderId) return;
+            this.qrisSimulating = true;
+            
+            fetch('/cashier/pos/orders/' + this.qrisOrderId + '/simulate-qris', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(res => {
+                this.qrisSimulating = false;
+                if (res.success) {
+                    this.handleQrisSuccess(res.order, res.receipt_url);
+                }
+            })
+            .catch(err => {
+                this.qrisSimulating = false;
+                console.error('Simulate payment error:', err);
+            });
+        },
+
+        handleQrisSuccess(order, receiptUrl) {
+            this.stopQrisPolling();
+            this.qrisModal = false;
+            this.lastOrder = order;
+            if (receiptUrl) this.lastOrder.receipt_url = receiptUrl;
+
+            // Kurangi stok di UI lokal
+            this.cart.forEach(item => {
+                const prod = this.products.find(p => p.id === item.product_id);
+                if (prod) prod.stock -= item.quantity;
+            });
+
+            this.cart = [];
+            this.discount = 0;
+            this.notes = '';
+            this.successModal = true;
+        },
+
+        cancelQrisOrder() {
+            if (!confirm('Batalkan transaksi QRIS ini?')) return;
+            this.stopQrisPolling();
+            
+            if (this.qrisOrderId) {
+                fetch('/cashier/pos/orders/' + this.qrisOrderId + '/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+            }
+
+            this.qrisModal = false;
+            this.checkoutModal = true;
+        },
+
+        stopQrisPolling() {
+            if (this.qrisPollInterval) clearInterval(this.qrisPollInterval);
+            if (this.qrisTimerInterval) clearInterval(this.qrisTimerInterval);
+        },
+
         printReceipt(url) {
             const win = window.open(url, '_blank', 'width=400,height=600');
             if (win) {
                 win.focus();
             }
+        },
+
+        async loadPickups() {
+            try {
+                const params = new URLSearchParams();
+                if (this.pickupSearch) params.append('search', this.pickupSearch);
+                if (this.pickupFilter !== 'all') params.append('status', this.pickupFilter);
+
+                const res = await fetch("{{ route('cashier.pos.member-pickups') }}?" + params.toString(), {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.pickupOrders = data.orders;
+                    this.pickupPendingCount = data.pending_count;
+                }
+            } catch (e) {}
+        },
+
+        async markOrderPickedUp(order) {
+            if (!confirm('Serahkan barang untuk pesanan ' + order.invoice_number + ' (' + order.customer_name + ')?')) return;
+
+            this.pickupHandingOver = order.id;
+            try {
+                const res = await fetch("{{ url('/cashier/pos/orders') }}/" + order.id + "/pickup", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await this.loadPickups();
+                } else {
+                    alert(data.message || 'Gagal menyerahkan pesanan');
+                }
+            } catch (err) {
+                alert('Gagal menghubungi server');
+            } finally {
+                this.pickupHandingOver = null;
+            }
         }
-    }"
+    };
+}
+window.cashierPosApp = cashierPosApp;
+</script>
+
+<div 
+    x-data="cashierPosApp()"
+    x-init="init()"
     class="space-y-4"
 >
 
@@ -257,9 +466,20 @@
         </div>
 
         <div class="flex items-center justify-between lg:justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 col-span-2 lg:col-span-1">
-            <span class="text-xs text-slate-500 font-medium">{{ $shiftTransactionsCount }} Transaksi Selesai</span>
-            <a href="{{ route('cashier.orders.index') }}" class="text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition">
-                Rekap Detail &rarr;
+            <button 
+                type="button" 
+                @click="pickupModal = true; loadPickups()" 
+                class="text-xs font-bold text-slate-950 bg-lime-400 hover:bg-lime-300 active:scale-95 px-3 py-1.5 rounded-xl transition shadow-sm flex items-center gap-1.5"
+            >
+                <span>📦 Pickup Member</span>
+                <span 
+                    x-show="pickupPendingCount > 0" 
+                    x-text="pickupPendingCount"
+                    class="px-1.5 py-0.2 rounded-full bg-slate-950 text-lime-400 text-[10px] font-black animate-pulse"
+                ></span>
+            </button>
+            <a href="{{ route('cashier.orders.index') }}" class="text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-xl transition">
+                Rekap &rarr;
             </a>
         </div>
     </div>
@@ -270,8 +490,8 @@
         {{-- LEFT PANEL: PRODUCT CATALOG (8 cols) --}}
         <div class="lg:col-span-7 xl:col-span-8 space-y-4">
             
-            {{-- SEARCH & CATEGORY BAR --}}
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+            {{-- SEARCH & CATEGORY BAR (Sticky for quick access while scrolling products) --}}
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between sticky top-20 z-10">
                 <div class="relative w-full sm:w-72">
                     <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -329,8 +549,8 @@
                 </div>
             </div>
 
-            {{-- PRODUCT GRID --}}
-            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
+            {{-- PRODUCT GRID (Full natural height, smooth page scroll) --}}
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
                 <template x-for="p in filteredProducts" :key="p.id">
                     <div 
                         @click="addToCart(p)"
@@ -366,13 +586,13 @@
                                 </template>
                             </div>
 
-                            {{-- Image / Visual Icon Container --}}
+                            {{-- Image / Visual Container (Aspect-Square for perfect 1:1 photos without cropping) --}}
                             <div 
-                                class="w-full h-24 rounded-xl border overflow-hidden mb-3 flex items-center justify-center relative bg-gradient-to-br transition group-hover:scale-[1.02]"
+                                class="w-full aspect-square rounded-xl border overflow-hidden mb-2.5 flex items-center justify-center relative bg-slate-100 transition group-hover:scale-[1.02]"
                                 :class="getCategoryBg(p.category)"
                             >
                                 <template x-if="p.image">
-                                    <img :src="'/storage/' + p.image" :alt="p.name" class="w-full h-full object-cover">
+                                    <img :src="getProductImage(p)" :alt="p.name" class="w-full h-full object-cover object-center" loading="lazy">
                                 </template>
                                 <template x-if="!p.image">
                                     <span class="text-4xl filter drop-shadow-sm select-none" x-text="getCategoryEmoji(p.category)"></span>
@@ -695,6 +915,87 @@
         </div>
     </div>
 
+    {{-- MODAL QRIS DINAMIS LIVE & SIMULATOR --}}
+    <div 
+        x-show="qrisModal" 
+        x-cloak 
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md overflow-y-auto"
+    >
+        <div 
+            class="bg-white rounded-2xl sm:rounded-3xl max-w-sm w-full p-4 sm:p-5 shadow-2xl border border-slate-100 text-center relative my-auto max-h-[92vh] overflow-y-auto"
+        >
+            {{-- Top Header --}}
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-2.5">
+                <div class="flex items-center gap-1.5">
+                    <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-black text-[11px] tracking-wider">QRIS</span>
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Dinamis Otomatis</span>
+                </div>
+                <div class="flex items-center gap-1 text-[11px] font-mono font-bold bg-amber-50 text-amber-800 px-2 py-0.5 rounded-lg border border-amber-200">
+                    <svg class="w-3 h-3 text-amber-600 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span x-text="qrisFormattedTimer"></span>
+                </div>
+            </div>
+
+            {{-- QR Code Container --}}
+            <div class="bg-gradient-to-b from-slate-50 to-slate-100/90 p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-inner inline-block mx-auto">
+                <div class="w-40 h-40 sm:w-44 sm:h-44 bg-white rounded-xl p-2 shadow-sm flex items-center justify-center mx-auto border border-slate-200">
+                    <template x-if="qrisData && qrisData.qr_url">
+                        <img :src="qrisData.qr_url" alt="QRIS Code" class="w-full h-full object-contain">
+                    </template>
+                </div>
+                <p class="font-mono text-[11px] text-slate-500 mt-1 font-semibold" x-text="lastOrder ? lastOrder.invoice_number : ''"></p>
+            </div>
+
+            {{-- Total Tagihan Display --}}
+            <div class="mt-2 p-2.5 bg-slate-900 text-white rounded-xl">
+                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Tagihan QRIS</p>
+                <p class="font-display font-black text-xl text-lime-400 mt-0.5">
+                    Rp<span x-text="lastOrder ? Number(lastOrder.total_amount).toLocaleString('id-ID') : '0'"></span>
+                </p>
+                <p class="text-[10px] text-slate-300 mt-0.5" x-text="'Pelanggan: ' + (lastOrder ? lastOrder.customer_name : '')"></p>
+            </div>
+
+            {{-- Live Status Indicator --}}
+            <div class="my-2 py-1.5 px-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>Menunggu Pembeli Scan & Membayar...</span>
+            </div>
+
+            {{-- SIMULATOR TEST ACTION BOX --}}
+            <div class="p-2.5 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200 rounded-xl text-left space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1">
+                        <span>🧪</span> Mode Uji Coba (Simulator)
+                    </span>
+                    <span class="text-[9px] bg-indigo-200 text-indigo-900 px-1.5 py-0.5 rounded-full font-bold">Midtrans Ready</span>
+                </div>
+                <p class="text-[10px] text-indigo-800 leading-snug">
+                    Klik tombol di bawah untuk simulasi pembeli telah bayar via BCA/GoPay/OVO:
+                </p>
+                <button 
+                    type="button" 
+                    @click="simulateQrisPayment()"
+                    :disabled="qrisSimulating"
+                    class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-lg text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+                >
+                    <span x-show="!qrisSimulating">⚡ Simulasi: Pembeli Scan & Bayar Sukses</span>
+                    <span x-show="qrisSimulating">Memverifikasi Pembayaran...</span>
+                </button>
+            </div>
+
+            {{-- Cancel / Change Payment Method --}}
+            <div class="mt-2.5">
+                <button 
+                    type="button" 
+                    @click="cancelQrisOrder()"
+                    class="text-xs text-rose-600 hover:text-rose-800 font-bold hover:underline"
+                >
+                    ✕ Batalkan / Ganti Metode Pembayaran
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- MODAL SUCCESS & PRINT RECEIPT --}}
     <div 
         x-show="successModal" 
@@ -746,5 +1047,138 @@
         </div>
     </div>
 
+    {{-- MODAL PESANAN MEMBER / PICKUP KASIR --}}
+    <div 
+        x-show="pickupModal" 
+        x-cloak 
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md overflow-y-auto"
+    >
+        <div 
+            @click.away="pickupModal = false"
+            class="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-100 relative my-auto max-h-[92vh] overflow-y-auto"
+        >
+            {{-- Header --}}
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-2xl bg-lime-400 text-slate-950 flex items-center justify-center text-lg font-black shadow-sm">📦</span>
+                    <div>
+                        <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900">Pesanan Member (Pickup di Kasir)</h3>
+                        <p class="text-[11px] text-slate-500">Cocokkan nama & nomor invoice saat member menunjukkan bukti bayar QRIS</p>
+                    </div>
+                </div>
+                <button type="button" @click="pickupModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+            </div>
+
+            {{-- Search & Filter Controls --}}
+            <div class="mt-4 flex flex-col sm:flex-row gap-2.5 items-center justify-between">
+                <div class="relative w-full sm:flex-1">
+                    <input 
+                        type="text" 
+                        x-model="pickupSearch" 
+                        @input.debounce.300ms="loadPickups()"
+                        placeholder="Cari nama member / invoice (MBR-... / POS-...)" 
+                        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:bg-white"
+                    >
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+
+                <div class="flex items-center gap-1.5 w-full sm:w-auto text-xs">
+                    <button 
+                        type="button" 
+                        @click="pickupFilter = 'ready'; loadPickups()"
+                        :class="pickupFilter === 'ready' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="px-3 py-1.5 rounded-xl transition"
+                    >
+                        Siap Diambil
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="pickupFilter = 'all'; loadPickups()"
+                        :class="pickupFilter === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="px-3 py-1.5 rounded-xl transition"
+                    >
+                        Semua Hari Ini
+                    </button>
+                </div>
+            </div>
+
+            {{-- Orders List --}}
+            <div class="mt-4 space-y-3">
+                <template x-for="order in pickupOrders" :key="order.id">
+                    <div class="p-4 rounded-2xl border transition" :class="order.pickup_status === 'ready_for_pickup' ? 'bg-lime-50/40 border-lime-200 shadow-sm' : 'bg-slate-50 border-slate-200/80 opacity-80'">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200/60">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-black text-xs text-slate-900" x-text="order.invoice_number"></span>
+                                    <span 
+                                        x-show="order.pickup_status === 'ready_for_pickup'"
+                                        class="px-2 py-0.5 rounded-full bg-lime-400 text-slate-950 font-black text-[10px] animate-pulse"
+                                    >
+                                        📦 Siap Diambil
+                                    </span>
+                                    <span 
+                                        x-show="order.pickup_status === 'picked_up'"
+                                        class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px]"
+                                    >
+                                        ✓ Sudah Diserahkan
+                                    </span>
+                                </div>
+                                <p class="text-xs font-bold text-slate-800 mt-0.5" x-text="'Pembeli: ' + order.customer_name"></p>
+                            </div>
+                            <div class="text-left sm:text-right">
+                                <span class="font-display font-black text-sm text-slate-900 font-mono">
+                                    Rp<span x-text="Number(order.total_amount).toLocaleString('id-ID')"></span>
+                                </span>
+                                <p class="text-[10px] text-slate-500" x-text="new Date(order.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) + ' WIB'"></p>
+                            </div>
+                        </div>
+
+                        {{-- Items to prepare --}}
+                        <div class="py-2 space-y-1 text-xs">
+                            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Barang yang Harus Disiapkan:</p>
+                            <template x-for="item in order.items" :key="item.id">
+                                <div class="flex items-center justify-between font-semibold text-slate-800 pl-2 border-l-2 border-slate-300">
+                                    <span>
+                                        <span class="text-lime-700 font-bold font-mono" x-text="item.quantity + 'x '"></span>
+                                        <span x-text="item.product_name"></span>
+                                    </span>
+                                    <span class="text-slate-500 font-mono text-[11px]" x-text="'Rp' + Number(item.subtotal).toLocaleString('id-ID')"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Action Button --}}
+                        <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                            <p class="text-[11px] text-slate-500 italic" x-text="order.notes ? 'Catatan: ' + order.notes : ''"></p>
+                            
+                            <template x-if="order.pickup_status === 'ready_for_pickup'">
+                                <button 
+                                    type="button" 
+                                    @click="markOrderPickedUp(order)"
+                                    :disabled="pickupHandingOver === order.id"
+                                    class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-lime-400 font-display font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                >
+                                    <span>✓ Serahkan Barang</span>
+                                    <span x-show="pickupHandingOver === order.id" class="animate-spin text-xs">⌛</span>
+                                </button>
+                            </template>
+                            <template x-if="order.pickup_status === 'picked_up'">
+                                <span class="text-[11px] text-slate-500">
+                                    Diserahkan: <strong x-text="order.picker ? order.picker.name : 'Kasir'"></strong>
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="pickupOrders.length === 0">
+                    <div class="py-12 text-center text-slate-400 text-xs">
+                        <p class="text-3xl mb-1">📦</p>
+                        <p class="font-bold text-slate-700">Tidak ada pesanan member</p>
+                        <p class="mt-0.5">Pesanan yang dibayar oleh member di portal member akan muncul di sini untuk disiapkan kasir.</p>
+                    </div>
+                </template>
+            </div>
+        </div>
 </div>
 @endsection

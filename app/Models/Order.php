@@ -23,6 +23,9 @@ class Order extends Model
         'payment_status',
         'notes',
         'created_by',
+        'pickup_status',
+        'picked_up_at',
+        'picked_up_by',
     ];
 
     protected function casts(): array
@@ -34,6 +37,7 @@ class Order extends Model
             'cost_total' => 'decimal:2',
             'cash_received' => 'decimal:2',
             'cash_change' => 'decimal:2',
+            'picked_up_at' => 'datetime',
         ];
     }
 
@@ -45,6 +49,11 @@ class Order extends Model
     public function cashier()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function picker()
+    {
+        return $this->belongsTo(User::class, 'picked_up_by');
     }
 
     public function items()
@@ -75,5 +84,15 @@ class Order extends Model
     public function getProfitAttribute(): float
     {
         return (float) $this->total_amount - (float) $this->cost_total;
+    }
+
+    public function isReadyForPickup(): bool
+    {
+        return $this->payment_status === 'paid' && $this->pickup_status === 'ready_for_pickup';
+    }
+
+    public function isPickedUp(): bool
+    {
+        return $this->pickup_status === 'picked_up';
     }
 }

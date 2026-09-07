@@ -57,27 +57,42 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="text-left bg-slate-50 text-slate-600 border-b border-slate-200">
-                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Waktu</th>
                     <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Member</th>
-                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Metode</th>
-                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">UID Kartu</th>
+                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Kartu RFID</th>
+                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Jam Masuk</th>
+                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Jam Keluar</th>
+                    <th class="px-5 py-3.5 font-semibold text-xs uppercase tracking-wider">Durasi Sesi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
             @forelse ($attendances as $a)
                 <tr class="hover:bg-slate-50/80 transition">
-                    <td class="px-5 py-3.5 text-slate-700 font-mono font-medium">{{ $a->check_in_at->format('H:i:s') }} WIB</td>
                     <td class="px-5 py-3.5">
                         <p class="text-slate-900 font-semibold">{{ $a->member->user->name }}</p>
                         <p class="text-xs text-slate-500 font-mono">{{ $a->member->member_code }}</p>
                     </td>
                     <td class="px-5 py-3.5">
-                        <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold {{ $a->method=='rfid' ? 'bg-lime-100 text-lime-800' : 'bg-slate-100 text-slate-600' }}">{{ $a->method == 'rfid' ? 'RFID Tap' : 'Manual' }}</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold {{ $a->method=='rfid' ? 'bg-lime-100 text-lime-800' : 'bg-slate-100 text-slate-600' }}">{{ $a->method == 'rfid' ? '⚡ ' . ($a->rfidCard->uid ?? 'RFID') : '✍️ Manual' }}</span>
                     </td>
-                    <td class="px-5 py-3.5 font-mono text-xs text-slate-600">{{ $a->rfidCard->uid ?? '—' }}</td>
+                    <td class="px-5 py-3.5 text-slate-800 font-mono font-bold">{{ $a->check_in_at->format('H:i:s') }} WIB</td>
+                    <td class="px-5 py-3.5 text-slate-600 font-mono">
+                        @if ($a->check_out_at)
+                            {{ $a->check_out_at->format('H:i:s') }} WIB
+                        @else
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                                SEDANG LATIHAN
+                            </span>
+                        @endif
+                    </td>
+                    <td class="px-5 py-3.5 font-medium text-slate-700">
+                        <span class="font-semibold text-slate-900">{{ $a->duration_formatted }}</span>
+                        @if (!$a->check_out_at)
+                            <span class="text-[10px] text-emerald-600 font-bold ml-1">(Berjalan)</span>
+                        @endif
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="4" class="px-5 py-10 text-center text-slate-500">Belum ada check-in di tanggal ini.</td></tr>
+                <tr><td colspan="5" class="px-5 py-10 text-center text-slate-500">Belum ada check-in di tanggal ini.</td></tr>
             @endforelse
             </tbody>
         </table>

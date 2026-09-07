@@ -34,6 +34,10 @@ class Product extends Model
         ];
     }
 
+    protected $appends = [
+        'image_url',
+    ];
+
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
@@ -42,6 +46,23 @@ class Product extends Model
     public function isLowStock(): bool
     {
         return $this->stock <= $this->min_stock_alert;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://') || str_starts_with($this->image, '/')) {
+            return $this->image;
+        }
+
+        if (str_starts_with($this->image, 'storage/')) {
+            return '/' . $this->image;
+        }
+
+        return '/storage/' . $this->image;
     }
 
     public function getCategoryLabelAttribute(): string

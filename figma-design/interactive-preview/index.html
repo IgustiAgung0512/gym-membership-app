@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymPulse · Figma Design System & Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== TOP STATUS BAR ==================== -->
+  <div class="top-notice-bar">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="badge-pulse">
+        <span class="pulse-dot"></span>
+        BUKA HARI INI
+      </span>
+      <span>Jam Operasional: <strong>06:00 - 22:00 WIB</strong> (Setiap Hari)</span>
+    </div>
+    <div>
+      <span style="color: #94A3B8;">⚡ Akses Pintu Smart RFID Siap · Clean Athletic Design System</span>
+    </div>
+  </div>
+
+  <!-- ==================== HEADER BAR ==================== -->
+  <header class="preview-header">
+    <div class="brand-container">
+      <div class="logo-badge">G</div>
+      <div>
+        <h1 class="brand-title">GymPulse<span>.</span></h1>
+        <div class="brand-subtitle">SMART RFID FITNESS · FIGMA DESIGNS</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('landing')">
+        <span>🌐</span> Landing Page
+      </button>
+      <button class="tab-btn" onclick="switchTab('admin')">
+        <span>📊</span> Admin Dashboard
+      </button>
+      <button class="tab-btn" onclick="switchTab('pos')">
+        <span>🛒</span> Kasir POS
+      </button>
+      <button class="tab-btn" onclick="switchTab('products')">
+        <span>📦</span> Foto Produk
+      </button>
+      <button class="tab-btn" onclick="switchTab('mobile')">
+        <span>📱</span> Mobile Portal
+      </button>
+      <button class="tab-btn" onclick="switchTab('uikit')">
+        <span>🎨</span> UI Kit
+      </button>
+      <button class="tab-btn" onclick="switchTab('tokens')">
+        <span>📦</span> Tokens (JSON)
+      </button>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="action-btn" onclick="copyCurrentSvg()">
+        <span>📋</span> Copy Vector ke Figma
+      </button>
+      <a href="../FIGMA_DESIGN_SYSTEM.md" target="_blank" class="action-btn primary">
+        <span>📖</span> Spesifikasi Desain
+      </a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-wrapper">
+
+    <!-- TAB 1: LANDING PAGE -->
+    <section id="tab-landing" class="tab-content active">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">LANDING PAGE WEB</span>
+            <span class="frame-title">01. Landing Page Desktop (welcome.blade.php)</span>
+            <span class="frame-dim">1440 × 3200 px</span>
+          </div>
+          <div class="header-actions">
+            <a href="../svg-mockups/01_landing_page_desktop.svg" download="01_landing_page_desktop.svg" class="action-btn">
+              ⬇ Download SVG
+            </a>
+          </div>
+        </div>
+        <div class="canvas-viewport">
+          <img src="../svg-mockups/01_landing_page_desktop.svg" alt="Landing Page Mockup" style="width: 100%; max-width: 1440px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ADMIN DASHBOARD -->
+    <section id="tab-admin" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">ADMIN PANEL</span>
+            <span class="frame-title">02. Admin Dashboard &amp; RFID Live Monitor (admin/dashboard.blade.php)</span>
+            <span class="frame-dim">1440 × 960 px</span>
+          </div>
+          <div class="header-actions">
+            <a href="../svg-mockups/02_admin_dashboard.svg" download="02_admin_dashboard.svg" class="action-btn">
+              ⬇ Download SVG
+            </a>
+          </div>
+        </div>
+        <div class="canvas-viewport">
+          <img src="../svg-mockups/02_admin_dashboard.svg" alt="Admin Dashboard Mockup" style="width: 100%; max-width: 1440px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CASHIER POS TERMINAL -->
+    <section id="tab-pos" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">KASIR POINT OF SALE</span>
+            <span class="frame-title">03. Kasir POS Gym Store (cashier/pos/index.blade.php)</span>
+            <span class="frame-dim">1440 × 960 px</span>
+          </div>
+          <div class="header-actions">
+            <a href="../svg-mockups/03_cashier_pos_terminal.svg" download="03_cashier_pos_terminal.svg" class="action-btn">
+              ⬇ Download SVG
+            </a>
+          </div>
+        </div>
+        <div class="canvas-viewport">
+          <img src="../svg-mockups/03_cashier_pos_terminal.svg" alt="Cashier POS Mockup" style="width: 100%; max-width: 1440px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: PRODUK FOTO GALLERY -->
+    <section id="tab-products" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">PRODUK TOKO GYM</span>
+            <span class="frame-title">Koleksi Foto Produk HD &amp; Suplemen GymPulse</span>
+            <span class="frame-dim">Resolusi Tinggi (1:1) Studio Photography</span>
+          </div>
+          <div class="header-actions">
+            <a href="../../public/images/products/" target="_blank" class="action-btn">
+              📁 Buka Folder Aset Produk
+            </a>
+          </div>
+        </div>
+
+        <div style="padding: 32px; background: #F8FAFC;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+            <!-- Prod 1: Whey Protein -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/whey_protein.jpg" alt="Whey Protein Isolate" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#D97706; background:#FEF3C7; padding:2px 8px; border-radius:6px; margin-bottom:6px;">⚡ SUPLEMEN</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">Whey Protein Isolate</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: SUP-WHEY-01 • 25g Pure Isolate</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 20.000 <span style="font-size:12px; color:#64748B; font-weight:400;">/ scoop</span></span>
+                  <a href="../assets/products/whey_protein.jpg" download="whey_protein.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prod 2: Creatine Monohydrate -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/creatine.jpg" alt="Creatine Monohydrate" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#D97706; background:#FEF3C7; padding:2px 8px; border-radius:6px; margin-bottom:6px;">⚡ SUPLEMEN</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">Creatine Monohydrate</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: SUP-CREA-01 • 5g Pure Scoop</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 10.000 <span style="font-size:12px; color:#64748B; font-weight:400;">/ scoop</span></span>
+                  <a href="../assets/products/creatine.jpg" download="creatine.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prod 3: Pre-Workout Energy Drink -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/pre_workout.jpg" alt="Pre-Workout Energy Drink" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#0284C7; background:#E0F2FE; padding:2px 8px; border-radius:6px; margin-bottom:6px;">🥤 MINUMAN</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">Pre-Workout Iced Cup</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: SUP-PREW-01 • Dingin Siap Minum</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 25.000 <span style="font-size:12px; color:#64748B; font-weight:400;">/ cup</span></span>
+                  <a href="../assets/products/pre_workout.jpg" download="pre_workout.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prod 4: Gym Towel Microfiber -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/gym_towel.jpg" alt="Gym Towel Microfiber" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#334155; background:#F1F5F9; padding:2px 8px; border-radius:6px; margin-bottom:6px;">🎒 GEAR</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">Gym Towel Microfiber</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: GER-TWL01 • Quick-Dry Lembut</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 45.000</span>
+                  <a href="../assets/products/gym_towel.jpg" download="gym_towel.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prod 5: Keto Fuel Protein Bar -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/protein_bar.jpg" alt="Keto Fuel Protein Bar" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#B45309; background:#FEF3C7; padding:2px 8px; border-radius:6px; margin-bottom:6px;">🍫 SNACK</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">Keto Fuel Energy Bar</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: SNK-PBAR01 • Dark Choc 20g Protein</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 18.000</span>
+                  <a href="../assets/products/protein_bar.jpg" download="protein_bar.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prod 6: GymPulse Shaker Bottle -->
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+              <div style="width:100%; aspect-ratio:1/1; background:#F8FAFC; overflow:hidden;">
+                <img src="../assets/products/shaker.jpg" alt="Gym Shaker Bottle" style="width:100%; height:100%; object-fit:cover;">
+              </div>
+              <div style="padding:16px;">
+                <span style="display:inline-block; font-size:10px; font-weight:700; color:#334155; background:#F1F5F9; padding:2px 8px; border-radius:6px; margin-bottom:6px;">🎒 GEAR</span>
+                <h3 style="font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:#0F172A;">GymPulse Pro Shaker</h3>
+                <p style="font-size:12px; color:#64748B; margin-top:2px;">SKU: GER-SHK700 • 700ml Stainless Ball</p>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+                  <span style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:#0F172A;">Rp 85.000</span>
+                  <a href="../assets/products/shaker.jpg" download="shaker.jpg" class="action-btn" style="padding:4px 10px; font-size:11px;">⬇ Unduh</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: MEMBER MOBILE PORTAL -->
+    <section id="tab-mobile" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">MEMBER PORTAL</span>
+            <span class="frame-title">04. Member Mobile Experience (member/dashboard.blade.php)</span>
+            <span class="frame-dim">390 × 844 px (iPhone Standard)</span>
+          </div>
+          <div class="header-actions">
+            <a href="../svg-mockups/04_member_mobile_portal.svg" download="04_member_mobile_portal.svg" class="action-btn">
+              ⬇ Download SVG
+            </a>
+          </div>
+        </div>
+        <div class="canvas-viewport" style="background: #E2E8F0;">
+          <img src="../svg-mockups/04_member_mobile_portal.svg" alt="Member Mobile Portal Mockup" style="max-width: 390px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: UI KIT & COMPONENTS -->
+    <section id="tab-uikit" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">DESIGN SYSTEM</span>
+            <span class="frame-title">05. UI Kit, Buttons, Inputs, Status Badges &amp; Swatches</span>
+            <span class="frame-dim">1440 × 1200 px</span>
+          </div>
+          <div class="header-actions">
+            <a href="../svg-mockups/05_ui_kit_components.svg" download="05_ui_kit_components.svg" class="action-btn">
+              ⬇ Download SVG
+            </a>
+          </div>
+        </div>
+        <div class="canvas-viewport">
+          <img src="../svg-mockups/05_ui_kit_components.svg" alt="UI Kit Components Mockup" style="width: 100%; max-width: 1440px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: DESIGN TOKENS (JSON) -->
+    <section id="tab-tokens" class="tab-content">
+      <div class="preview-card">
+        <div class="preview-toolbar">
+          <div class="frame-info">
+            <span class="frame-pill">FIGMA VARIABLES &amp; TOKENS</span>
+            <span class="frame-title">Design Tokens (W3C Standard JSON)</span>
+          </div>
+          <div class="header-actions">
+            <button class="action-btn" onclick="copyTokensJson()">
+              <span>📋</span> Copy JSON Tokens
+            </button>
+            <a href="../figma_tokens.json" download="figma_tokens.json" class="action-btn primary">
+              ⬇ Download figma_tokens.json
+            </a>
+          </div>
+        </div>
+
+        <div style="padding: 24px; background: #F8FAFC;">
+          <div class="tokens-grid" style="margin-bottom: 24px;">
+            <div class="token-box">
+              <div class="token-name">--gp-lime (#84CC16)</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <div style="width:24px; height:24px; background:#84CC16; border-radius:6px;"></div>
+                <div class="token-val">Volt Lime Accent (Brand Primary)</div>
+              </div>
+            </div>
+            <div class="token-box">
+              <div class="token-name">--gp-primary (#0F172A)</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <div style="width:24px; height:24px; background:#0F172A; border-radius:6px;"></div>
+                <div class="token-val">Slate 900 (Sidebar &amp; Buttons)</div>
+              </div>
+            </div>
+            <div class="token-box">
+              <div class="token-name">--gp-bg (#F8FAFC)</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <div style="width:24px; height:24px; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:6px;"></div>
+                <div class="token-val">Slate 50 (App Canvas Base)</div>
+              </div>
+            </div>
+            <div class="token-box">
+              <div class="token-name">--gp-emerald (#10B981)</div>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <div style="width:24px; height:24px; background:#10B981; border-radius:6px;"></div>
+                <div class="token-val">Emerald Active &amp; Lunas Status</div>
+              </div>
+            </div>
+          </div>
+
+          <pre id="json-preview" style="background:#0F172A; border:1px solid #1E293B; border-radius:12px; padding:20px; color:#A3E635; font-family:'JetBrains Mono', monospace; font-size:12px; max-height:450px; overflow:auto;"></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notice -->
+  <div id="toast" class="toast-notice">
+    <span style="color: #84CC16;">✔</span>
+    <span id="toast-text">Berhasil disalin!</span>
+  </div>
+
+  <script>
+    let currentTab = 'landing';
+
+    const tabSvgMap = {
+      'landing': '../svg-mockups/01_landing_page_desktop.svg',
+      'admin': '../svg-mockups/02_admin_dashboard.svg',
+      'pos': '../svg-mockups/03_cashier_pos_terminal.svg',
+      'mobile': '../svg-mockups/04_member_mobile_portal.svg',
+      'uikit': '../svg-mockups/05_ui_kit_components.svg'
+    };
+
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
+
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const targetSection = document.getElementById('tab-' + tabId);
+      if (targetSection) targetSection.classList.add('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    async function copyCurrentSvg() {
+      const svgPath = tabSvgMap[currentTab];
+      if (!svgPath) {
+        showToast('Pilih tab SVG (Landing, Admin, POS, Mobile, atau UI Kit)');
+        return;
+      }
+      try {
+        const res = await fetch(svgPath);
+        const text = await res.text();
+        await navigator.clipboard.writeText(text);
+        showToast('SVG berhasil disalin! Tinggal Paste (Ctrl+V) di Figma Canvas.');
+      } catch (err) {
+        showToast('Gagal menyalin SVG: ' + err.message);
+      }
+    }
+
+    async function copyTokensJson() {
+      try {
+        const res = await fetch('../figma_tokens.json');
+        const text = await res.text();
+        await navigator.clipboard.writeText(text);
+        showToast('Tokens JSON berhasil disalin! Siap diimpor ke Figma Variables.');
+      } catch (err) {
+        showToast('Gagal menyalin Tokens');
+      }
+    }
+
+    // Load JSON snippet on start
+    fetch('../figma_tokens.json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('json-preview').textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

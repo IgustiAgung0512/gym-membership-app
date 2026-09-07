@@ -24,9 +24,9 @@ class MemberController extends Controller
                 'uid' => $request->uid,
             ]);
         } else {
-            $checkUid->update([
-                'uid' => $request->uid
-            ]);
+            $checkUid->uid = $request->uid;
+            $checkUid->touch();
+            $checkUid->save();
         }
 
         $uid = trim($checkUid->uid);
@@ -62,6 +62,7 @@ class MemberController extends Controller
             ], 403);
         }
 
+        // Cari sesi presensi terbuka untuk member ini pada hari ini
         $openAttendance = Attendance::with([
             'member.user',
             'rfidCard',
@@ -69,12 +70,26 @@ class MemberController extends Controller
             ->where('member_id', $member->id)
             ->where('rfid_card_id', $card->id)
             ->where('method', 'rfid')
+            ->whereDate('check_in_at', today())
             ->whereNull('check_out_at')
             ->latest('id')
             ->first();
 
         if ($openAttendance) {
-            // Ada sesi yang masih terbuka (belum checkout) -> tap ini = CHECK-OUT.
+            // Proteksi double-tap kartu (jika tap kedua terjadi dalam jeda < 3 detik)
+            if ($openAttendance->check_in_at && $openAttendance->check_in_at->diffInSeconds(now()) < 3) {
+                return response()->json([
+                    'success' => true,
+                    'action'  => 'checkin_duplicate_ignored',
+                    'message' => 'Kartu baru saja di-tap (Check-in aktif). Mohon tunggu beberapa detik sebelum Check-out.',
+                    'member_name' => $member->user->name,
+                    'member_code' => $member->member_code,
+                    'check_in_at' => $openAttendance->check_in_at->format('H:i:s'),
+                    'attendance'  => $openAttendance,
+                ], 200);
+            }
+
+            // Ada sesi yang masih terbuka -> tap ini = CHECK-OUT.
             $openAttendance->update([
                 'check_out_at' => now(),
             ]);
@@ -83,10 +98,19 @@ class MemberController extends Controller
                 'member.user',
                 'rfidCard',
             ]);
+
+            return response()->json([
+                'success'     => true,
+                'action'      => 'checkout',
+                'message'     => 'Check-out berhasil untuk ' . $member->user->name . '!',
+                'member_name' => $member->user->name,
+                'member_code' => $member->member_code,
+                'check_in_at' => $attendance->check_in_at->format('H:i:s'),
+                'check_out_at'=> $attendance->check_out_at ? $attendance->check_out_at->format('H:i:s') : null,
+                'attendance'  => $attendance,
+            ], 200);
         } else {
-            // Tidak ada sesi terbuka -> tap ini = CHECK-IN baru.
-            // Tidak dibatasi tanggal, jadi member boleh checkin/checkout
-            // berkali-kali dalam sehari (misal pagi & sore).
+            // Tidak ada sesi terbuka hari ini -> tap ini = CHECK-IN baru.
             $attendance = Attendance::create([
                 'member_id' => $member->id,
                 'rfid_card_id' => $card->id,
@@ -97,13 +121,16 @@ class MemberController extends Controller
                 'member.user',
                 'rfidCard',
             ]);
-        }
 
-        return response()->json([
-            'success'   => true,
-            'message' => 'Check-in berhasil!',
-            'attendance' => $attendance,
-        ], 200);
-        
+            return response()->json([
+                'success'     => true,
+                'action'      => 'checkin',
+                'message'     => 'Check-in berhasil untuk ' . $member->user->name . '!',
+                'member_name' => $member->user->name,
+                'member_code' => $member->member_code,
+                'check_in_at' => $attendance->check_in_at->format('H:i:s'),
+                'attendance'  => $attendance,
+            ], 200);
+        }
     }
 }

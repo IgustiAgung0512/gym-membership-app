@@ -1,0 +1,534 @@
+<svg width="1440" height="3200" viewBox="0 0 1440 3200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- FIGMA METADATA: Frame Name = GymPulse / 01 - Landing Page Desktop (Exact Project Match) -->
+  <defs>
+    <linearGradient id="limeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A3E635"/>
+      <stop offset="100%" stop-color="#65A30D"/>
+    </linearGradient>
+
+    <filter id="cleanShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.04"/>
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#0F172A" flood-opacity="0.06"/>
+    </filter>
+
+    <filter id="btnShadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <style>
+    .font-display { font-family: 'Space Grotesk', -apple-system, sans-serif; font-weight: 700; }
+    .font-sans { font-family: 'Inter', -apple-system, sans-serif; }
+    .text-slate-900 { fill: #0F172A; }
+    .text-slate-800 { fill: #1E293B; }
+    .text-slate-600 { fill: #475569; }
+    .text-slate-500 { fill: #64748B; }
+    .text-slate-400 { fill: #94A3B8; }
+    .text-white { fill: #FFFFFF; }
+    .text-lime { fill: #65A30D; }
+    .text-lime-bright { fill: #84CC16; }
+    .text-emerald { fill: #059669; }
+  </style>
+
+  <!-- Base Page Background (Slate-50) -->
+  <rect width="1440" height="3200" fill="#F8FAFC"/>
+
+  <!-- ==================== 1. TOP DARK STATUS BAR (Y: 0 - 40) ==================== -->
+  <g id="Top_Status_Bar" transform="translate(0, 0)">
+    <rect width="1440" height="40" fill="#0F172A"/>
+    <line x1="0" y1="40" x2="1440" y2="40" stroke="#1E293B" stroke-width="1"/>
+
+    <!-- Operational Hours & Status -->
+    <g transform="translate(80, 10)">
+      <!-- Badge Buka Hari Ini -->
+      <rect width="110" height="20" rx="10" fill="#84CC16" fill-opacity="0.2"/>
+      <circle cx="12" cy="10" r="3.5" fill="#84CC16"/>
+      <text x="24" y="14" class="font-sans text-lime-bright" font-size="11" font-weight="700">BUKA HARI INI</text>
+
+      <text x="125" y="14" class="font-sans text-slate-400" font-size="12">
+        Jam Operasional: <tspan fill="#FFFFFF" font-weight="600">06:00 - 22:00 WIB</tspan> (Setiap Hari)
+      </text>
+    </g>
+
+    <!-- RFID Ready & WhatsApp -->
+    <g transform="translate(980, 10)">
+      <text x="0" y="14" class="font-sans text-slate-400" font-size="12">⚡ Akses Pintu Smart RFID Siap</text>
+      <text x="210" y="14" class="font-sans text-lime-bright" font-size="12" font-weight="600">Chat WhatsApp: +62 812-3456-7890 →</text>
+    </g>
+  </g>
+
+  <!-- ==================== 2. MAIN NAVBAR HEADER (Y: 40 - 120) ==================== -->
+  <g id="Main_Navbar" transform="translate(0, 40)">
+    <rect width="1440" height="80" fill="#FFFFFF" fill-opacity="0.95"/>
+    <line x1="0" y1="80" x2="1440" y2="80" stroke="#E2E8F0" stroke-width="1"/>
+
+    <!-- Brand Logo -->
+    <g transform="translate(80, 20)">
+      <rect width="40" height="40" rx="10" fill="#0F172A"/>
+      <text x="20" y="27" class="font-display text-lime-bright" font-size="22" text-anchor="middle">G</text>
+      <g transform="translate(52, 6)">
+        <text x="0" y="20" class="font-display text-slate-900" font-size="22" letter-spacing="-0.5">GymPulse<tspan fill="#65A30D">.</tspan></text>
+        <text x="0" y="32" class="font-sans text-slate-500" font-size="9" font-weight="700" letter-spacing="1">SMART RFID FITNESS</text>
+      </g>
+    </g>
+
+    <!-- Navigation Links -->
+    <g transform="translate(420, 45)" class="font-sans text-slate-600" font-size="14" font-weight="600">
+      <text x="0" y="0">Tentang</text>
+      <text x="80" y="0">Fasilitas</text>
+      <g transform="translate(160, -14)">
+        <rect width="115" height="28" rx="8" fill="#F1F5F9"/>
+        <circle cx="14" cy="14" r="3.5" fill="#84CC16"/>
+        <text x="26" y="18" class="text-slate-900" font-size="13">Smart RFID</text>
+      </g>
+      <text x="295" y="0">Program</text>
+      <text x="380" y="0">Paket Member</text>
+      <text x="495" y="0">Kalkulator BMI</text>
+      <text x="615" y="0">FAQ &amp; Lokasi</text>
+    </g>
+
+    <!-- Header Auth Actions -->
+    <g transform="translate(1170, 20)">
+      <!-- Login Button -->
+      <rect x="0" y="0" width="80" height="40" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="40" y="25" class="font-sans text-slate-800" font-size="13" font-weight="600" text-anchor="middle">Masuk</text>
+
+      <!-- Register CTA -->
+      <rect x="90" y="0" width="120" height="40" rx="10" fill="#0F172A" filter="url(#btnShadow)"/>
+      <text x="150" y="25" class="font-display text-white" font-size="13" font-weight="700" text-anchor="middle">Daftar Member</text>
+    </g>
+  </g>
+
+  <!-- ==================== 3. HERO SECTION (Y: 150 - 750) ==================== -->
+  <g id="Hero_Section" transform="translate(80, 160)">
+    
+    <!-- Left Column: Copywriting -->
+    <g transform="translate(0, 20)">
+      <!-- Pill Badge -->
+      <rect width="280" height="32" rx="16" fill="#ECFCCB" stroke="#D9F99D" stroke-width="1"/>
+      <circle cx="16" cy="16" r="4" fill="#65A30D"/>
+      <text x="30" y="21" class="font-sans text-lime" font-size="12" font-weight="700">⚡ SMART RFID GYM SYSTEM · JAKARTA</text>
+
+      <!-- Main Headline -->
+      <text x="0" y="85" class="font-display text-slate-900" font-size="46" letter-spacing="-1">
+        TRANSFORMASI TUBUH
+      </text>
+      <text x="0" y="140" class="font-display text-slate-900" font-size="46" letter-spacing="-1">
+        &amp; KESEHATAN DI PUSAT
+      </text>
+      <text x="0" y="195" class="font-display" font-size="46" letter-spacing="-1" fill="#65A30D">
+        FITNESS MODERN.
+      </text>
+
+      <!-- Subtitle Description -->
+      <text x="0" y="240" class="font-sans text-slate-600" font-size="16" line-height="26">
+        <tspan x="0" dy="0">Fasilitas gym terlengkap dengan akses instan teknologi Smart RFID Tap-In,</tspan>
+        <tspan x="0" dy="26">personal trainer bersertifikat, dan kasir penjualan suplemen terintegrasi.</tspan>
+      </text>
+
+      <!-- CTA Buttons -->
+      <g transform="translate(0, 315)">
+        <rect width="190" height="50" rx="12" fill="#0F172A" filter="url(#btnShadow)"/>
+        <text x="95" y="31" class="font-display text-white" font-size="15" font-weight="700" text-anchor="middle">Mulai Sekarang →</text>
+
+        <rect x="205" y="0" width="180" height="50" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+        <text x="295" y="31" class="font-sans text-slate-800" font-size="14" font-weight="600" text-anchor="middle">Pelajari Fasilitas</text>
+      </g>
+
+      <!-- Quick Trust Indicators -->
+      <g transform="translate(0, 400)" class="font-sans text-slate-500" font-size="13">
+        <g transform="translate(0, 0)">
+          <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+          <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+          <text x="24" y="12" class="text-slate-700" font-weight="500">Tanpa Antre Kasir</text>
+        </g>
+        <g transform="translate(160, 0)">
+          <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+          <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+          <text x="24" y="12" class="text-slate-700" font-weight="500">Tap RFID 0.4 Detik</text>
+        </g>
+        <g transform="translate(320, 0)">
+          <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+          <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+          <text x="24" y="12" class="text-slate-700" font-weight="500">Loker &amp; Shower Bersih</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Right Column: RFID Hardware Terminal Interactive Live Card -->
+    <g transform="translate(680, 10)" filter="url(#cleanShadow)">
+      <!-- Main White Clean Card -->
+      <rect width="600" height="460" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+
+      <!-- Card Header -->
+      <g transform="translate(30, 25)">
+        <text x="0" y="16" class="font-display text-slate-900" font-size="18">Monitor Check-in RFID Real-Time</text>
+        <text x="0" y="34" class="font-sans text-slate-500" font-size="12">Informasi member saat menempelkan kartu pada alat reader</text>
+
+        <!-- Live Badge -->
+        <rect x="420" y="2" width="120" height="26" rx="13" fill="#ECFCCB" stroke="#D9F99D"/>
+        <circle cx="432" cy="15" r="3.5" fill="#65A30D"/>
+        <text x="444" y="19" class="font-sans text-lime" font-size="11" font-weight="700">● READER ONLINE</text>
+      </g>
+
+      <!-- RFID Check-in Success Result Box -->
+      <g transform="translate(30, 85)">
+        <rect width="540" height="150" rx="16" fill="#F8FAFC" stroke="#E2E8F0"/>
+        
+        <!-- Member Avatar -->
+        <g transform="translate(24, 25)">
+          <rect width="100" height="100" rx="16" fill="#E2E8F0" stroke="#CBD5E1"/>
+          <text x="50" y="62" class="font-display text-slate-700" font-size="36" text-anchor="middle">AC</text>
+        </g>
+
+        <!-- Member Meta Details -->
+        <g transform="translate(145, 30)">
+          <text x="0" y="16" class="font-display text-slate-900" font-size="20">Alexander Chen</text>
+          
+          <rect x="0" y="26" width="90" height="22" rx="6" fill="#ECFCCB"/>
+          <text x="45" y="41" class="font-sans text-lime" font-size="11" font-weight="700" text-anchor="middle">PRO UNLIMITED</text>
+
+          <text x="100" y="41" class="font-sans text-slate-500" font-size="12">UID: <tspan font-family="'JetBrains Mono'" font-weight="600" fill="#0F172A">4A:9C:12:F1</tspan></text>
+
+          <g transform="translate(0, 60)">
+            <rect width="365" height="30" rx="8" fill="#D1FAE5" stroke="#A7F3D0"/>
+            <text x="12" y="20" class="font-sans text-emerald" font-size="12" font-weight="700">✔ CHECK-IN BERHASIL · Pintu Masuk Terbuka</text>
+            <text x="350" y="20" class="font-sans text-emerald" font-size="11" text-anchor="end">09:41 WIB</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- 2 Stats Boxes Below -->
+      <g transform="translate(30, 255)">
+        <!-- Box 1: Realtime Members -->
+        <rect width="255" height="175" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+        <g transform="translate(20, 20)">
+          <rect width="38" height="38" rx="10" fill="#ECFCCB"/>
+          <path d="M14 20L19 14L24 20" stroke="#65A30D" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="48" y="24" class="font-sans text-slate-500" font-size="12" font-weight="600">MEMBER DI DALAM</text>
+          
+          <text x="0" y="80" class="font-display text-slate-900" font-size="38">183</text>
+          <text x="0" y="105" class="font-sans text-slate-500" font-size="12">Kapasitas Optimal (73%)</text>
+          <rect x="0" y="118" width="215" height="6" rx="3" fill="#F1F5F9"/>
+          <rect x="0" y="118" width="156" height="6" rx="3" fill="#84CC16"/>
+        </g>
+
+        <!-- Box 2: POS Omzet Today -->
+        <g transform="translate(285, 0)">
+          <rect width="255" height="175" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+          <g transform="translate(20, 20)">
+            <rect width="38" height="38" rx="10" fill="#E0F2FE"/>
+            <path d="M14 18H24L22 24H16L14 18Z" stroke="#0284C7" stroke-width="2"/>
+            <text x="48" y="24" class="font-sans text-slate-500" font-size="12" font-weight="600">TRANSAKSI KASIR POS</text>
+            
+            <text x="0" y="75" class="font-display text-slate-900" font-size="24">Rp 4.850.000</text>
+            <text x="0" y="105" class="font-sans text-slate-500" font-size="12">42 Nota Terjual Hari Ini</text>
+            <text x="0" y="128" class="font-sans text-emerald" font-size="11" font-weight="600">● 100% Tercatat Otomatis</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== 4. STATS COUNTER BAR (Y: 820 - 940) ==================== -->
+  <g id="Stats_Counter_Bar" transform="translate(80, 800)">
+    <rect width="1280" height="120" rx="20" fill="#0F172A" filter="url(#btnShadow)"/>
+
+    <g transform="translate(50, 35)">
+      <!-- Metric 1 -->
+      <g>
+        <text x="0" y="26" class="font-display text-white" font-size="34">2,450+</text>
+        <text x="0" y="50" class="font-sans text-slate-400" font-size="13">Member Aktif Terdaftar</text>
+      </g>
+      <line x1="260" y1="5" x2="260" y2="55" stroke="#334155"/>
+
+      <!-- Metric 2 -->
+      <g transform="translate(310, 0)">
+        <text x="0" y="26" class="font-display text-lime-bright" font-size="34">0.4s</text>
+        <text x="0" y="50" class="font-sans text-slate-400" font-size="13">Respon RFID Contactless</text>
+      </g>
+      <line x1="570" y1="5" x2="570" y2="55" stroke="#334155"/>
+
+      <!-- Metric 3 -->
+      <g transform="translate(620, 0)">
+        <text x="0" y="26" class="font-display text-white" font-size="34">50+</text>
+        <text x="0" y="50" class="font-sans text-slate-400" font-size="13">Alat Fitness Import USA</text>
+      </g>
+      <line x1="880" y1="5" x2="880" y2="55" stroke="#334155"/>
+
+      <!-- Metric 4 -->
+      <g transform="translate(930, 0)">
+        <text x="0" y="26" class="font-display text-white" font-size="34">100%</text>
+        <text x="0" y="50" class="font-sans text-slate-400" font-size="13">Transparan &amp; Bebas Antre</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== 5. MEMBERSHIP PLANS (Y: 980 - 1700) ==================== -->
+  <g id="Pricing_Section" transform="translate(80, 970)">
+    <!-- Header -->
+    <text x="640" y="0" class="font-sans text-lime" font-size="13" font-weight="700" text-anchor="middle">PILIHAN PAKET MEMBERSHIP</text>
+    <text x="640" y="36" class="font-display text-slate-900" font-size="36" text-anchor="middle">Investasi Terbaik untuk Gaya Hidup Sehat</text>
+    <text x="640" y="68" class="font-sans text-slate-600" font-size="16" text-anchor="middle">Pilih durasi paket membership sesuai kebutuhan target latihan Anda.</text>
+
+    <!-- Plan 1: 1 Bulan Starter -->
+    <g transform="translate(0, 110)" filter="url(#cleanShadow)">
+      <rect width="400" height="560" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+      <g transform="translate(35, 40)">
+        <text x="0" y="16" class="font-display text-slate-900" font-size="22">1 Bulan Starter</text>
+        <text x="0" y="38" class="font-sans text-slate-500" font-size="13">Cocok bagi yang ingin mulai adaptasi latihan</text>
+
+        <text x="0" y="90" class="font-display text-slate-900" font-size="36">Rp 150.000</text>
+        <text x="195" y="90" class="font-sans text-slate-500" font-size="14">/ bulan</text>
+
+        <line x1="0" y1="120" x2="330" y2="120" stroke="#E2E8F0"/>
+
+        <!-- Features list -->
+        <g transform="translate(0, 150)" class="font-sans text-slate-600" font-size="14">
+          <g transform="translate(0, 0)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Akses Semua Alat Gym</text>
+          </g>
+          <g transform="translate(0, 35)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Kartu Fisik RFID Standard</text>
+          </g>
+          <g transform="translate(0, 70)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Locker &amp; Kamar Mandi</text>
+          </g>
+          <g transform="translate(0, 105)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Portal Member &amp; Streak Absensi</text>
+          </g>
+        </g>
+
+        <!-- CTA Button -->
+        <rect x="0" y="420" width="330" height="48" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+        <text x="165" y="450" class="font-sans text-slate-800" font-size="14" font-weight="600" text-anchor="middle">Pilih Paket Starter</text>
+      </g>
+    </g>
+
+    <!-- Plan 2: 3 Bulan Pro Gym (POPULAR HIGHLIGHT) -->
+    <g transform="translate(440, 85)" filter="url(#cleanShadow)">
+      <rect width="400" height="610" rx="20" fill="#FFFFFF" stroke="#84CC16" stroke-width="2"/>
+      
+      <!-- Popular Badge -->
+      <rect x="130" y="-14" width="140" height="28" rx="14" fill="#84CC16"/>
+      <text x="200" y="5" class="font-sans" fill="#0F172A" font-size="12" font-weight="800" text-anchor="middle">★ PALING POPULER</text>
+
+      <g transform="translate(35, 50)">
+        <text x="0" y="16" class="font-display text-slate-900" font-size="24">3 Bulan Pro Gym</text>
+        <text x="0" y="38" class="font-sans text-lime" font-size="13" font-weight="600">Hemat Rp 50.000 + Bebas Biaya Kartu</text>
+
+        <text x="0" y="95" class="font-display text-slate-900" font-size="40">Rp 400.000</text>
+        <text x="220" y="95" class="font-sans text-slate-500" font-size="14">/ 3 bulan</text>
+
+        <line x1="0" y1="125" x2="330" y2="125" stroke="#E2E8F0"/>
+
+        <!-- Features list -->
+        <g transform="translate(0, 155)" class="font-sans text-slate-700" font-size="14">
+          <g transform="translate(0, 0)">
+            <circle cx="8" cy="8" r="8" fill="#84CC16"/>
+            <path d="M5 8L7 10L11 6" stroke="#0F172A" stroke-width="2"/>
+            <text x="26" y="13" class="text-slate-900" font-weight="600">Semua Fasilitas Paket Starter</text>
+          </g>
+          <g transform="translate(0, 35)">
+            <circle cx="8" cy="8" r="8" fill="#84CC16"/>
+            <path d="M5 8L7 10L11 6" stroke="#0F172A" stroke-width="2"/>
+            <text x="26" y="13" class="text-slate-900" font-weight="600">Gratis 1 Sesi Personal Trainer</text>
+          </g>
+          <g transform="translate(0, 70)">
+            <circle cx="8" cy="8" r="8" fill="#84CC16"/>
+            <path d="M5 8L7 10L11 6" stroke="#0F172A" stroke-width="2"/>
+            <text x="26" y="13" class="text-slate-900" font-weight="600">Akses Masuk Kapan Saja 24/7</text>
+          </g>
+          <g transform="translate(0, 105)">
+            <circle cx="8" cy="8" r="8" fill="#84CC16"/>
+            <path d="M5 8L7 10L11 6" stroke="#0F172A" stroke-width="2"/>
+            <text x="26" y="13" class="text-slate-900" font-weight="600">Diskon 5% Belanja di Kasir POS</text>
+          </g>
+          <g transform="translate(0, 140)">
+            <circle cx="8" cy="8" r="8" fill="#84CC16"/>
+            <path d="M5 8L7 10L11 6" stroke="#0F172A" stroke-width="2"/>
+            <text x="26" y="13" class="text-slate-900" font-weight="600">Perpanjangan Online Mandiri (QRIS)</text>
+          </g>
+        </g>
+
+        <!-- CTA Button -->
+        <rect x="0" y="465" width="330" height="52" rx="12" fill="#0F172A" filter="url(#btnShadow)"/>
+        <text x="165" y="497" class="font-display text-white" font-size="15" font-weight="700" text-anchor="middle">Pilih Paket Pro Sekarang →</text>
+      </g>
+    </g>
+
+    <!-- Plan 3: 12 Bulan VIP Platinum -->
+    <g transform="translate(880, 110)" filter="url(#cleanShadow)">
+      <rect width="400" height="560" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5"/>
+      <g transform="translate(35, 40)">
+        <text x="0" y="16" class="font-display text-slate-900" font-size="22">12 Bulan VIP Platinum</text>
+        <text x="0" y="38" class="font-sans text-slate-500" font-size="13">Nilai terbaik untuk transformasi 1 tahun penuh</text>
+
+        <text x="0" y="90" class="font-display text-slate-900" font-size="36">Rp 1.400.000</text>
+        <text x="245" y="90" class="font-sans text-slate-500" font-size="14">/ tahun</text>
+
+        <line x1="0" y1="120" x2="330" y2="120" stroke="#E2E8F0"/>
+
+        <!-- Features list -->
+        <g transform="translate(0, 150)" class="font-sans text-slate-600" font-size="14">
+          <g transform="translate(0, 0)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Semua Akses Fasilitas Gym VIP</text>
+          </g>
+          <g transform="translate(0, 35)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Gratis 5 Sesi Personal Trainer</text>
+          </g>
+          <g transform="translate(0, 70)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Gratis Shaker Bottle GymPulse</text>
+          </g>
+          <g transform="translate(0, 105)">
+            <circle cx="8" cy="8" r="8" fill="#ECFCCB"/>
+            <path d="M5 8L7 10L11 6" stroke="#65A30D" stroke-width="1.8"/>
+            <text x="26" y="13">Diskon 10% Semua Produk Kasir POS</text>
+          </g>
+        </g>
+
+        <!-- CTA Button -->
+        <rect x="0" y="420" width="330" height="48" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+        <text x="165" y="450" class="font-sans text-slate-800" font-size="14" font-weight="600" text-anchor="middle">Pilih Paket VIP Platinum</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== 6. GYM STORE & POS SHOWCASE (Y: 1730 - 2250) ==================== -->
+  <g id="Store_Section" transform="translate(80, 1750)">
+    <text x="640" y="0" class="font-sans text-lime" font-size="13" font-weight="700" text-anchor="middle">GYMPULSE STORE &amp; KASIR POS</text>
+    <text x="640" y="36" class="font-display text-slate-900" font-size="34" text-anchor="middle">Suplemen &amp; Minuman Kebugaran Tersedia di Tempat</text>
+    <text x="640" y="68" class="font-sans text-slate-600" font-size="15" text-anchor="middle">Transaksi cepat di kasir front desk dengan struk thermal siap cetak.</text>
+
+    <!-- Product Cards 4 Columns with Real Product Photography -->
+    <g transform="translate(0, 110)">
+      <!-- Prod 1: Whey Protein -->
+      <g transform="translate(0, 0)" filter="url(#cleanShadow)">
+        <rect width="295" height="360" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+        <!-- Product Photo Container -->
+        <g transform="translate(20, 20)">
+          <rect width="255" height="160" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+          <image href="../assets/products/whey_protein.jpg" x="25" y="5" width="205" height="150" preserveAspectRatio="xMidYMid contain"/>
+        </g>
+        <g transform="translate(20, 200)">
+          <text x="0" y="14" class="font-display text-slate-900" font-size="16">Gold Standard Whey</text>
+          <text x="0" y="34" class="font-sans text-slate-500" font-size="12">⚡ Suplemen • Stok: 18 pcs</text>
+          <text x="0" y="68" class="font-display text-slate-900" font-size="20">Rp 750.000</text>
+          <rect x="0" y="85" width="255" height="38" rx="8" fill="#0F172A"/>
+          <text x="127" y="109" class="font-sans text-white" font-size="13" font-weight="600" text-anchor="middle">Beli di Kasir POS</text>
+        </g>
+      </g>
+
+      <!-- Prod 2: Creatine -->
+      <g transform="translate(325, 0)" filter="url(#cleanShadow)">
+        <rect width="295" height="360" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+        <g transform="translate(20, 20)">
+          <rect width="255" height="160" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+          <image href="../assets/products/creatine.jpg" x="25" y="5" width="205" height="150" preserveAspectRatio="xMidYMid contain"/>
+        </g>
+        <g transform="translate(20, 200)">
+          <text x="0" y="14" class="font-display text-slate-900" font-size="16">MuscleTech Creatine</text>
+          <text x="0" y="34" class="font-sans text-slate-500" font-size="12">⚡ Suplemen • Stok: 24 pcs</text>
+          <text x="0" y="68" class="font-display text-slate-900" font-size="20">Rp 380.000</text>
+          <rect x="0" y="85" width="255" height="38" rx="8" fill="#0F172A"/>
+          <text x="127" y="109" class="font-sans text-white" font-size="13" font-weight="600" text-anchor="middle">Beli di Kasir POS</text>
+        </g>
+      </g>
+
+      <!-- Prod 3: C4 Energy Drink -->
+      <g transform="translate(650, 0)" filter="url(#cleanShadow)">
+        <rect width="295" height="360" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+        <g transform="translate(20, 20)">
+          <rect width="255" height="160" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+          <image href="../assets/products/c4_energy.jpg" x="25" y="5" width="205" height="150" preserveAspectRatio="xMidYMid contain"/>
+        </g>
+        <g transform="translate(20, 200)">
+          <text x="0" y="14" class="font-display text-slate-900" font-size="16">C4 Energy Drink Can</text>
+          <text x="0" y="34" class="font-sans text-slate-500" font-size="12">🥤 Minuman • Dingin Siap Minum</text>
+          <text x="0" y="68" class="font-display text-slate-900" font-size="20">Rp 45.000</text>
+          <rect x="0" y="85" width="255" height="38" rx="8" fill="#0F172A"/>
+          <text x="127" y="109" class="font-sans text-white" font-size="13" font-weight="600" text-anchor="middle">Beli di Kasir POS</text>
+        </g>
+      </g>
+
+      <!-- Prod 4: Shaker Bottle -->
+      <g transform="translate(975, 0)" filter="url(#cleanShadow)">
+        <rect width="295" height="360" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+        <g transform="translate(20, 20)">
+          <rect width="255" height="160" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+          <image href="../assets/products/shaker.jpg" x="25" y="5" width="205" height="150" preserveAspectRatio="xMidYMid contain"/>
+        </g>
+        <g transform="translate(20, 200)">
+          <text x="0" y="14" class="font-display text-slate-900" font-size="16">GymPulse Pro Shaker</text>
+          <text x="0" y="34" class="font-sans text-slate-500" font-size="12">🎽 Aksesoris • BPA Free</text>
+          <text x="0" y="68" class="font-display text-slate-900" font-size="20">Rp 85.000</text>
+          <rect x="0" y="85" width="255" height="38" rx="8" fill="#0F172A"/>
+          <text x="127" y="109" class="font-sans text-white" font-size="13" font-weight="600" text-anchor="middle">Beli di Kasir POS</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== 7. FOOTER (Y: 2850 - 3200) ==================== -->
+  <g id="Footer" transform="translate(0, 2850)">
+    <rect width="1440" height="350" fill="#0F172A"/>
+    <line x1="0" y1="0" x2="1440" y2="0" stroke="#1E293B" stroke-width="1"/>
+
+    <g transform="translate(80, 60)">
+      <!-- Brand & Description -->
+      <g>
+        <div class="flex items-center gap-2">
+          <rect width="36" height="36" rx="8" fill="#84CC16"/>
+          <text x="18" y="25" class="font-display text-slate-900" font-size="20" text-anchor="middle">G</text>
+          <text x="48" y="25" class="font-display text-white" font-size="22">GymPulse<tspan fill="#84CC16">.</tspan></text>
+        </div>
+        <text x="0" y="65" class="font-sans text-slate-400" font-size="14" line-height="24">
+          <tspan x="0" dy="0">Pusat kebugaran modern berfasilitas lengkap dengan akses instan</tspan>
+          <tspan x="0" dy="24">teknologi Smart RFID Tap-In dan sistem kasir POS terintegrasi.</tspan>
+        </text>
+        <text x="0" y="130" class="font-sans text-slate-500" font-size="13">© 2026 GymPulse. All rights reserved.</text>
+      </g>
+
+      <!-- Links 1 -->
+      <g transform="translate(520, 0)" class="font-sans" font-size="14">
+        <text x="0" y="20" class="font-display text-white" font-size="14">NAVIGASI UTAMA</text>
+        <text x="0" y="55" class="text-slate-400">Tentang GymPulse</text>
+        <text x="0" y="85" class="text-slate-400">Fasilitas &amp; Alat</text>
+        <text x="0" y="115" class="text-slate-400">Paket Membership</text>
+        <text x="0" y="145" class="text-slate-400">Kalkulator BMI</text>
+      </g>
+
+      <!-- Links 2 -->
+      <g transform="translate(760, 0)" class="font-sans" font-size="14">
+        <text x="0" y="20" class="font-display text-white" font-size="14">SISTEM &amp; FITUR</text>
+        <text x="0" y="55" class="text-slate-400">Portal Member Mandiri</text>
+        <text x="0" y="85" class="text-slate-400">Kasir POS Gym Store</text>
+        <text x="0" y="115" class="text-slate-400">Hardware Reader RFID</text>
+        <text x="0" y="145" class="text-slate-400">Notifikasi WhatsApp</text>
+      </g>
+
+      <!-- Links 3 -->
+      <g transform="translate(1000, 0)" class="font-sans" font-size="14">
+        <text x="0" y="20" class="font-display text-white" font-size="14">KONTAK &amp; LOKASI</text>
+        <text x="0" y="55" class="text-slate-400">WhatsApp: +62 812-3456-7890</text>
+        <text x="0" y="85" class="text-slate-400">admin@gympulse.test</text>
+        <text x="0" y="115" class="text-slate-400">Jakarta Selatan, DKI Jakarta</text>
+        <text x="0" y="145" class="text-lime-bright" font-weight="600">Jam: 06:00 - 22:00 WIB</text>
+      </g>
+    </g>
+  </g>
+</svg>

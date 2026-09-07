@@ -78,6 +78,45 @@ class RfidScanController extends Controller
             ], 403);
         }
 
+        // Cari sesi presensi terbuka untuk member ini pada hari ini
+        $openAttendance = Attendance::where('member_id', $member->id)
+            ->where('rfid_card_id', $card->id)
+            ->where('method', 'rfid')
+            ->whereDate('check_in_at', today())
+            ->whereNull('check_out_at')
+            ->latest('id')
+            ->first();
+
+        if ($openAttendance) {
+            // Proteksi double-tap kartu (jika tap kedua terjadi dalam jeda < 3 detik)
+            if ($openAttendance->check_in_at && $openAttendance->check_in_at->diffInSeconds(now()) < 3) {
+                return response()->json([
+                    'status' => 'success',
+                    'action' => 'checkin_duplicate_ignored',
+                    'message' => 'Kartu baru saja di-tap (Check-in aktif). Mohon tunggu beberapa detik sebelum Check-out.',
+                    'member_name' => $member->user->name,
+                    'member_code' => $member->member_code,
+                    'check_in_at' => $openAttendance->check_in_at->format('H:i:s'),
+                ]);
+            }
+
+            $openAttendance->update([
+                'check_out_at' => now(),
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'action' => 'checkout',
+                'message' => 'Check-out berhasil',
+                'member_name' => $member->user->name,
+                'member_code' => $member->member_code,
+                'check_in_at' => $openAttendance->check_in_at->format('H:i:s'),
+                'check_out_at' => $openAttendance->check_out_at ? $openAttendance->check_out_at->format('H:i:s') : now()->format('H:i:s'),
+                'expire_date' => optional($member->expire_date)->format('Y-m-d'),
+                'days_remaining' => $member->daysRemaining(),
+            ]);
+        }
+
         $attendance = Attendance::create([
             'member_id' => $member->id,
             'rfid_card_id' => $card->id,
@@ -94,6 +133,7 @@ class RfidScanController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'action' => 'checkin',
             'message' => 'Check-in berhasil',
             'member_name' => $member->user->name,
             'member_code' => $member->member_code,

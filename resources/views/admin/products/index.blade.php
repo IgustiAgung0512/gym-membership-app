@@ -151,8 +151,12 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">
-                                        {{ $p->category_icon }}
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0 overflow-hidden border border-slate-200">
+                                        @if ($p->image)
+                                            <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                        @else
+                                            {{ $p->category_icon }}
+                                        @endif
                                     </div>
                                     <div>
                                         <p class="font-bold text-slate-900 text-sm">{{ $p->name }}</p>

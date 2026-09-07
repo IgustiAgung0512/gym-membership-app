@@ -121,37 +121,38 @@
 <body class="font-sans text-slate-800 bg-[#F8FAFC] antialiased pb-24 lg:pb-12">
 
 {{-- MEMBER HEADER BAR --}}
-<header class="print:hidden no-print sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="max-w-4xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
+<header class="print:hidden no-print sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-3.5 sm:px-6 h-14 sm:h-16">
         
-        <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-slate-900 text-lime-400 flex items-center justify-center font-display font-extrabold text-base">
+        <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 text-lime-400 flex items-center justify-center font-display font-extrabold text-sm sm:text-base">
                 G
             </div>
-            <span class="font-display font-bold text-lg text-slate-900 tracking-tight">
+            <span class="font-display font-bold text-base sm:text-lg text-slate-900 tracking-tight">
                 GymPulse<span class="text-lime-600">.</span>
             </span>
-            <span class="hidden sm:inline text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-lime-100 text-lime-800 ml-1">
+            <span class="hidden md:inline text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-lime-100 text-lime-800 ml-1">
                 Portal Member
             </span>
         </a>
 
-        <div class="flex items-center gap-2 sm:gap-3">
-            <a href="{{ route('member.dashboard') }}" class="text-xs px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.dashboard') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+            <a href="{{ route('member.dashboard') }}" class="text-xs px-2.5 sm:px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.dashboard') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium">
                 Dashboard
             </a>
 
-            <a href="{{ route('member.store.index') }}" class="text-xs px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.store.*') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium inline-flex items-center gap-1.5">
-                <span>🛒 Gym Store</span>
+            <a href="{{ route('member.store.index') }}" class="text-xs px-2.5 sm:px-3 py-1.5 rounded-lg border {{ request()->routeIs('member.store.*') ? 'bg-slate-900 text-white font-bold border-slate-900 shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900' }} transition font-medium inline-flex items-center gap-1">
+                <span>🛒</span>
+                <span>Toko</span>
             </a>
 
-            <a href="{{ route('member.password.edit') }}" class="text-xs px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 transition font-medium hidden sm:inline-flex">
+            <a href="{{ route('member.password.edit') }}" class="text-xs px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 transition font-medium hidden sm:inline-flex">
                 Ganti Password
             </a>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button class="text-xs px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition font-medium">
+                <button class="text-xs px-2.5 sm:px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition font-medium">
                     Keluar
                 </button>
             </form>
@@ -161,7 +162,7 @@
 </header>
 
 {{-- MAIN CONTENT --}}
-<main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+<main class="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6">
     @yield('content')
 </main>
 

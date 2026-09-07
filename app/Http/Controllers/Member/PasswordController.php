@@ -20,7 +20,7 @@ class PasswordController extends Controller
         $user = $request->user();
 
         $rules = [
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
 
         // Kalau ini bukan pemaksaan ganti password pertama kali, wajib masukkan password lama dulu.
@@ -28,7 +28,14 @@ class PasswordController extends Controller
             $rules['current_password'] = ['required', 'string'];
         }
 
-        $data = $request->validate($rules);
+        $messages = [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password baru minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'current_password.required' => 'Password saat ini wajib diisi.',
+        ];
+
+        $data = $request->validate($rules, $messages);
 
         if (! $user->must_change_password && ! Hash::check($data['current_password'], $user->password)) {
             return back()->withErrors(['current_password' => 'Password lama yang kamu masukkan salah.']);
@@ -39,6 +46,8 @@ class PasswordController extends Controller
             'must_change_password' => false,
         ]);
 
-        return redirect()->route('member.dashboard')->with('success', 'Password berhasil diganti.');
+        $request->session()->regenerate();
+
+        return redirect()->route('member.dashboard')->with('success', 'Password berhasil diperbarui dengan aman.');
     }
 }
