@@ -1,5 +1,10 @@
 <?php
 
+// Tampilkan error jika ada masalah saat booting
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 // Pastikan semua direktori temporary yang dibutuhkan Laravel di /tmp sudah dibuat
 $storageDirs = [
     '/tmp/storage',
@@ -25,7 +30,11 @@ putenv('VERCEL=1');
 $_ENV['VERCEL'] = '1';
 $_SERVER['VERCEL'] = '1';
 
-// Arahkan log ke stderr Vercel agar tidak mencoba menulis ke file lokal yang read-only
+putenv('APP_DEBUG=true');
+$_ENV['APP_DEBUG'] = 'true';
+$_SERVER['APP_DEBUG'] = 'true';
+
+// Arahkan log ke stderr Vercel
 putenv('LOG_CHANNEL=stderr');
 $_ENV['LOG_CHANNEL'] = 'stderr';
 $_SERVER['LOG_CHANNEL'] = 'stderr';
@@ -38,5 +47,15 @@ putenv('APP_PACKAGES_CACHE=/tmp/bootstrap/cache/packages.php');
 putenv('APP_ROUTES_CACHE=/tmp/bootstrap/cache/routes.php');
 putenv('APP_EVENTS_CACHE=/tmp/bootstrap/cache/events.php');
 
-// Forward request ke public/index.php Laravel
-require __DIR__ . '/../public/index.php';
+// Forward request ke public/index.php Laravel dengan try-catch agar error detail langsung terlihat
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    http_response_code(500);
+    echo '<div style="font-family: monospace; padding: 20px; background: #fff5f5; color: #9b1c1c; border: 1px solid #f87171; border-radius: 8px; margin: 20px;">';
+    echo '<h2 style="margin-top:0;">⚠️ Laravel Error pada Vercel</h2>';
+    echo '<p><strong>Message:</strong> ' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '<p><strong>File:</strong> ' . htmlspecialchars($e->getFile()) . ' (baris ' . $e->getLine() . ')</p>';
+    echo '<pre style="background: #fee2e2; padding: 10px; overflow-x: auto; border-radius: 4px;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+    echo '</div>';
+}
