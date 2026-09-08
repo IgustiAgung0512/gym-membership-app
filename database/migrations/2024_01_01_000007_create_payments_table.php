@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('membership_package_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 12, 2);
             $table->date('payment_date');
-            $table->enum('status', ['paid', 'pending'])->default('paid');
+            $table->enum('status', ['paid', 'pending', 'cancelled'])->default('paid');
             $table->timestamps();
         });
     }

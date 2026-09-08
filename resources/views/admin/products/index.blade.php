@@ -152,8 +152,8 @@
                             <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0 overflow-hidden border border-slate-200">
-                                        @if ($p->image)
-                                            <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                        @if ($p->image_url)
+                                            <img src="{{ $p->image_url }}" alt="{{ $p->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'">
                                         @else
                                             {{ $p->category_icon }}
                                         @endif
@@ -257,6 +257,31 @@
                     <input type="text" name="name" required placeholder="Contoh: Whey Protein Isolate (1 Scoop)" class="w-full py-2 px-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-lime-500/20">
                 </div>
 
+                {{-- UPLOAD FOTO PRODUK --}}
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Foto / Gambar Produk</label>
+                    <div x-data="{ preview: null }" class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div class="w-14 h-14 rounded-xl bg-white border border-slate-300 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                            <template x-if="preview">
+                                <img :src="preview" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!preview">
+                                <span class="text-xl">📷</span>
+                            </template>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <input 
+                                type="file" 
+                                name="image" 
+                                accept="image/png,image/jpeg,image/webp" 
+                                @change="const file = $event.target.files[0]; if (file) { preview = URL.createObjectURL(file) } else { preview = null }"
+                                class="block w-full text-xs text-slate-500 file:mr-2.5 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer"
+                            >
+                            <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, atau WEBP (Maks. 2MB). Rekomendasi rasio 1:1.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Kategori <span class="text-rose-500">*</span></label>
@@ -335,6 +360,34 @@
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Nama Produk <span class="text-rose-500">*</span></label>
                     <input type="text" name="name" x-model="selectedProduct.name" required class="w-full py-2 px-3 rounded-xl border border-slate-200 focus:outline-none">
+                </div>
+
+                {{-- UPLOAD / GANTI FOTO PRODUK --}}
+                <div x-data="{ newPreview: null }">
+                    <label class="block font-bold text-slate-700 mb-1">Foto / Gambar Produk</label>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+                        <div class="w-14 h-14 rounded-xl bg-white border border-slate-300 flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                            <template x-if="newPreview">
+                                <img :src="newPreview" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!newPreview && selectedProduct.image_url">
+                                <img :src="selectedProduct.image_url" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!newPreview && !selectedProduct.image_url">
+                                <span class="text-xl">📷</span>
+                            </template>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <input 
+                                type="file" 
+                                name="image" 
+                                accept="image/png,image/jpeg,image/webp" 
+                                @change="const file = $event.target.files[0]; if (file) { newPreview = URL.createObjectURL(file) } else { newPreview = null }"
+                                class="block w-full text-xs text-slate-500 file:mr-2.5 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer"
+                            >
+                            <p class="text-[10px] text-slate-400 mt-1">Pilih gambar baru untuk mengganti foto produk saat ini (Maks. 2MB).</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">

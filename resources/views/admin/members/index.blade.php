@@ -26,7 +26,8 @@
             <div class="flex items-start justify-between gap-2">
                 <div class="flex items-center gap-3 min-w-0">
                     @if ($m->photo)
-                        <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-10 h-10 rounded-full object-cover shrink-0">
+                        <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-10 h-10 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-10 h-10 rounded-full bg-lime-100 text-lime-800 hidden items-center justify-center font-bold shrink-0">{{ substr($m->user->name,0,1) }}</div>
                     @else
                         <div class="w-10 h-10 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold shrink-0">{{ substr($m->user->name,0,1) }}</div>
                     @endif
@@ -72,7 +73,8 @@
                 <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
                         @if ($m->photo)
-                            <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0">
+                            <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 hidden items-center justify-center font-bold text-sm shrink-0">{{ substr($m->user->name,0,1) }}</div>
                         @else
                             <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">{{ substr($m->user->name,0,1) }}</div>
                         @endif

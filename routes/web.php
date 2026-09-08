@@ -124,6 +124,7 @@ Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cash
     Route::get('/members', [CashierMemberController::class, 'index'])->name('members.index');
     Route::get('/members/create', [CashierMemberController::class, 'create'])->name('members.create');
     Route::post('/members', [CashierMemberController::class, 'store'])->name('members.store');
+    Route::get('/members/{member}/photo', [CashierMemberController::class, 'photo'])->name('members.photo');
     Route::post('/members/{member}/renew', [CashierMemberController::class, 'renew'])->name('members.renew');
 
     Route::get('/attendance', [CashierAttendanceController::class, 'index'])->name('attendance.index');
@@ -133,6 +134,10 @@ Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cash
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
     Route::post('/renew', [MemberDashboardController::class, 'renew'])->name('renew');
+    Route::post('/renew/initiate', [MemberDashboardController::class, 'initiateRenewal'])->name('renew.initiate')->middleware('throttle:checkout');
+    Route::get('/renew/{payment}/status', [MemberDashboardController::class, 'renewalStatus'])->name('renew.status');
+    Route::post('/renew/{payment}/simulate', [MemberDashboardController::class, 'simulateRenewal'])->name('renew.simulate');
+    Route::post('/renew/{payment}/cancel', [MemberDashboardController::class, 'cancelRenewal'])->name('renew.cancel');
     Route::get('/store', [MemberStoreController::class, 'index'])->name('store.index');
     Route::post('/store/checkout', [MemberStoreController::class, 'checkout'])->name('store.checkout')->middleware('throttle:checkout');
     Route::get('/store/orders/{order}/status', [MemberStoreController::class, 'orderStatus'])->name('store.order-status');

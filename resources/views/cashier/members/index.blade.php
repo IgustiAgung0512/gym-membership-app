@@ -66,11 +66,16 @@
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-700 shrink-0">
+                                    <div class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-700 shrink-0 relative">
                                         @if ($m->photo)
-                                            <img src="{{ asset('storage/' . $m->photo) }}" class="w-full h-full object-cover">
+                                            <img src="{{ route('cashier.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <span class="hidden items-center justify-center w-full h-full text-slate-700 font-bold text-sm bg-lime-100 text-lime-800">
+                                                {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                                            </span>
                                         @else
-                                            {{ substr($m->user->name, 0, 1) }}
+                                            <span class="flex items-center justify-center w-full h-full bg-slate-100 text-slate-700 font-bold text-sm">
+                                                {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                                            </span>
                                         @endif
                                     </div>
                                     <div>

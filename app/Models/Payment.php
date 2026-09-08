@@ -9,7 +9,17 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['member_id', 'membership_package_id', 'amount', 'payment_date', 'status'];
+    protected $fillable = [
+        'invoice_number',
+        'member_id',
+        'membership_package_id',
+        'amount',
+        'payment_method',
+        'type',
+        'payment_date',
+        'status',
+        'notes',
+    ];
 
     protected function casts(): array
     {

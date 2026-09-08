@@ -165,4 +165,17 @@ class MemberController extends Controller
         return redirect()->route('cashier.members.index')
             ->with('success', "Perpanjangan member {$member->user->name} berhasil diproses.");
     }
+
+    /**
+     * Tampilkan foto member (untuk kasir) langsung dari storage,
+     * tanpa bergantung pada symlink public/storage.
+     */
+    public function photo(Member $member)
+    {
+        if (! $member->photo || ! Storage::disk('public')->exists($member->photo)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($member->photo);
+    }
 }

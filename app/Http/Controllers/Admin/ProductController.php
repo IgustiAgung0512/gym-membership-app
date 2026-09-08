@@ -73,6 +73,13 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
             $validated['image'] = $path;
+
+            try {
+                $publicTargetDir = public_path('storage/products');
+                if (!is_link(public_path('storage')) && is_dir($publicTargetDir)) {
+                    @copy(Storage::disk('public')->path($path), public_path('storage/' . $path));
+                }
+            } catch (\Throwable $e) {}
         }
 
         Product::create($validated);
@@ -104,9 +111,17 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
+                @unlink(public_path('storage/' . $product->image));
             }
             $path = $request->file('image')->store('products', 'public');
             $validated['image'] = $path;
+
+            try {
+                $publicTargetDir = public_path('storage/products');
+                if (!is_link(public_path('storage')) && is_dir($publicTargetDir)) {
+                    @copy(Storage::disk('public')->path($path), public_path('storage/' . $path));
+                }
+            } catch (\Throwable $e) {}
         }
 
         $product->update($validated);
@@ -130,6 +145,7 @@ class ProductController extends Controller
     {
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
+            @unlink(public_path('storage/' . $product->image));
         }
 
         $product->delete();

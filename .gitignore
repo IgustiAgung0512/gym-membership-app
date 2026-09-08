@@ -1,7 +1,14 @@
 /vendor
 /node_modules
 .env
+.env.backup
+.phpunit.result.cache
 /storage/*.key
+/storage/logs/*.log
+/storage/framework/cache/data/*
+/storage/framework/views/*
+/storage/framework/sessions/*
 /public/hot
 /public/storage
-/public/build
+.DS_Store
+Thumbs.db

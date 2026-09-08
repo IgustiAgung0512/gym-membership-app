@@ -40,13 +40,18 @@ class PaymentWebhookController extends Controller
             ], 400);
         }
 
-        // 1. Cari Order di Database
+        // 1. Cari Order atau Renewal Payment di Database
         $order = Order::where('invoice_number', $orderId)->first();
         if (!$order) {
-            Log::warning("Payment Webhook order not found: {$orderId}");
+            $payment = \App\Models\Payment::with(['member.user', 'package'])->where('invoice_number', $orderId)->first();
+            if ($payment) {
+                return $this->handleRenewalPayment($payment, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, $request);
+            }
+
+            Log::warning("Payment Webhook record not found: {$orderId}");
             return response()->json([
                 'success' => false,
-                'message' => 'Order not found',
+                'message' => 'Order or Payment record not found',
             ], 404);
         }
 
@@ -170,6 +175,107 @@ class PaymentWebhookController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Payment status received: ' . $transactionStatus,
+            ]);
+        });
+    }
+
+    /**
+     * Handle Official Webhook Notification for Membership Renewal Payments
+     */
+    protected function handleRenewalPayment($payment, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, Request $request)
+    {
+        $serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
+
+        // 1. Verifikasi Tanda Tangan Kriptografis
+        if (!empty($serverKey) && !empty($receivedSignature)) {
+            $isValidSignature = QrisService::verifyMidtransNotification(
+                $orderId,
+                $statusCode,
+                $grossAmount,
+                $receivedSignature,
+                $serverKey
+            );
+
+            if (!$isValidSignature) {
+                Log::critical("SECURITY ALERT: Invalid Midtrans Signature on Renewal {$orderId}!");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Security Error: Invalid cryptographic signature',
+                ], 403);
+            }
+        }
+
+        // 2. Validasi Nominal
+        if ($grossAmount !== '0' && (int) round((float) $grossAmount) !== (int) $payment->amount) {
+            Log::critical("SECURITY ALERT: Amount mismatch on Renewal {$orderId}! DB: {$payment->amount}, Paid: {$grossAmount}");
+            return response()->json([
+                'success' => false,
+                'message' => 'Security Error: Gross amount mismatch with renewal total',
+            ], 422);
+        }
+
+        // 3. State Machine & Idempotent Renewal Updating
+        return DB::transaction(function () use ($payment, $transactionStatus, $fraudStatus) {
+            if ($payment->status === 'paid') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Renewal payment was already marked as paid (Idempotent OK)',
+                ]);
+            }
+
+            // Pembayaran Berhasil
+            if (in_array($transactionStatus, ['settlement', 'paid', 'success']) ||
+                ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
+
+                $payment->update([
+                    'status' => 'paid',
+                    'payment_date' => now(),
+                ]);
+
+                $member = $payment->member;
+                if ($member && $payment->package) {
+                    $currentExpire = $member->expire_date && $member->expire_date->isFuture()
+                        ? $member->expire_date
+                        : now();
+                    $newExpire = (clone $currentExpire)->addMonths($payment->package->duration_months);
+
+                    $member->update([
+                        'membership_package_id' => $payment->package->id,
+                        'expire_date' => $newExpire,
+                        'status' => 'active',
+                    ]);
+
+                    try {
+                        app(\App\Services\WhatsAppService::class)->sendRenewalSuccess($member->fresh(['package', 'user']));
+                    } catch (\Throwable $e) {
+                        Log::warning("Failed sending renewal WhatsApp from Webhook: " . $e->getMessage());
+                    }
+                }
+
+                Log::info("Renewal {$payment->invoice_number} successfully SETTLED and membership extended.");
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Renewal payment successfully verified and membership extended',
+                ]);
+            }
+
+            // Pembayaran Dibatalkan / Kedaluwarsa
+            if (in_array($transactionStatus, ['cancel', 'deny', 'expire', 'cancelled'])) {
+                $payment->update([
+                    'status' => 'cancelled',
+                    'notes' => ($payment->notes ? $payment->notes . ' | ' : '') . "Dibatalkan oleh Gateway (status: {$transactionStatus})",
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Renewal marked as cancelled ({$transactionStatus})",
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Renewal payment status received: ' . $transactionStatus,
             ]);
         });
     }

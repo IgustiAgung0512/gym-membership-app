@@ -35,14 +35,14 @@
 
             <div class="space-y-1">
                 <label class="block text-xs font-semibold text-slate-700">Password Baru</label>
-                <input type="password" name="password" required minlength="6"
+                <input type="password" name="password" required minlength="8"
                        class="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-lime-600 focus:ring-2 focus:ring-lime-100">
-                <p class="text-[11px] text-slate-400">Minimal 6 karakter.</p>
+                <p class="text-[11px] text-slate-400">Minimal 8 karakter.</p>
             </div>
 
             <div class="space-y-1">
                 <label class="block text-xs font-semibold text-slate-700">Konfirmasi Password Baru</label>
-                <input type="password" name="password_confirmation" required minlength="6"
+                <input type="password" name="password_confirmation" required minlength="8"
                        class="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-lime-600 focus:ring-2 focus:ring-lime-100">
             </div>
 

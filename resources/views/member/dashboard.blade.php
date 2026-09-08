@@ -59,16 +59,211 @@
 <div x-data="{ 
     invoiceModal: false, 
     renewModal: false,
+    renewStep: 'select', // 'select', 'qris', 'success'
     selectedPackageId: '{{ $packages->first()->id ?? '' }}',
     selectedPackagePrice: {{ $packages->first()->price ?? 150000 }},
     selectedPackageName: '{{ $packages->first()->name ?? '' }}',
+    selectedPackageDuration: {{ $packages->first()->duration_months ?? 1 }},
     onlinePaymentMethod: 'qris',
     packagesList: {{ Js::from($packages) }},
-    setPackage(id, price, name) {
+    copiedBank: null,
+
+    // Renewal QRIS & Checkout state
+    loadingRenewal: false,
+    renewErrorMessage: '',
+    renewPayment: null,
+    renewQrisData: null,
+    renewNewExpirePreview: '',
+    renewTimer: 300,
+    renewTimerInterval: null,
+    renewPollingInterval: null,
+    renewSimulating: false,
+    renewSuccessData: null,
+
+    setPackage(id, price, name, duration = 1) {
         this.selectedPackageId = id;
         this.selectedPackagePrice = price;
         this.selectedPackageName = name;
+        this.selectedPackageDuration = duration;
     },
+
+    openRenewModal() {
+        this.renewStep = 'select';
+        this.renewErrorMessage = '';
+        this.renewModal = true;
+    },
+
+    get renewFormattedTimer() {
+        const minutes = Math.floor(this.renewTimer / 60);
+        const seconds = this.renewTimer % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    },
+
+    copyBank(accNumber, key) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(accNumber);
+        }
+        this.copiedBank = key;
+        setTimeout(() => { this.copiedBank = null; }, 2000);
+    },
+
+    async submitRenewalCheckout() {
+        if (!this.selectedPackageId) return;
+
+        this.loadingRenewal = true;
+        this.renewErrorMessage = '';
+
+        try {
+            const response = await fetch('{{ route('member.renew.initiate') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    membership_package_id: this.selectedPackageId,
+                    payment_method: this.onlinePaymentMethod,
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                this.renewErrorMessage = data.message || 'Gagal membuat tagihan perpanjangan.';
+                this.loadingRenewal = false;
+                return;
+            }
+
+            this.renewPayment = data.payment;
+            this.renewQrisData = data.qris;
+            this.renewNewExpirePreview = data.new_expire_preview;
+
+            if (this.onlinePaymentMethod === 'qris') {
+                this.startQrisFlow(data);
+            } else {
+                this.handleRenewalSuccess(data);
+            }
+        } catch (err) {
+            this.renewErrorMessage = 'Gagal menghubungi server. Periksa koneksi internet Anda.';
+        } finally {
+            this.loadingRenewal = false;
+        }
+    },
+
+    startQrisFlow(data) {
+        this.renewStep = 'qris';
+        this.renewTimer = 300;
+        this.renewSimulating = false;
+
+        // Timer countdown
+        clearInterval(this.renewTimerInterval);
+        this.renewTimerInterval = setInterval(() => {
+            if (this.renewTimer > 0) {
+                this.renewTimer--;
+            } else {
+                this.cancelRenewalOrder(true);
+            }
+        }, 1000);
+
+        // Status polling
+        clearInterval(this.renewPollingInterval);
+        this.renewPollingInterval = setInterval(() => {
+            this.checkRenewalStatus(data.status_url);
+        }, 2500);
+    },
+
+    async checkRenewalStatus(statusUrl) {
+        if (this.renewStep !== 'qris' || !this.renewModal) return;
+
+        try {
+            const res = await fetch(statusUrl, {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.success && data.is_paid) {
+                this.handleRenewalSuccess(data);
+            }
+        } catch (e) {}
+    },
+
+    async simulateRenewalPayment() {
+        if (!this.renewPayment || this.renewSimulating) return;
+
+        this.renewSimulating = true;
+
+        try {
+            const res = await fetch('{{ url('/member/renew') }}/' + this.renewPayment.id + '/simulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                }
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                this.handleRenewalSuccess(data);
+            } else {
+                alert(data.message || 'Gagal memproses simulasi');
+            }
+        } catch (err) {
+            alert('Gagal menghubungi server');
+        } finally {
+            this.renewSimulating = false;
+        }
+    },
+
+    async cancelRenewalOrder(isExpired = false) {
+        if (!this.renewPayment) {
+            this.closeRenewalModal();
+            return;
+        }
+
+        if (!isExpired && !confirm('Apakah Anda yakin ingin membatalkan transaksi perpanjangan ini?')) {
+            return;
+        }
+
+        try {
+            await fetch('{{ url('/member/renew') }}/' + this.renewPayment.id + '/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                }
+            });
+        } catch (e) {}
+
+        this.closeRenewalModal();
+        if (isExpired) {
+            alert('Waktu pembayaran QRIS telah habis. Transaksi dibatalkan.');
+        }
+    },
+
+    handleRenewalSuccess(data) {
+        clearInterval(this.renewTimerInterval);
+        clearInterval(this.renewPollingInterval);
+        this.renewSuccessData = data;
+        this.renewStep = 'success';
+    },
+
+    closeRenewalModal() {
+        clearInterval(this.renewTimerInterval);
+        clearInterval(this.renewPollingInterval);
+        this.renewModal = false;
+        this.renewStep = 'select';
+        this.renewPayment = null;
+        this.renewQrisData = null;
+    },
+
+    finishAndReload() {
+        this.closeRenewalModal();
+        window.location.reload();
+    },
+
     classTab: 'today',
     nutritionTab: 'tips',
     nutritionCategory: 'all',
@@ -143,7 +338,7 @@
 
             <button 
                 type="button" 
-                @click="renewModal = true"
+                @click="openRenewModal()"
                 class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-display font-bold shadow-lg hover:shadow-xl transition whitespace-nowrap self-stretch md:self-auto justify-center"
             >
                 <span class="text-lime-400 font-bold">⚡</span>
@@ -261,7 +456,7 @@
                     <span>Bukti Keanggotaan</span>
                 </button>
 
-                <button @click="renewModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
+                <button @click="openRenewModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
                     <span class="text-sm">⚡</span>
                     <span>Perpanjang Online</span>
                 </button>
@@ -328,40 +523,80 @@
 
             </div>
 
-            {{-- RIWAYAT CHECK-IN --}}
+            {{-- RIWAYAT PRESENSI & SESI LATIHAN (CHECK-IN & CHECK-OUT) --}}
             <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="font-display font-bold text-base text-slate-900">Riwayat Check-in</h3>
-                        <p class="text-xs text-slate-500">Aktivitas kehadiran latihan via kartu RFID</p>
+                        <h3 class="font-display font-bold text-base text-slate-900">Riwayat Presensi & Sesi Latihan</h3>
+                        <p class="text-xs text-slate-500">Aktivitas check-in, check-out & durasi latihan via kartu RFID</p>
                     </div>
                     <span class="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-600">
                         Log Absensi
                     </span>
                 </div>
 
-                <div class="space-y-2.5">
+                <div class="space-y-3">
                     @forelse ($attendances as $a)
-                        <div class="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition">
-                            <div class="w-9 h-9 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
+                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl {{ $a->check_out_at ? 'bg-lime-100 text-lime-800' : 'bg-lime-400 text-slate-950 animate-pulse' }} flex items-center justify-center shrink-0">
+                                        @if ($a->check_out_at)
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        @else
+                                            <span class="text-xs font-black">🔥</span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900">{{ $a->check_in_at->translatedFormat('l, d F Y') }}</p>
+                                        <p class="text-xs text-slate-500">
+                                            Akses: <span class="font-medium text-slate-700">{{ $a->method === 'rfid' ? 'Kartu RFID' : 'Manual' }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    @if ($a->check_out_at)
+                                        <span class="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs inline-flex items-center gap-1">
+                                            <span>✓ Selesai</span>
+                                        </span>
+                                    @else
+                                        <span class="text-[11px] font-black text-slate-950 bg-lime-400 px-2.5 py-1 rounded-lg shadow-sm animate-pulse inline-flex items-center gap-1">
+                                            <span>🔥 Sedang Latihan</span>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-slate-900">{{ $a->check_in_at->translatedFormat('l, d F Y') }}</p>
-                                <p class="text-xs text-slate-500 mt-0.5">
-                                    Akses: <span class="font-medium text-slate-700">{{ $a->method === 'rfid' ? 'Kartu RFID' : 'Manual' }}</span>
-                                </p>
+
+                            {{-- Rincian Sesi Check-in, Check-out & Durasi --}}
+                            <div class="pt-2 border-t border-slate-200/60 grid grid-cols-3 gap-2 text-xs">
+                                <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                                    <span class="text-[10px] uppercase font-semibold text-slate-400 block">Jam Masuk</span>
+                                    <span class="font-mono font-bold text-slate-800">{{ $a->check_in_at->format('H:i') }} WIB</span>
+                                </div>
+
+                                <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                                    <span class="text-[10px] uppercase font-semibold text-slate-400 block">Jam Keluar</span>
+                                    @if ($a->check_out_at)
+                                        <span class="font-mono font-bold text-slate-800">{{ $a->check_out_at->format('H:i') }} WIB</span>
+                                    @else
+                                        <span class="font-bold text-lime-700 italic">Belum Tap Out</span>
+                                    @endif
+                                </div>
+
+                                <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                                    <span class="text-[10px] uppercase font-semibold text-slate-400 block">Durasi Sesi</span>
+                                    <span class="font-mono font-extrabold text-lime-700">{{ $a->duration_formatted }}</span>
+                                </div>
                             </div>
-                            <span class="text-xs font-mono font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-md shrink-0">
-                                {{ $a->check_in_at->format('H:i') }} WIB
-                            </span>
                         </div>
                     @empty
                         <div class="text-center py-8 text-slate-400 text-xs">
-                            <p>Belum ada riwayat check-in tercatat.</p>
-                            <p class="mt-1 text-slate-500">Cukup tempelkan kartu RFID Anda di gate scanner saat tiba di gym!</p>
+                            <p class="text-2xl mb-1">🏷️</p>
+                            <p class="font-bold text-slate-700">Belum ada riwayat presensi tercatat.</p>
+                            <p class="mt-1 text-slate-500">Cukup tempelkan kartu RFID Anda di gate scanner saat tiba dan selesai latihan di gym!</p>
                         </div>
                     @endforelse
                 </div>
@@ -1046,36 +1281,48 @@
     </div>
 
     {{-- =========================================================
-        MODAL: PERPANJANGAN MEMBERSHIP ONLINE (QRIS / TRANSFER)
+        MODAL: PERPANJANGAN MEMBERSHIP ONLINE (QRIS DINAMIS / TRANSFER)
     ========================================================= --}}
     <div 
         x-show="renewModal" 
         x-cloak 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm overflow-y-auto"
-        @keydown.escape.window="renewModal = false"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md overflow-y-auto"
+        @keydown.escape.window="if(renewStep !== 'qris') closeRenewalModal()"
     >
         <div 
-            @click.outside="renewModal = false" 
-            class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative my-8 max-h-[90vh] overflow-y-auto"
+            @click.outside="if(renewStep !== 'qris') closeRenewalModal()" 
+            class="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl w-full max-w-lg p-5 sm:p-7 shadow-2xl relative my-6 max-h-[92vh] overflow-y-auto"
         >
-            <button @click="renewModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 text-lg font-bold" title="Tutup">
+            {{-- Close Button (only on non-qris step) --}}
+            <button 
+                x-show="renewStep !== 'qris'" 
+                @click="closeRenewalModal()" 
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 text-lg font-bold" 
+                title="Tutup"
+            >
                 ✕
             </button>
 
-            {{-- Header Modal --}}
-            <div class="pb-4 border-b border-slate-100">
-                <span class="text-[10px] font-extrabold uppercase tracking-widest text-lime-700 bg-lime-100 px-2.5 py-0.5 rounded-md inline-flex items-center gap-1">
-                    <span>⚡</span>
-                    <span>PERPANJANGAN ONLINE OTOMATIS</span>
-                </span>
-                <h3 class="font-display font-extrabold text-xl text-slate-900 mt-1.5">Perpanjang Membership Gym</h3>
-                <p class="text-xs text-slate-500 mt-0.5">
-                    Pilih paket dan selesaikan pembayaran online. Akses RFID gate otomatis aktif seketika!
-                </p>
-            </div>
+            {{-- =========================================================
+                STEP 1: SELEKSI PAKET & METODE PEMBAYARAN
+            ========================================================= --}}
+            <div x-show="renewStep === 'select'" class="space-y-4 sm:space-y-5">
+                {{-- Header Modal --}}
+                <div class="pb-3 sm:pb-4 border-b border-slate-100">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-lime-700 bg-lime-100 px-2.5 py-0.5 rounded-md inline-flex items-center gap-1">
+                        <span>⚡</span>
+                        <span>PERPANJANGAN ONLINE OTOMATIS</span>
+                    </span>
+                    <h3 class="font-display font-extrabold text-xl text-slate-900 mt-1.5">Perpanjang Membership Gym</h3>
+                    <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                        Pilih paket dan selesaikan pembayaran online. Masa aktif bertambah & akses RFID gate langsung aktif seketika!
+                    </p>
+                </div>
 
-            <form method="POST" action="{{ route('member.renew') }}" class="mt-5 space-y-5">
-                @csrf
+                {{-- Error Message Box --}}
+                <template x-if="renewErrorMessage">
+                    <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold" x-text="renewErrorMessage"></div>
+                </template>
 
                 {{-- 1. PILIH PAKET MEMBERSHIP --}}
                 <div>
@@ -1086,8 +1333,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         @foreach ($packages as $pkg)
                             <div 
-                                @click="setPackage({{ $pkg->id }}, {{ $pkg->price }}, '{{ $pkg->name }}')"
-                                :class="selectedPackageId == {{ $pkg->id }} ? 'border-lime-500 bg-lime-50/40 shadow-sm ring-2 ring-lime-500/20' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'"
+                                @click="setPackage({{ $pkg->id }}, {{ $pkg->price }}, '{{ $pkg->name }}', {{ $pkg->duration_months }})"
+                                :class="selectedPackageId == {{ $pkg->id }} ? 'border-lime-500 bg-lime-50/50 shadow-sm ring-2 ring-lime-500/20' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'"
                                 class="border-2 rounded-2xl p-3 cursor-pointer transition flex flex-col justify-between select-none relative"
                             >
                                 <div>
@@ -1103,7 +1350,6 @@
                             </div>
                         @endforeach
                     </div>
-                    <input type="hidden" name="membership_package_id" :value="selectedPackageId">
                 </div>
 
                 {{-- 2. PILIH METODE PEMBAYARAN ONLINE --}}
@@ -1119,7 +1365,7 @@
                             :class="onlinePaymentMethod === 'qris' ? 'border-lime-500 bg-lime-50/50 ring-2 ring-lime-500/20 text-slate-950 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
                             class="border-2 rounded-2xl p-3 text-xs flex items-center gap-2.5 transition text-left"
                         >
-                            <span class="text-2xl">📱</span>
+                            <span class="text-2xl shrink-0">📱</span>
                             <div>
                                 <p class="font-bold">QRIS Dinamis</p>
                                 <p class="text-[10px] text-slate-400 font-normal">GoPay, OVO, Dana, BCA, dll</p>
@@ -1132,44 +1378,34 @@
                             :class="onlinePaymentMethod === 'transfer' ? 'border-lime-500 bg-lime-50/50 ring-2 ring-lime-500/20 text-slate-950 font-bold' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
                             class="border-2 rounded-2xl p-3 text-xs flex items-center gap-2.5 transition text-left"
                         >
-                            <span class="text-2xl">🏦</span>
+                            <span class="text-2xl shrink-0">🏦</span>
                             <div>
                                 <p class="font-bold">Transfer Bank</p>
                                 <p class="text-[10px] text-slate-400 font-normal">BCA & Mandiri GymPulse</p>
                             </div>
                         </button>
                     </div>
-                    <input type="hidden" name="payment_method" :value="onlinePaymentMethod">
                 </div>
 
-                {{-- 3. DETAIL PEMBAYARAN: QRIS / TRANSFER --}}
-                <div x-show="onlinePaymentMethod === 'qris'" class="p-4 rounded-2xl bg-slate-900 text-white space-y-3 text-center">
-                    <div class="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[11px] text-lime-400 font-bold">
-                        <span>QRIS Terverifikasi Otomatis</span>
+                {{-- 3. DETAIL METODE: QRIS / TRANSFER --}}
+                <div x-show="onlinePaymentMethod === 'qris'" class="p-3.5 sm:p-4 rounded-2xl bg-slate-950 text-white space-y-2 text-left">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Paket Terpilih</span>
+                        <span class="font-bold text-white" x-text="selectedPackageName + ' (' + selectedPackageDuration + ' Bulan)'"></span>
                     </div>
-
-                    {{-- QRIS Simulation Box --}}
-                    <div class="w-44 h-44 mx-auto bg-white p-3 rounded-2xl shadow-md flex flex-col items-center justify-center">
-                        <div class="w-full h-full border-2 border-slate-900 rounded-xl flex flex-col items-center justify-center bg-slate-50 p-2 relative overflow-hidden">
-                            <span class="text-4xl mb-1">📱</span>
-                            <span class="font-mono text-[9px] font-bold text-slate-800 text-center uppercase tracking-tighter">NMID: ID102003892019</span>
-                            <span class="font-bold text-[10px] text-slate-900 mt-1">GymPulse Fitness</span>
-                            <div class="absolute inset-x-0 bottom-0 bg-lime-400 text-slate-950 text-[8px] font-black py-0.5 text-center uppercase">
-                                Scan Bebas Biaya Admin
-                            </div>
-                        </div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Metode Pembayaran</span>
+                        <span class="font-bold text-lime-400">📱 QRIS Dinamis Otomatis</span>
                     </div>
-
-                    <div class="text-xs space-y-1">
-                        <p class="text-slate-400">Total Tagihan:</p>
-                        <p class="font-display font-black text-2xl text-lime-400">
+                    <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-300 font-semibold uppercase">Total Tagihan</span>
+                        <span class="font-display font-black text-lg sm:text-xl text-lime-400 font-mono">
                             Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
-                        </p>
-                        <p class="text-[11px] text-slate-400">Buka aplikasi m-Banking atau E-Wallet apa saja & scan kode QR di atas.</p>
+                        </span>
                     </div>
                 </div>
 
-                <div x-show="onlinePaymentMethod === 'transfer'" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                <div x-show="onlinePaymentMethod === 'transfer'" class="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
                     <p class="font-bold text-slate-800">Silakan transfer persis ke rekening resmi gym:</p>
 
                     <div class="space-y-2">
@@ -1179,7 +1415,14 @@
                                 <span class="font-mono font-extrabold text-sm text-slate-900">8271-9928-1120</span>
                                 <span class="text-[10px] text-slate-400 block">a.n. GymPulse Indonesia</span>
                             </div>
-                            <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">BCA</span>
+                            <button 
+                                type="button" 
+                                @click="copyBank('827199281120', 'bca')" 
+                                class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] transition"
+                            >
+                                <span x-show="copiedBank !== 'bca'">📋 Salin No</span>
+                                <span x-show="copiedBank === 'bca'">✓ Tersalin</span>
+                            </button>
                         </div>
 
                         <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between">
@@ -1188,7 +1431,14 @@
                                 <span class="font-mono font-extrabold text-sm text-slate-900">1370-0099-2811-2</span>
                                 <span class="text-[10px] text-slate-400 block">a.n. GymPulse Indonesia</span>
                             </div>
-                            <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">Mandiri</span>
+                            <button 
+                                type="button" 
+                                @click="copyBank('1370009928112', 'mandiri')" 
+                                class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] transition"
+                            >
+                                <span x-show="copiedBank !== 'mandiri'">📋 Salin No</span>
+                                <span x-show="copiedBank === 'mandiri'">✓ Tersalin</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1198,25 +1448,188 @@
                     </div>
                 </div>
 
-                {{-- SUBMIT BUTTON --}}
-                <div class="pt-3 border-t border-slate-100 flex gap-3">
+                {{-- ACTION BUTTONS --}}
+                <div class="pt-3 border-t border-slate-100 flex gap-2.5">
                     <button 
                         type="button" 
-                        @click="renewModal = false" 
-                        class="px-5 py-3 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition"
+                        @click="closeRenewalModal()" 
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition"
                     >
                         Batal
                     </button>
+
+                    {{-- QRIS Trigger Button --}}
+                    <template x-if="onlinePaymentMethod === 'qris'">
+                        <button 
+                            type="button" 
+                            @click="submitRenewalCheckout()" 
+                            :disabled="loadingRenewal"
+                            class="flex-1 py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-display font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2"
+                        >
+                            <span x-show="!loadingRenewal">⚡ Bayar via QRIS (Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>)</span>
+                            <span x-show="loadingRenewal">Membuat QRIS...</span>
+                        </button>
+                    </template>
+
+                    {{-- Transfer Direct Form Trigger --}}
+                    <template x-if="onlinePaymentMethod === 'transfer'">
+                        <form method="POST" action="{{ route('member.renew') }}" class="flex-1">
+                            @csrf
+                            <input type="hidden" name="membership_package_id" :value="selectedPackageId">
+                            <input type="hidden" name="payment_method" value="transfer">
+                            <button 
+                                type="submit" 
+                                class="w-full py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-display font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2"
+                            >
+                                <span>Konfirmasi Pembayaran Transfer</span>
+                            </button>
+                        </form>
+                    </template>
+                </div>
+            </div>
+
+            {{-- =========================================================
+                STEP 2: MODAL QRIS DINAMIS PERPANJANGAN (IDENTIK PRODUK)
+            ========================================================= --}}
+            <div x-show="renewStep === 'qris'" class="text-center space-y-3">
+                {{-- Top Header --}}
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-black text-[11px] tracking-wider">QRIS</span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Dinamis Otomatis</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-[11px] font-mono font-bold bg-amber-50 text-amber-800 px-2 py-0.5 rounded-lg border border-amber-200">
+                        <svg class="w-3 h-3 text-amber-600 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span x-text="renewFormattedTimer"></span>
+                    </div>
+                </div>
+
+                {{-- QR Code Container --}}
+                <div class="bg-gradient-to-b from-slate-50 to-slate-100/90 p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-inner inline-block mx-auto">
+                    <div class="w-40 h-40 sm:w-44 sm:h-44 bg-white rounded-xl p-2 shadow-sm flex items-center justify-center mx-auto border border-slate-200">
+                        <template x-if="renewQrisData && renewQrisData.qr_url">
+                            <img :src="renewQrisData.qr_url" alt="QRIS Code" class="w-full h-full object-contain">
+                        </template>
+                    </div>
+                    <p class="font-mono text-[11px] text-slate-500 mt-1 font-semibold" x-text="renewPayment ? renewPayment.invoice_number : ''"></p>
+                </div>
+
+                {{-- Total Tagihan Display --}}
+                <div class="p-2.5 bg-slate-900 text-white rounded-xl">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Tagihan Membership</p>
+                    <p class="font-display font-black text-xl text-lime-400 mt-0.5 font-mono">
+                        Rp<span x-text="renewPayment ? Number(renewPayment.amount).toLocaleString('id-ID') : Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
+                    </p>
+                    <div class="flex items-center justify-center gap-2 text-[11px] text-slate-300 mt-0.5">
+                        <span x-text="'Paket: ' + selectedPackageName"></span>
+                        <span>•</span>
+                        <span class="text-lime-300 font-semibold" x-text="'Perpanjangan: ' + selectedPackageDuration + ' Bulan'"></span>
+                    </div>
+                </div>
+
+                {{-- Live Status Indicator --}}
+                <div class="py-1.5 px-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>Menunggu Pembayaran Anda...</span>
+                </div>
+
+                {{-- SIMULATOR TEST ACTION BOX --}}
+                <div class="p-2.5 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 border border-indigo-200 rounded-xl text-left space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1">
+                            <span>🧪</span> Mode Uji Coba (Simulator)
+                        </span>
+                        <span class="text-[9px] bg-indigo-200 text-indigo-900 px-1.5 py-0.5 rounded-full font-bold">Midtrans Ready</span>
+                    </div>
+                    <p class="text-[10px] text-indigo-800 leading-snug">
+                        Klik tombol di bawah untuk simulasi telah bayar via BCA Mobile / GoPay / OVO:
+                    </p>
                     <button 
-                        type="submit" 
-                        class="flex-1 py-3 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-display font-extrabold text-xs transition shadow-lg flex items-center justify-center gap-2"
+                        type="button" 
+                        @click="simulateRenewalPayment()"
+                        :disabled="renewSimulating"
+                        class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-lg text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
                     >
-                        <span>Konfirmasi Pembayaran</span>
-                        <span class="font-mono">(Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>)</span>
+                        <span x-show="!renewSimulating">⚡ Simulasi: Bayar QRIS Sukses</span>
+                        <span x-show="renewSimulating">Memverifikasi Pembayaran...</span>
                     </button>
                 </div>
 
-            </form>
+                {{-- Cancel Action --}}
+                <div class="pt-1">
+                    <button 
+                        type="button" 
+                        @click="cancelRenewalOrder()"
+                        class="text-xs text-rose-600 hover:text-rose-800 font-bold hover:underline"
+                    >
+                        ✕ Batalkan Transaksi
+                    </button>
+                </div>
+            </div>
+
+            {{-- =========================================================
+                STEP 3: MODAL SUKSES PERPANJANGAN & AUTO EXTENSION
+            ========================================================= --}}
+            <div x-show="renewStep === 'success'" class="text-center space-y-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl sm:text-2xl mb-1 shadow-inner">
+                    ✓
+                </div>
+
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-black text-[10px] uppercase tracking-wider">
+                    Lunas via QRIS
+                </span>
+
+                <h3 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 mt-1">Perpanjangan Berhasil! 🎉</h3>
+                <p class="font-mono text-xs text-slate-500 font-bold" x-text="renewPayment ? renewPayment.invoice_number : ''"></p>
+
+                {{-- EXTENSION SUMMARY CARD --}}
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-lime-50 border border-lime-200 text-left space-y-2">
+                    <div class="flex items-center justify-between text-xs pb-2 border-b border-lime-200/60">
+                        <span class="text-slate-600 font-medium">Paket Keanggotaan</span>
+                        <span class="font-bold text-slate-900" x-text="selectedPackageName + ' (' + selectedPackageDuration + ' Bulan)'"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pb-2 border-b border-lime-200/60">
+                        <span class="text-slate-600 font-medium">Masa Aktif Baru</span>
+                        <span class="font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200 font-mono" x-text="'s/d ' + (renewSuccessData && renewSuccessData.new_expire_date ? renewSuccessData.new_expire_date : renewNewExpirePreview)"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pb-2 border-b border-lime-200/60">
+                        <span class="text-slate-600 font-medium">Status RFID Gate</span>
+                        <span class="inline-flex items-center gap-1 font-bold text-emerald-700">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Aktif & Siap Digunakan</span>
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <span class="text-slate-700 font-bold">Total Pembayaran:</span>
+                        <span class="font-display font-black text-sm text-emerald-800 font-mono">
+                            Rp<span x-text="renewPayment ? Number(renewPayment.amount).toLocaleString('id-ID') : Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="pt-2 space-y-2">
+                    <button 
+                        type="button" 
+                        @click="invoiceModal = true; closeRenewalModal()" 
+                        class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                        <span>📄</span>
+                        <span>Buka Bukti Keanggotaan / E-Receipt</span>
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="finishAndReload()" 
+                        class="w-full py-2 px-4 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition"
+                    >
+                        Selesai & Muat Ulang Dashboard
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 

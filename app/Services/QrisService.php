@@ -13,6 +13,34 @@ class QrisService
      */
     public static function generate(Order $order): array
     {
+        return self::generateGeneric(
+            invoiceNumber: $order->invoice_number,
+            amount: (int) $order->total_amount,
+            id: $order->id,
+            merchantName: 'GYMPULSE STORE',
+            orderObject: $order
+        );
+    }
+
+    /**
+     * Generate Dynamic QRIS Data for a Membership Renewal Payment
+     */
+    public static function generateForRenewal(\App\Models\Payment $payment): array
+    {
+        $invoice = $payment->invoice_number ?: ('RNW-' . now()->format('ymd') . '-' . str_pad($payment->id, 4, '0', STR_PAD_LEFT));
+        return self::generateGeneric(
+            invoiceNumber: $invoice,
+            amount: (int) $payment->amount,
+            id: $payment->id,
+            merchantName: 'GYMPULSE MEMBERSHIP'
+        );
+    }
+
+    /**
+     * Internal Generic Dynamic QRIS Generator with Cryptographic Integrity & Midtrans Bridge
+     */
+    public static function generateGeneric(string $invoiceNumber, int $amount, $id = null, string $merchantName = 'GYMPULSE', ?Order $orderObject = null): array
+    {
         $serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
         $isProduction = config('services.midtrans.is_production', env('MIDTRANS_IS_PRODUCTION', false));
         $expiresAt = now()->addMinutes(15)->toISOString();
@@ -29,8 +57,8 @@ class QrisService
                     ->post($endpoint, [
                         'payment_type' => 'qris',
                         'transaction_details' => [
-                            'order_id' => $order->invoice_number,
-                            'gross_amount' => (int) $order->total_amount,
+                            'order_id' => $invoiceNumber,
+                            'gross_amount' => $amount,
                         ],
                         'qris' => [
                             'acquirer' => 'gopay',
@@ -41,7 +69,9 @@ class QrisService
                     $data = $response->json();
                     $qrString = $data['qr_string'] ?? null;
                     $qrUrl = $data['actions'][0]['url'] ?? null;
-                    $signature = self::generateSignature($order, $expiresAt);
+                    $signature = $orderObject 
+                        ? self::generateSignature($orderObject, $expiresAt)
+                        : self::generateGenericSignature($invoiceNumber, $amount, $id, $expiresAt);
 
                     return [
                         'mode' => 'midtrans',
@@ -49,9 +79,9 @@ class QrisService
                         'qr_url' => $qrUrl ?: "https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=" . urlencode($qrString),
                         'signature' => $signature,
                         'expires_at' => $expiresAt,
-                        'merchant_name' => 'GYMPULSE STORE',
-                        'amount' => (int) $order->total_amount,
-                        'invoice_number' => $order->invoice_number,
+                        'merchant_name' => $merchantName,
+                        'amount' => $amount,
+                        'invoice_number' => $invoiceNumber,
                     ];
                 } else {
                     Log::warning('Midtrans QRIS creation returned error, falling back to simulator', [
@@ -64,10 +94,8 @@ class QrisService
         }
 
         // 2. High-Fidelity Built-in QRIS Generator (Bank Indonesia / ASPI & EMVCo Standard)
-        $merchantName = 'GYMPULSE STORE';
         $city = 'JAKARTA';
-        $amount = (int) $order->total_amount;
-        $invoice = $order->invoice_number;
+        $invoice = $invoiceNumber;
 
         // Construct standard EMVCo dynamic QRIS structure (Tag-Length-Value)
         $payloadWithoutCrc = "000201" // Format Indicator: 01
@@ -88,7 +116,9 @@ class QrisService
         $fullQrisPayload = $payloadWithoutCrc . $crc16;
 
         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=350x350&margin=10&data=" . urlencode($fullQrisPayload);
-        $signature = self::generateSignature($order, $expiresAt);
+        $signature = $orderObject 
+            ? self::generateSignature($orderObject, $expiresAt)
+            : self::generateGenericSignature($invoiceNumber, $amount, $id, $expiresAt);
 
         return [
             'mode' => 'simulator',
@@ -101,6 +131,22 @@ class QrisService
             'expires_at' => $expiresAt,
             'crc16' => $crc16,
         ];
+    }
+
+    /**
+     * Generate Cryptographic Signature for Generic Transaction
+     */
+    public static function generateGenericSignature(string $invoiceNumber, int $amount, $id, string $expiresAt): string
+    {
+        $appKey = config('app.key') ?: 'gympulse_secret_signing_key_2026';
+        $payload = implode('|', [
+            $invoiceNumber,
+            $amount,
+            $id,
+            $expiresAt,
+        ]);
+
+        return hash_hmac('sha256', $payload, $appKey);
     }
 
     /**

@@ -514,15 +514,15 @@
             @click.away="myOrdersModal = false"
             class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl border border-slate-100 relative my-auto max-h-[92vh] overflow-y-auto"
         >
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm font-bold">🧾</span>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-xl bg-slate-900 text-lime-400 flex items-center justify-center text-base font-bold shadow-sm">🧾</span>
                     <div>
-                        <h3 class="font-display font-bold text-sm sm:text-base text-slate-900">Riwayat Pesanan & Bukti Bayar</h3>
-                        <p class="text-[10px] sm:text-[11px] text-slate-500">Tunjukkan bukti bayar ini ke kasir saat mengambil barang</p>
+                        <h3 class="font-display font-bold text-base text-slate-900 !text-slate-900">Riwayat Pesanan & Bukti Bayar</h3>
+                        <p class="text-xs text-slate-500 !text-slate-500 font-medium">Tunjukkan bukti bayar ini ke kasir saat mengambil barang</p>
                     </div>
                 </div>
-                <button type="button" @click="myOrdersModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+                <button type="button" @click="myOrdersModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xl font-bold transition">&times;</button>
             </div>
 
             <div class="mt-3.5 space-y-2.5">
