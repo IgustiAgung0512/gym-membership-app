@@ -1,20 +1,14 @@
-# Cara Membuat / Memulihkan Akun Admin — Tanpa Hapus Database
+# Cara Membuat / Memulihkan Akun Admin & Kasir — Tanpa Hapus Database
 
-Panduan ini untuk situasi seperti: lupa password admin, akun admin ke-hapus, atau butuh admin baru — **tanpa perlu** `migrate:fresh`, hapus tabel manual, atau kehilangan data member, RFID, dan absensi yang sudah ada.
+Panduan ini untuk situasi seperti: lupa password admin/kasir, akun terhapus, database baru di-reset, atau butuh staf kasir baru — **tanpa perlu** merusak relasi tabel, atau kehilangan data member, RFID, dan absensi yang sudah ada.
 
 ---
 
-## Cara Cepat (Direkomendasikan)
+## 1. Akun Admin (`make:admin`)
 
 Project ini sudah dilengkapi perintah artisan khusus: `make:admin`.
 
-### 1. Buka terminal di folder project
-
-```bash
-cd gym-membership-app
-```
-
-### 2. Jalankan perintah berikut
+### Jalankan perintah di terminal:
 
 **Mode interaktif** (akan ditanya satu-satu):
 ```bash
@@ -32,27 +26,43 @@ Password admin (min. 6 karakter): ********
 php artisan make:admin --name="Admin GYM" --email=admin@gym.test --password=passwordbaru123
 ```
 
-### 3. Selesai
+---
 
-Kalau berhasil, akan muncul:
+## 2. Akun Kasir Front Desk (`make:cashier`)
+
+Untuk membuat atau memulihkan akun staf kasir (Front Desk & Terminal POS):
+
+### Jalankan perintah di terminal:
+
+**Mode interaktif**:
+```bash
+php artisan make:cashier
 ```
-Akun admin siap dipakai:
-  Email    : admin@gym.test
-  Password : (sesuai yang barusan kamu masukkan)
+Contoh isian:
+```
+Nama kasir: Staff Kasir Front Desk
+Email kasir: kasir@gym.test
+No. WhatsApp / HP kasir (opsional): 081234567899
+Password kasir (min. 6 karakter): ********
 ```
 
-Langsung login ke `/login` dengan email & password tersebut.
+**Atau mode satu baris**:
+```bash
+php artisan make:cashier --name="Staff Kasir" --email=kasir@gym.test --phone=081234567899 --password=password123
+```
+
+Setelah selesai, akun kasir langsung siap digunakan untuk login di `/login` dan otomatis diarahkan ke antarmuka **Kasir POS & Pendaftaran Member**.
 
 ---
 
 ## Kenapa Ini Aman Dijalankan Kapan Saja
 
-Perintah `make:admin` dirancang **idempotent** — artinya boleh dijalankan berkali-kali tanpa risiko:
+Perintah `make:admin` dan `make:cashier` dirancang **idempotent** — artinya boleh dijalankan berkali-kali tanpa risiko:
 
 | Situasi | Yang terjadi |
 |---|---|
-| Email **belum terdaftar** di database | Dibuatkan akun baru dengan role `admin` |
-| Email **sudah ada** (misalnya akun member biasa, atau admin lama yang lupa password) | Akun itu **di-upgrade jadi admin** dan passwordnya **direset** ke yang baru kamu masukkan |
+| Email **belum terdaftar** di database | Dibuatkan akun baru dengan role yang sesuai (`admin` / `cashier`) |
+| Email **sudah ada** (misalnya lupa password) | Akun tersebut **diperbarui role-nya** dan passwordnya **direset** ke password baru |
 | Data member, kartu RFID, riwayat absensi, paket membership | **Tidak disentuh sama sekali** — hanya baris user dengan email tersebut yang diubah |
 
 Jadi tidak ada alasan lagi untuk `migrate:fresh` atau hapus database cuma gara-gara lupa akun admin.
@@ -61,35 +71,33 @@ Jadi tidak ada alasan lagi untuk `migrate:fresh` atau hapus database cuma gara-g
 
 ## Contoh Skenario
 
-### Skenario 1: Database baru, belum ada admin sama sekali
+### Skenario 1: Database baru dibuat, buat akun Admin & Kasir pertama
 ```bash
 php artisan migrate
 php artisan make:admin --name="Admin GYM" --email=admin@gym.test --password=admin123
+php artisan make:cashier --name="Staff Kasir" --email=kasir@gym.test --phone=081234567899 --password=password123
 ```
 
-### Skenario 2: Lupa password admin yang sudah ada
+### Skenario 2: Lupa password admin atau kasir yang sudah ada
 ```bash
 php artisan make:admin --email=admin@gym.test --password=passwordbaruku
+# atau untuk kasir:
+php artisan make:cashier --email=kasir@gym.test --password=passwordbarukasir
 ```
-(Nama boleh diisi ulang atau dikosongkan — kalau mode interaktif dan tidak mau ganti nama, isi saja nama yang sama seperti sebelumnya)
+*(Nama boleh diisi ulang atau dikosongkan jika via mode interaktif)*
 
-### Skenario 3: Ingin admin kedua sebagai cadangan
+### Skenario 3: Menambah staf kasir shift baru
 ```bash
-php artisan make:admin --name="Admin Cadangan" --email=admin2@gym.test --password=cadangan123
+php artisan make:cashier --name="Kasir Shift Pagi" --email=kasirpagi@gym.test --password=pagi123
+php artisan make:cashier --name="Kasir Shift Malam" --email=kasirmalam@gym.test --password=malam123
 ```
-Sekarang ada dua akun admin yang bisa login terpisah.
-
-### Skenario 4: Akun member biasa ingin dijadikan admin
-```bash
-php artisan make:admin --name="Budi Santoso" --email=budi@gym.test --password=newpassword
-```
-⚠️ Perhatikan: ini akan mengubah role akun itu jadi `admin` dan **memutus tautannya sebagai member** secara akses (baris di tabel `members` tetap ada, tapi user tersebut sekarang login sebagai admin, bukan lagi ke dashboard member). Gunakan email khusus admin, jangan email member aktif, kecuali memang disengaja.
+Sekarang setiap staf kasir memiliki akun login masing-masing.
 
 ---
 
-## Cara Alternatif (Manual via Tinker) — kalau perintah `make:admin` belum terpasang
+## Cara Alternatif: Manual via Laravel Tinker
 
-Kalau kamu belum sempat menambahkan file `app/Console/Commands/MakeAdminCommand.php` ke project, bisa juga lewat Tinker:
+Bisa juga membuat atau mereset password admin & kasir lewat Tinker:
 
 ```bash
 php artisan tinker
@@ -98,7 +106,8 @@ php artisan tinker
 Lalu jalankan:
 
 ```php
-$admin = \App\Models\User::updateOrCreate(
+// Buat / Reset Akun Admin
+\App\Models\User::updateOrCreate(
     ['email' => 'admin@gym.test'],
     [
         'name' => 'Admin GYM',
@@ -108,35 +117,43 @@ $admin = \App\Models\User::updateOrCreate(
     ]
 );
 
-echo "Admin siap: {$admin->email}";
+// Buat / Reset Akun Kasir
+\App\Models\User::updateOrCreate(
+    ['email' => 'kasir@gym.test'],
+    [
+        'name' => 'Staff Kasir Front Desk',
+        'phone' => '081234567899',
+        'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        'role' => 'cashier',
+        'must_change_password' => false,
+    ]
+);
 ```
 
 Ketik `exit` untuk keluar.
 
 ---
 
-## Yang PERLU DIHINDARI
+## Cara Alternatif: Database Seeder (Saat Database Baru / Reset Total)
 
-Jangan lakukan hal berikut hanya karena lupa/butuh akun admin:
+Jika database baru di-reset dari awal dan Anda ingin memasukkan data demo lengkap (Admin, Kasir, Paket Membership, dan Produk Toko):
 
-- ❌ `php artisan migrate:fresh` — menghapus **semua tabel** dan **semua data**, termasuk member, kartu RFID, riwayat absensi
-- ❌ Hapus manual tabel `users` lewat phpMyAdmin — bisa merusak relasi ke tabel `members` (foreign key)
-- ❌ Drop seluruh database lalu import ulang file `.sql` awal — kamu akan kehilangan seluruh data yang sudah bertambah sejak awal setup
+```bash
+php artisan migrate:fresh --seed
+```
 
-Cukup gunakan `php artisan make:admin` — aman, cepat, dan tidak mengganggu data lain.
+Akun bawaan hasil seeder:
+- **Admin**: `admin@gym.test` / password: `password`
+- **Kasir**: `kasir@gym.test` / password: `password`
 
 ---
 
-## Instalasi Perintah `make:admin` (kalau belum ada di project kamu)
+## Yang PERLU DIHINDARI
 
-Kalau project kamu belum punya file ini, salin file berikut ke lokasi yang sesuai:
+Jangan lakukan hal berikut hanya karena lupa/butuh akun admin atau kasir:
 
-**File:** `app/Console/Commands/MakeAdminCommand.php`
+- ❌ `php artisan migrate:fresh` pada database yang sedang aktif digunakan — akan menghapus **semua tabel** dan **semua data member, kartu RFID, transaksi kasir, serta riwayat absensi**.
+- ❌ Hapus manual tabel `users` lewat phpMyAdmin — bisa merusak relasi ke tabel `members` dan `orders` (foreign key constraint).
+- ❌ Drop seluruh database lalu import ulang file `.sql` awal — Anda akan kehilangan seluruh transaksi yang sudah berjalan.
 
-Laravel otomatis mendeteksi command baru di folder `app/Console/Commands/` tanpa perlu registrasi tambahan. Setelah file disalin, cek apakah perintahnya sudah terbaca:
-
-```bash
-php artisan list make
-```
-
-Kalau `make:admin` muncul di daftar, berarti sudah siap dipakai.
+Cukup gunakan perintah `php artisan make:admin` atau `php artisan make:cashier` — aman, cepat, dan tidak mengganggu data lainnya.

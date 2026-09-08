@@ -56,4 +56,22 @@ class SecurityHardeningTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertStringContainsString('Terlalu banyak percobaan login gagal', session('errors')->first('email'));
     }
+
+    /**
+     * Test perintah php artisan make:cashier berhasil membuat user kasir.
+     */
+    public function test_make_cashier_command_creates_cashier_user(): void
+    {
+        $this->artisan('make:cashier', [
+            '--name' => 'Kasir Baru',
+            '--email' => 'kasirbaru@gym.test',
+            '--phone' => '081234567800',
+            '--password' => 'password123',
+        ])->assertSuccessful();
+
+        $user = User::where('email', 'kasirbaru@gym.test')->first();
+        $this->assertNotNull($user);
+        $this->assertEquals('cashier', $user->role);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password123', $user->password));
+    }
 }

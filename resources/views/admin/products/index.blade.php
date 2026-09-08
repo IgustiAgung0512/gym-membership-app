@@ -151,11 +151,16 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3.5 px-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0 overflow-hidden border border-slate-200">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0 overflow-hidden border border-slate-200 relative">
                                         @if ($p->image_url)
-                                            <img src="{{ $p->image_url }}" alt="{{ $p->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                                            <img src="{{ $p->image_url }}" alt="{{ $p->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <span class="hidden items-center justify-center w-full h-full text-lg">
+                                                {{ $p->category_icon }}
+                                            </span>
                                         @else
-                                            {{ $p->category_icon }}
+                                            <span class="flex items-center justify-center w-full h-full text-lg">
+                                                {{ $p->category_icon }}
+                                            </span>
                                         @endif
                                     </div>
                                     <div>
