@@ -634,11 +634,11 @@ window.cashierPosApp = cashierPosApp;
         </div>
 
         {{-- RIGHT PANEL: SHOPPING CART & CHECKOUT (4-5 cols) --}}
-        <div class="lg:col-span-5 xl:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 lg:p-5 flex flex-col justify-between sticky top-20 max-h-[calc(100vh-100px)]">
+        <div class="lg:col-span-5 xl:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 lg:p-5 flex flex-col justify-between sticky top-16 lg:top-20 h-auto lg:h-[calc(100vh-6rem)] overflow-hidden">
             
-            <div>
+            <div class="flex-1 min-h-0 flex flex-col">
                 {{-- HEADER CART --}}
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg bg-lime-400 text-slate-950 flex items-center justify-center font-bold text-sm">
                             🛒
@@ -659,7 +659,7 @@ window.cashierPosApp = cashierPosApp;
                 </div>
 
                 {{-- MEMBER / CUSTOMER SELECTION --}}
-                <div class="mt-3.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 shrink-0">
                     <div class="flex items-center justify-between">
                         <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Pelanggan / Member</label>
                         <span class="text-[10px] text-slate-400">Opsional</span>
@@ -675,8 +675,8 @@ window.cashierPosApp = cashierPosApp;
                     </select>
                 </div>
 
-                {{-- CART ITEMS LIST --}}
-                <div class="mt-3.5 space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {{-- CART ITEMS LIST (Dynamic Scrollable Area) --}}
+                <div class="mt-3 space-y-2 flex-1 min-h-0 overflow-y-auto pr-1">
                     <template x-for="item in cart" :key="item.product_id">
                         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
                             <div class="min-w-0 flex-1 pr-2">
@@ -714,7 +714,7 @@ window.cashierPosApp = cashierPosApp;
                     </template>
 
                     <template x-if="cart.length === 0">
-                        <div class="py-12 text-center text-slate-400">
+                        <div class="py-10 text-center text-slate-400">
                             <span class="text-3xl block mb-1">🛒</span>
                             <p class="text-xs font-semibold">Keranjang masih kosong</p>
                             <p class="text-[11px] text-slate-400">Pilih produk di sebelah kiri untuk mulai transaksi.</p>
@@ -723,8 +723,8 @@ window.cashierPosApp = cashierPosApp;
                 </div>
             </div>
 
-            {{-- PAYMENT SUMMARY & BUTTON --}}
-            <div class="mt-4 pt-4 border-t border-slate-200 space-y-2.5">
+            {{-- PAYMENT SUMMARY & BUTTON (Pinned to bottom) --}}
+            <div class="mt-3 pt-3 border-t border-slate-200 space-y-2 shrink-0">
                 <div class="flex justify-between text-xs text-slate-500">
                     <span>Subtotal</span>
                     <span class="font-mono font-semibold text-slate-800">
@@ -743,7 +743,7 @@ window.cashierPosApp = cashierPosApp;
                     >
                 </div>
 
-                <div class="flex justify-between text-base font-display font-extrabold text-slate-900 pt-2 border-t border-slate-100">
+                <div class="flex justify-between text-base font-display font-extrabold text-slate-900 pt-1.5 border-t border-slate-100">
                     <span>Total Tagihan</span>
                     <span class="text-lime-700 font-mono text-lg">
                         Rp<span x-text="totalAmount.toLocaleString('id-ID')"></span>

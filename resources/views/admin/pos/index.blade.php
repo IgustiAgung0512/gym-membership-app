@@ -606,14 +606,14 @@ window.adminPosApp = adminPosApp;
         </div>
 
         {{-- =========================================================
-            PANEL KANAN (4 COL): KERANJANG & CHECKOUT
+            RIGHT PANEL: SHOPPING CART & CHECKOUT (Fixed at desktop)
         ========================================================= --}}
-        <div class="lg:col-span-5 xl:col-span-4 sticky top-20">
-            <div class="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between min-h-[580px]">
+        <div class="lg:col-span-5 xl:col-span-4 sticky top-16 lg:top-20">
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col justify-between h-auto lg:h-[calc(100vh-6rem)] overflow-hidden">
                 
-                <div>
+                <div class="flex-1 min-h-0 flex flex-col">
                     {{-- Cart Header --}}
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">🛒</span>
                             <h3 class="font-display font-bold text-base text-slate-900">Keranjang Kasir</h3>
@@ -628,8 +628,8 @@ window.adminPosApp = adminPosApp;
                     </div>
 
                     {{-- Customer Selector --}}
-                    <div class="py-3 border-b border-slate-100">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Customer / Pembeli</label>
+                    <div class="py-2.5 border-b border-slate-100 shrink-0">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Customer / Pembeli</label>
                         <select 
                             x-model="memberId" 
                             @change="onMemberChange()"
@@ -642,10 +642,10 @@ window.adminPosApp = adminPosApp;
                         </select>
                     </div>
 
-                    {{-- Cart Items List --}}
-                    <div class="py-3 max-h-72 overflow-y-auto space-y-2.5">
+                    {{-- Cart Items List (Dynamic Scrollable Area) --}}
+                    <div class="py-2.5 flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
                         <template x-for="item in cart" :key="item.product_id">
-                            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs">
+                            <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs">
                                 <div class="flex-1 min-w-0">
                                     <h5 class="font-bold text-slate-900 truncate" x-text="item.name"></h5>
                                     <p class="text-slate-500 mt-0.5" x-text="formatRupiah(item.price)"></p>
@@ -676,7 +676,7 @@ window.adminPosApp = adminPosApp;
                         </template>
 
                         <template x-if="cart.length === 0">
-                            <div class="py-12 text-center text-slate-400 text-xs">
+                            <div class="py-10 text-center text-slate-400 text-xs">
                                 <p class="text-2xl mb-1">🛍️</p>
                                 <p>Keranjang masih kosong</p>
                                 <p class="text-[11px] text-slate-400 mt-0.5">Klik produk di panel sebelah kiri untuk menambahkan.</p>
@@ -685,9 +685,9 @@ window.adminPosApp = adminPosApp;
                     </div>
                 </div>
 
-                {{-- Cart Summary & Action Buttons --}}
-                <div class="pt-4 border-t border-slate-100 space-y-3">
-                    <div class="space-y-1.5 text-xs">
+                {{-- Cart Summary & Action Buttons (Pinned to bottom) --}}
+                <div class="pt-3 border-t border-slate-100 space-y-2.5 shrink-0">
+                    <div class="space-y-1 text-xs">
                         <div class="flex justify-between text-slate-500">
                             <span>Subtotal</span>
                             <span class="font-mono font-bold text-slate-800" x-text="formatRupiah(subtotal)"></span>
@@ -703,7 +703,7 @@ window.adminPosApp = adminPosApp;
                                 class="w-24 text-right py-1 px-2 rounded-lg border border-slate-200 bg-slate-50 text-xs font-mono font-bold text-rose-600 focus:outline-none"
                             >
                         </div>
-                        <div class="flex justify-between text-base pt-2 border-t border-slate-100">
+                        <div class="flex justify-between text-base pt-1.5 border-t border-slate-100">
                             <span class="font-display font-bold text-slate-900">Total Tagihan</span>
                             <span class="font-display font-extrabold text-xl text-slate-900" x-text="formatRupiah(totalAmount)"></span>
                         </div>
@@ -713,7 +713,7 @@ window.adminPosApp = adminPosApp;
                         @click="openCheckout()"
                         :disabled="cart.length === 0"
                         :class="cart.length === 0 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-lime-500 hover:bg-lime-400 text-slate-950 shadow-md'"
-                        class="w-full py-3.5 rounded-2xl font-display font-bold text-sm transition flex items-center justify-center gap-2"
+                        class="w-full py-3 rounded-2xl font-display font-bold text-sm transition flex items-center justify-center gap-2"
                     >
                         <span>💳 Proses Pembayaran</span>
                         <span class="text-xs px-2 py-0.5 rounded-md bg-slate-950/15 font-mono">F4</span>
