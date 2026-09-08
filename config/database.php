@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION') ?: 'mysql',
 
     /*
     |--------------------------------------------------------------------------
@@ -47,11 +47,11 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST') ?: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+            'port' => env('DB_PORT') ?: '4000',
+            'database' => env('DB_DATABASE') ?: 'test',
+            'username' => env('DB_USERNAME') ?: '2k6bquwmDUSys4g.root',
+            'password' => env('DB_PASSWORD') ?: 'OekoAc0KNbUvxb8D',
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),

@@ -34,6 +34,12 @@ putenv('APP_DEBUG=true');
 $_ENV['APP_DEBUG'] = 'true';
 $_SERVER['APP_DEBUG'] = 'true';
 
+if (empty($_ENV['DB_CONNECTION']) && empty($_SERVER['DB_CONNECTION']) && !getenv('DB_CONNECTION')) {
+    putenv('DB_CONNECTION=mysql');
+    $_ENV['DB_CONNECTION'] = 'mysql';
+    $_SERVER['DB_CONNECTION'] = 'mysql';
+}
+
 // Arahkan log ke stderr Vercel
 putenv('LOG_CHANNEL=stderr');
 $_ENV['LOG_CHANNEL'] = 'stderr';
