@@ -3,9 +3,11 @@
     "framework": null,
     "buildCommand": "npm run build",
     "outputDirectory": "public",
+    "regions": ["sin1"],
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.7.3"
+            "runtime": "vercel-php@0.7.3",
+            "memory": 1024
         }
     },
     "routes": [
