@@ -34,6 +34,12 @@ putenv('APP_DEBUG=true');
 $_ENV['APP_DEBUG'] = 'true';
 $_SERVER['APP_DEBUG'] = 'true';
 
+if (empty($_ENV['APP_KEY']) && empty($_SERVER['APP_KEY']) && !getenv('APP_KEY')) {
+    putenv('APP_KEY=base64:9y5s5FaJvVAJg48uDyS3JYXJr+EWKrv2XPAeN4dDBgQ=');
+    $_ENV['APP_KEY'] = 'base64:9y5s5FaJvVAJg48uDyS3JYXJr+EWKrv2XPAeN4dDBgQ=';
+    $_SERVER['APP_KEY'] = 'base64:9y5s5FaJvVAJg48uDyS3JYXJr+EWKrv2XPAeN4dDBgQ=';
+}
+
 if (empty($_ENV['DB_CONNECTION']) && empty($_SERVER['DB_CONNECTION']) && !getenv('DB_CONNECTION')) {
     putenv('DB_CONNECTION=mysql');
     $_ENV['DB_CONNECTION'] = 'mysql';
