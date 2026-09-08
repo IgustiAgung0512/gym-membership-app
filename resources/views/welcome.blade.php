@@ -7,6 +7,9 @@
     <title>GymPulse · Pusat Kebugaran Modern & Smart RFID Gym</title>
     <meta name="description" content="GymPulse adalah pusat kebugaran modern berfasilitas lengkap dengan akses instan teknologi Smart RFID Tap-In, personal trainer bersertifikat, dan komunitas fitness terbaik.">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
