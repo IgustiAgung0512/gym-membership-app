@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || app()->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Rate limiter untuk proteksi brute force login (maksimal 5 kali percobaan gagal per menit)
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
