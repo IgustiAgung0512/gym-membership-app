@@ -13,6 +13,16 @@ class MemberController extends Controller
 {
     public function store(Request $request)
     {
+        $deviceKey = $request->header('X-Device-Key');
+
+        if (config('services.rfid.device_key') && $deviceKey !== config('services.rfid.device_key')) {
+            return response()->json([
+                'success' => false,
+                'reason' => 'unauthorized_device',
+                'message' => 'Perangkat tidak dikenali.',
+            ], 401);
+        }
+
         $request->validate([
             'uid' => 'required|string|max:255',
         ]);
