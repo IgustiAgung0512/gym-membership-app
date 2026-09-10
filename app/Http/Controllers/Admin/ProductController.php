@@ -35,7 +35,7 @@ class ProductController extends Controller
         }
 
         $products = $query->latest()->paginate(12)->withQueryString();
-        
+
         $totalProducts = Product::count();
         $lowStockCount = Product::whereRaw('stock <= min_stock_alert')->where('stock', '>', 0)->count();
         $outOfStockCount = Product::where('stock', '<=', 0)->count();
@@ -71,15 +71,7 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
-
-            try {
-                $publicTargetDir = public_path('storage/products');
-                if (!is_link(public_path('storage')) && is_dir($publicTargetDir)) {
-                    @copy(Storage::disk('public')->path($path), public_path('storage/' . $path));
-                }
-            } catch (\Throwable $e) {}
+            $validated['image'] = $this->uploadProductImage($request->file('image'));
         }
 
         Product::create($validated);
@@ -109,19 +101,8 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-                @unlink(public_path('storage/' . $product->image));
-            }
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
-
-            try {
-                $publicTargetDir = public_path('storage/products');
-                if (!is_link(public_path('storage')) && is_dir($publicTargetDir)) {
-                    @copy(Storage::disk('public')->path($path), public_path('storage/' . $path));
-                }
-            } catch (\Throwable $e) {}
+            $this->deleteProductImage($product->image);
+            $validated['image'] = $this->uploadProductImage($request->file('image'));
         }
 
         $product->update($validated);
@@ -143,14 +124,60 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-            @unlink(public_path('storage/' . $product->image));
-        }
+        $this->deleteProductImage($product->image);
 
         $product->delete();
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    /**
+     * Upload gambar produk ke disk sesuai FILESYSTEM_DISK di .env
+     * (mis. 's3' untuk Supabase Storage / Cloudflare R2 / dll)
+     * dan kembalikan URL publik lengkapnya untuk disimpan di kolom `image`.
+     */
+    private function uploadProductImage($file): string
+    {
+        $disk = config('filesystems.default', 'public');
+
+        $path = $file->store('products', $disk);
+
+        if ($disk === 's3') {
+            return Storage::disk('s3')->url($path);
+        }
+
+        // Fallback: masih pakai disk lokal (development di komputer sendiri).
+        return $path;
+    }
+
+    /**
+     * Hapus gambar produk lama, baik yang tersimpan sebagai URL penuh (s3)
+     * maupun sebagai path relatif (disk lokal 'public', untuk data lama).
+     */
+    private function deleteProductImage(?string $image): void
+    {
+        if (!$image) {
+            return;
+        }
+
+        if (str_starts_with($image, 'http://') || str_starts_with($image, 'https://')) {
+            $s3BaseUrl = rtrim((string) config('filesystems.disks.s3.url'), '/');
+
+            if ($s3BaseUrl && str_starts_with($image, $s3BaseUrl)) {
+                $relativePath = ltrim(substr($image, strlen($s3BaseUrl)), '/');
+                try {
+                    Storage::disk('s3')->delete($relativePath);
+                } catch (\Throwable $e) {}
+            }
+
+            return;
+        }
+
+        // Data lama yang masih pakai disk lokal 'public'.
+        if (Storage::disk('public')->exists($image)) {
+            Storage::disk('public')->delete($image);
+            @unlink(public_path('storage/' . $image));
+        }
     }
 }
