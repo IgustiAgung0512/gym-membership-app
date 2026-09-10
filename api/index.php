@@ -26,13 +26,23 @@ foreach ($storageDirs as $dir) {
     }
 }
 
+// Sinkronisasi Environment Variables dari Vercel ke $_ENV dan putenv
+foreach ($_SERVER as $key => $value) {
+    if (is_string($value) && !isset($_ENV[$key])) {
+        $_ENV[$key] = $value;
+        putenv("{$key}={$value}");
+    }
+}
+
 putenv('VERCEL=1');
 $_ENV['VERCEL'] = '1';
 $_SERVER['VERCEL'] = '1';
 
-putenv('APP_DEBUG=true');
-$_ENV['APP_DEBUG'] = 'true';
-$_SERVER['APP_DEBUG'] = 'true';
+if (empty($_ENV['APP_DEBUG']) && empty($_SERVER['APP_DEBUG']) && !getenv('APP_DEBUG')) {
+    putenv('APP_DEBUG=true');
+    $_ENV['APP_DEBUG'] = 'true';
+    $_SERVER['APP_DEBUG'] = 'true';
+}
 
 if (empty($_ENV['APP_KEY']) && empty($_SERVER['APP_KEY']) && !getenv('APP_KEY')) {
     putenv('APP_KEY=base64:9y5s5FaJvVAJg48uDyS3JYXJr+EWKrv2XPAeN4dDBgQ=');
