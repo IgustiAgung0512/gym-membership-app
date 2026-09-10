@@ -240,10 +240,22 @@ class MemberController extends Controller
     /**
      * Tampilkan foto member (untuk admin) langsung dari storage,
      * tanpa bergantung pada symlink public/storage.
+     *
+     * Kalau foto tersimpan sebagai URL penuh (disk 's3' / Supabase Storage),
+     * langsung redirect ke URL publiknya. Kalau masih path relatif lama
+     * (disk lokal 'public'), tetap di-serve lewat controller.
      */
     public function photo(Member $member)
     {
-        if (! $member->photo || ! Storage::disk('public')->exists($member->photo)) {
+        if (! $member->photo) {
+            abort(404);
+        }
+
+        if (str_starts_with($member->photo, 'http://') || str_starts_with($member->photo, 'https://')) {
+            return redirect($member->photo);
+        }
+
+        if (! Storage::disk('public')->exists($member->photo)) {
             abort(404);
         }
 

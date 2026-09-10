@@ -69,9 +69,11 @@ class MemberController extends Controller
                 'must_change_password' => true,
             ]);
 
-            $photoPath = null;
+            $photoValue = null;
             if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('members/photos', 'public');
+                $disk = config('filesystems.default', 'public');
+                $path = $request->file('photo')->store('members/photos', $disk);
+                $photoValue = $disk === 's3' ? Storage::disk('s3')->url($path) : $path;
             }
 
             $memberCode = 'GYM-' . now()->format('ym') . '-' . str_pad(Member::count() + 1, 4, '0', STR_PAD_LEFT);
@@ -83,7 +85,7 @@ class MemberController extends Controller
                 'join_date' => now(),
                 'expire_date' => now()->addMonths($package->duration_months),
                 'status' => 'active',
-                'photo' => $photoPath,
+                'photo' => $photoValue,
             ]);
 
             if ($request->filled('rfid_uid')) {
@@ -169,10 +171,22 @@ class MemberController extends Controller
     /**
      * Tampilkan foto member (untuk kasir) langsung dari storage,
      * tanpa bergantung pada symlink public/storage.
+     *
+     * Kalau foto tersimpan sebagai URL penuh (disk 's3' / Supabase Storage),
+     * langsung redirect ke URL publiknya. Kalau masih path relatif lama
+     * (disk lokal 'public'), tetap di-serve lewat controller.
      */
     public function photo(Member $member)
     {
-        if (! $member->photo || ! Storage::disk('public')->exists($member->photo)) {
+        if (! $member->photo) {
+            abort(404);
+        }
+
+        if (str_starts_with($member->photo, 'http://') || str_starts_with($member->photo, 'https://')) {
+            return redirect($member->photo);
+        }
+
+        if (! Storage::disk('public')->exists($member->photo)) {
             abort(404);
         }
 

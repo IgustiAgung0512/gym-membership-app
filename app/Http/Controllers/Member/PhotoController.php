@@ -11,15 +11,24 @@ class PhotoController extends Controller
     /**
      * Tampilkan foto profil member yang sedang login.
      *
-     * Di-serve langsung lewat controller (bukan lewat symlink public/storage)
-     * supaya tetap jalan walau `php artisan storage:link` belum/tidak bisa
-     * dijalankan (sering terjadi di Windows/Laragon/XAMPP tanpa privilege admin).
+     * Kalau foto tersimpan sebagai URL penuh (disk 's3' / Supabase Storage),
+     * langsung redirect ke URL publiknya. Kalau masih path relatif lama
+     * (disk lokal 'public', dari sebelum migrasi ke S3), tetap di-serve
+     * lewat controller seperti sebelumnya.
      */
     public function show(Request $request)
     {
         $member = $request->user()->member()->firstOrFail();
 
-        if (! $member->photo || ! Storage::disk('public')->exists($member->photo)) {
+        if (! $member->photo) {
+            abort(404);
+        }
+
+        if (str_starts_with($member->photo, 'http://') || str_starts_with($member->photo, 'https://')) {
+            return redirect($member->photo);
+        }
+
+        if (! Storage::disk('public')->exists($member->photo)) {
             abort(404);
         }
 
@@ -44,12 +53,29 @@ class PhotoController extends Controller
 
         $oldPhoto = $member->photo;
 
-        $path = $request->file('photo')->store('members', 'public');
+        $disk = config('filesystems.default', 'public');
 
-        $member->update(['photo' => $path]);
+        try {
+            $path = $request->file('photo')->store('members', $disk);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Upload foto gagal: ' . $e->getMessage());
+        }
 
-        if ($oldPhoto && Storage::disk('public')->exists($oldPhoto)) {
-            Storage::disk('public')->delete($oldPhoto);
+        $newPhoto = $disk === 's3' ? Storage::disk('s3')->url($path) : $path;
+
+        $member->update(['photo' => $newPhoto]);
+
+        if ($oldPhoto) {
+            if (str_starts_with($oldPhoto, 'http://') || str_starts_with($oldPhoto, 'https://')) {
+                $s3BaseUrl = rtrim((string) config('filesystems.disks.s3.url'), '/');
+                if ($s3BaseUrl && str_starts_with($oldPhoto, $s3BaseUrl)) {
+                    try {
+                        Storage::disk('s3')->delete(ltrim(substr($oldPhoto, strlen($s3BaseUrl)), '/'));
+                    } catch (\Throwable $e) {}
+                }
+            } elseif (Storage::disk('public')->exists($oldPhoto)) {
+                Storage::disk('public')->delete($oldPhoto);
+            }
         }
 
         return back()->with('success', 'Foto profil berhasil diperbarui.');
