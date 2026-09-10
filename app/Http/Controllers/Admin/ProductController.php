@@ -71,7 +71,11 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $this->uploadProductImage($request->file('image'));
+            try {
+                $validated['image'] = $this->uploadProductImage($request->file('image'));
+            } catch (\Throwable $e) {
+                return back()->withInput()->with('error', 'Upload gambar gagal: ' . $e->getMessage());
+            }
         }
 
         Product::create($validated);
@@ -101,8 +105,13 @@ class ProductController extends Controller
         $validated['is_active'] = $request->has('is_active');
 
         if ($request->hasFile('image')) {
+            try {
+                $newImage = $this->uploadProductImage($request->file('image'));
+            } catch (\Throwable $e) {
+                return back()->withInput()->with('error', 'Upload gambar gagal: ' . $e->getMessage());
+            }
             $this->deleteProductImage($product->image);
-            $validated['image'] = $this->uploadProductImage($request->file('image'));
+            $validated['image'] = $newImage;
         }
 
         $product->update($validated);
