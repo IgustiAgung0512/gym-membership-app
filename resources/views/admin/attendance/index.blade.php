@@ -18,9 +18,16 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
-                        {{ substr($a->member->user->name, 0, 1) }}
-                    </div>
+                    @if ($a->member?->photo)
+                        <img src="{{ route('admin.members.photo', $a->member) }}" alt="{{ $a->member->user->name }}" class="w-10 h-10 rounded-xl object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-800 hidden items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                        </div>
+                    @else
+                        <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                        </div>
+                    @endif
                     <div class="min-w-0">
                         <p class="text-slate-900 font-semibold text-sm truncate">{{ $a->member->user->name }}</p>
                         <p class="text-xs text-slate-500 font-mono">{{ $a->member->member_code }}</p>
@@ -68,8 +75,22 @@
             @forelse ($attendances as $a)
                 <tr class="hover:bg-slate-50/80 transition">
                     <td class="px-5 py-3.5">
-                        <p class="text-slate-900 font-semibold">{{ $a->member->user->name }}</p>
-                        <p class="text-xs text-slate-500 font-mono">{{ $a->member->member_code }}</p>
+                        <div class="flex items-center gap-3">
+                            @if ($a->member?->photo)
+                                <img src="{{ route('admin.members.photo', $a->member) }}" alt="{{ $a->member->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 hidden items-center justify-center font-bold text-sm shrink-0">
+                                    {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                                </div>
+                            @else
+                                <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
+                                    {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                                </div>
+                            @endif
+                            <div>
+                                <p class="text-slate-900 font-semibold">{{ $a->member->user->name }}</p>
+                                <p class="text-xs text-slate-500 font-mono">{{ $a->member->member_code }}</p>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-5 py-3.5">
                         <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold {{ $a->method=='rfid' ? 'bg-lime-100 text-lime-800' : 'bg-slate-100 text-slate-600' }}">{{ $a->method == 'rfid' ? '⚡ ' . ($a->rfidCard->uid ?? 'RFID') : '✍️ Manual' }}</span>

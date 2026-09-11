@@ -70,9 +70,25 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($attendances as $a)
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="py-3 px-4 font-semibold text-slate-900">
-                                {{ $a->member->user->name ?? 'Non-Member' }}
-                                <span class="text-[11px] text-slate-400 font-mono block">{{ $a->member->member_code ?? '-' }}</span>
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center font-bold text-slate-700 shrink-0 relative">
+                                        @if ($a->member?->photo)
+                                            <img src="{{ route('cashier.members.photo', $a->member) }}" alt="{{ $a->member->user->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <span class="hidden items-center justify-center w-full h-full text-slate-700 font-bold text-sm bg-lime-100 text-lime-800">
+                                                {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                                            </span>
+                                        @else
+                                            <span class="flex items-center justify-center w-full h-full bg-slate-100 text-slate-700 font-bold text-sm">
+                                                {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">{{ $a->member->user->name ?? 'Non-Member' }}</p>
+                                        <p class="text-[11px] text-slate-400 font-mono">{{ $a->member->member_code ?? '-' }}</p>
+                                    </div>
+                                </div>
                             </td>
                             <td class="py-3 px-4">
                                 @if ($a->rfidCard)

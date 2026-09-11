@@ -256,9 +256,16 @@
         <div class="space-y-3">
             @forelse ($recentCheckins as $a)
                 <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
-                    <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
-                        {{ substr($a->member->user->name, 0, 1) }}
-                    </div>
+                    @if ($a->member?->photo)
+                        <img src="{{ route('admin.members.photo', $a->member) }}" alt="{{ $a->member->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 hidden items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                        </div>
+                    @else
+                        <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($a->member->user->name ?? '?', 0, 1)) }}
+                        </div>
+                    @endif
                     <div class="min-w-0 flex-1">
                         <p class="text-slate-900 font-semibold truncate">{{ $a->member->user->name }}</p>
                         <p class="text-xs text-slate-400 font-mono">{{ $a->member->member_code }}</p>
@@ -281,9 +288,16 @@
         <div class="space-y-3">
             @forelse ($recentMembers as $m)
                 <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
-                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm shrink-0">
-                        {{ substr($m->user->name, 0, 1) }}
-                    </div>
+                    @if ($m->photo)
+                        <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 hidden items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                        </div>
+                    @else
+                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm shrink-0">
+                            {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                        </div>
+                    @endif
                     <div class="min-w-0 flex-1">
                         <p class="text-slate-900 font-semibold truncate">{{ $m->user->name }}</p>
                         <p class="text-xs text-slate-500">{{ $m->package->name ?? '-' }}</p>
