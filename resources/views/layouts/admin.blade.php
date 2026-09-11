@@ -118,6 +118,11 @@
                         'label' => 'Laporan',
                         'icon' => 'M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-9 4h14a1 1 0 001-1V4a1 1 0 00-1-1H6a1 1 0 00-1 1v16a1 1 0 001 1z'
                     ],
+                    [
+                        'route' => 'admin.user-management.index',
+                        'label' => 'Kelola Admin & Kasir',
+                        'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
+                    ],
                 ];
             @endphp
 

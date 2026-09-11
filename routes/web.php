@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RfidController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\WhatsappLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Cashier\AttendanceController as CashierAttendanceController;
@@ -104,6 +105,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         '/dashboard/latest-rfid-checkin',
         [AdminDashboardController::class, 'latestRfidCheckin']
     )->name('dashboard.latest-rfid-checkin');
+
+    // --- USER MANAGEMENT ---
+    Route::prefix('user-management')->name('user-management.')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index'])->name('index');
+        Route::post('/admin', [AdminUserController::class, 'storeAdmin'])->name('admin.store');
+        Route::post('/cashier', [AdminUserController::class, 'storeCashier'])->name('cashier.store');
+        Route::post('/{user}/password', [AdminUserController::class, 'changePassword'])->name('change-password');
+        Route::delete('/admin/{user}', [AdminUserController::class, 'destroyAdmin'])->name('admin.destroy');
+        Route::delete('/cashier/{user}', [AdminUserController::class, 'destroyCashier'])->name('cashier.destroy');
+    });
 });
 
 // --- CASHIER WORKSTATION (Direct entry to POS) ---
