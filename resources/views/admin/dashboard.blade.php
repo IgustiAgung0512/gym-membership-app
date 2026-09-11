@@ -74,14 +74,17 @@
     {{-- HASIL CHECK-IN --}}
     <div
         id="rfid-checkin-data"
-        class="hidden p-4 rounded-xl bg-slate-50 border border-slate-200"
+        class="hidden p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden"
     >
-        <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+        {{-- Ambient background glow --}}
+        <div id="rfid-ambient-glow" class="absolute -right-10 -bottom-10 w-56 h-56 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-500"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-5 relative z-10">
             {{-- FOTO --}}
             <div class="shrink-0">
                 <div
                     id="rfid-member-photo-wrapper"
-                    class="w-20 h-20 rounded-2xl overflow-hidden bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-700 shadow-sm"
+                    class="w-20 h-20 rounded-2xl overflow-hidden bg-slate-800 border-2 flex items-center justify-center text-white shadow-md transition-all duration-500"
                 >
                     <img
                         id="rfid-member-photo"
@@ -91,7 +94,7 @@
                     >
                     <span
                         id="rfid-member-initial"
-                        class="text-3xl font-display font-bold text-slate-700"
+                        class="text-3xl font-display font-bold text-white"
                     >
                         -
                     </span>
@@ -103,42 +106,54 @@
                 <div class="flex flex-wrap items-center gap-2 mb-1">
                     <h3
                         id="rfid-member-name"
-                        class="font-display text-xl font-bold text-slate-900"
+                        class="font-display text-xl font-bold tracking-tight text-white"
                     >
                         -
                     </h3>
-                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-lime-100 text-lime-800">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800/90 border border-slate-700 text-slate-300">
                         RFID TAP
+                    </span>
+                    <span 
+                        id="rfid-package-badge"
+                        class="text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 shadow-xs"
+                    >
+                        -
                     </span>
                 </div>
 
-                <p id="rfid-member-code" class="text-xs text-slate-500 font-mono">
-                    -
-                </p>
+                <div class="flex flex-wrap items-center gap-x-3 text-xs text-slate-400 font-mono">
+                    <span id="rfid-member-code">-</span>
+                    <span class="text-slate-600">•</span>
+                    <span id="rfid-member-validity" class="text-slate-300 font-sans font-medium">-</span>
+                </div>
 
                 <div class="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-xs">
                     <div>
                         <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">UID Kartu</p>
-                        <p id="rfid-member-uid" class="font-mono font-bold text-slate-800 mt-0.5">-</p>
+                        <p id="rfid-member-uid" class="font-mono font-bold text-slate-200 mt-0.5">-</p>
                     </div>
                     <div>
                         <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-In</p>
-                        <p id="rfid-member-time" class="font-semibold text-slate-900 mt-0.5">-</p>
+                        <p id="rfid-member-time" class="font-semibold text-slate-100 mt-0.5">-</p>
                     </div>
                     <div>
                         <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-Out</p>
-                        <p id="rfid-member-checkout-time" class="font-semibold text-slate-900 mt-0.5">-</p>
+                        <p id="rfid-member-checkout-time" class="font-semibold text-slate-100 mt-0.5">-</p>
+                    </div>
+                    <div id="rfid-session-box" class="hidden">
+                        <p class="text-[10px] uppercase font-semibold tracking-wider text-amber-300 font-bold">⏱️ Durasi Latihan</p>
+                        <p id="rfid-session-duration" class="font-bold text-amber-200 mt-0.5 font-mono text-[13px]">-</p>
                     </div>
                 </div>
             </div>
 
             {{-- STATUS --}}
             <div class="sm:ml-auto shrink-0 text-left sm:text-right">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <div id="rfid-status-badge" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs shadow-xs transition-all duration-300">
+                    <span id="rfid-status-dot" class="w-2 h-2 rounded-full"></span>
                     <span id="rfid-status-text">Check-in berhasil</span>
                 </div>
-                <p id="rfid-member-date" class="text-xs text-slate-400 mt-1">
+                <p id="rfid-member-date" class="text-xs text-slate-400 mt-1.5 font-mono">
                     -
                 </p>
             </div>
@@ -321,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const warningDetail = document.getElementById('rfid-warning-detail');
 
     const memberPhoto = document.getElementById('rfid-member-photo');
+    const memberPhotoWrapper = document.getElementById('rfid-member-photo-wrapper');
     const memberInitial = document.getElementById('rfid-member-initial');
 
     const memberName = document.getElementById('rfid-member-name');
@@ -329,7 +345,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const memberTime = document.getElementById('rfid-member-time');
     const memberCheckoutTime = document.getElementById('rfid-member-checkout-time');
     const memberDate = document.getElementById('rfid-member-date');
+    const memberValidity = document.getElementById('rfid-member-validity');
+    const packageBadge = document.getElementById('rfid-package-badge');
+    const sessionBox = document.getElementById('rfid-session-box');
+    const sessionDurationEl = document.getElementById('rfid-session-duration');
+    const ambientGlow = document.getElementById('rfid-ambient-glow');
 
+    const statusBadge = document.getElementById('rfid-status-badge');
+    const statusDot = document.getElementById('rfid-status-dot');
     const statusText = document.getElementById('rfid-status-text');
 
     const liveIndicator = document.getElementById('rfid-live-indicator');
@@ -338,6 +361,44 @@ document.addEventListener('DOMContentLoaded', function () {
     const recentCheckinsContainer = document.getElementById('recent-checkins-container');
     const todayCheckinsStat = document.getElementById('stat-today-checkins');
     let lastCheckinsSignature = '';
+
+    const themePresets = {
+        vip: {
+            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-purple-950/80 to-indigo-950 border-purple-500/50 shadow-lg shadow-purple-950/30 text-white',
+            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-purple-400 ring-2 ring-purple-400/40 bg-purple-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
+            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-xs',
+            badgeIcon: '✨',
+            glowColor: 'bg-purple-600',
+        },
+        gold: {
+            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-amber-950/80 to-yellow-950 border-amber-500/50 shadow-lg shadow-amber-950/30 text-white',
+            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-400 ring-2 ring-amber-400/40 bg-amber-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
+            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-xs',
+            badgeIcon: '👑',
+            glowColor: 'bg-amber-500',
+        },
+        silver: {
+            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950 border-cyan-500/50 shadow-lg shadow-cyan-950/30 text-white',
+            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-400 ring-2 ring-cyan-400/40 bg-slate-900 flex items-center justify-center text-white shadow-md transition-all duration-500',
+            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 shadow-xs',
+            badgeIcon: '🛡️',
+            glowColor: 'bg-cyan-500',
+        },
+        student: {
+            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-rose-950/80 to-pink-950 border-rose-500/50 shadow-lg shadow-rose-950/30 text-white',
+            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-rose-400 ring-2 ring-rose-400/40 bg-rose-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
+            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-xs',
+            badgeIcon: '🎓',
+            glowColor: 'bg-rose-500',
+        },
+        basic: {
+            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-lime-950/80 border-lime-500/50 shadow-lg shadow-lime-950/30 text-white',
+            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-lime-400 ring-2 ring-lime-400/40 bg-slate-900 flex items-center justify-center text-white shadow-md transition-all duration-500',
+            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-lime-500/25 text-lime-200 border border-lime-400/40 shadow-xs',
+            badgeIcon: '⚡',
+            glowColor: 'bg-lime-500',
+        }
+    };
 
     function escapeHtml(str) {
         if (!str) return '';
@@ -463,12 +524,56 @@ document.addEventListener('DOMContentLoaded', function () {
             memberCheckoutTime.textContent = data.checkout_time ?? '-';
             memberDate.textContent = data.date;
 
-            if (data.action === 'checkin') {
-                statusText.textContent = 'Check-in berhasil';
-            } else if (data.action === 'checkout') {
+            // Paket & Tema Dinamis
+            const currentTheme = themePresets[data.package_theme] || themePresets.basic;
+            checkinData.className = currentTheme.cardClasses;
+            memberPhotoWrapper.className = currentTheme.photoWrapperClasses;
+            ambientGlow.className = `absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl opacity-30 pointer-events-none transition-all duration-500 ${currentTheme.glowColor}`;
+
+            if (packageBadge) {
+                packageBadge.className = currentTheme.badgeClasses;
+                packageBadge.innerHTML = `<span>${currentTheme.badgeIcon}</span> <span>${escapeHtml(data.package_name || 'Standard')}</span>`;
+            }
+
+            // Info Masa Aktif
+            if (memberValidity) {
+                if (data.days_remaining !== null && data.days_remaining !== undefined) {
+                    if (data.days_remaining < 0) {
+                        memberValidity.textContent = 'Masa aktif berakhir';
+                        memberValidity.className = 'text-rose-300 font-semibold';
+                    } else if (data.days_remaining === 0) {
+                        memberValidity.textContent = 'Berakhir Hari Ini';
+                        memberValidity.className = 'text-amber-300 font-semibold';
+                    } else {
+                        memberValidity.textContent = `Sisa ${data.days_remaining} Hari Aktif`;
+                        memberValidity.className = 'text-slate-200 font-medium';
+                    }
+                } else {
+                    memberValidity.textContent = 'Membership Aktif';
+                    memberValidity.className = 'text-slate-200 font-medium';
+                }
+            }
+
+            // Status Check-in vs Check-out Visual
+            if (data.action === 'checkout') {
+                statusBadge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-xs';
+                statusDot.className = 'w-2 h-2 rounded-full bg-sky-400';
                 statusText.textContent = 'Check-out berhasil';
-            } else if (data.action === 'completed') {
-                statusText.textContent = 'Sudah check-in hari ini';
+
+                if (data.session_duration && sessionBox && sessionDurationEl) {
+                    sessionBox.classList.remove('hidden');
+                    sessionDurationEl.textContent = data.session_duration;
+                } else if (sessionBox) {
+                    sessionBox.classList.add('hidden');
+                }
+            } else {
+                statusBadge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 shadow-xs';
+                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                statusText.textContent = 'Check-in berhasil';
+
+                if (sessionBox) {
+                    sessionBox.classList.add('hidden');
+                }
             }
 
             const initial = data.name ? data.name.charAt(0).toUpperCase() : '-';

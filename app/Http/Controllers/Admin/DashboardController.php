@@ -203,6 +203,7 @@ class DashboardController extends Controller
 
         $attendance = Attendance::with([
             'member.user',
+            'member.package',
             'rfidCard',
         ])
             ->where('member_id', $member->id)
@@ -222,7 +223,7 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 9. SIAPKAN FOTO MEMBER
+        | 9. SIAPKAN FOTO MEMBER & THEME PAKET
         |--------------------------------------------------------------------------
         */
 
@@ -230,6 +231,38 @@ class DashboardController extends Controller
 
         if ($attendance->member?->photo) {
             $photo = route('admin.members.photo', $attendance->member);
+        }
+
+        $packageName = $attendance->member?->package?->name ?? 'Standard Membership';
+        $pkgLower = strtolower($packageName);
+
+        $packageTheme = 'basic';
+        if (str_contains($pkgLower, 'vip') || str_contains($pkgLower, 'platinum') || str_contains($pkgLower, 'diamond') || str_contains($pkgLower, 'royal') || str_contains($pkgLower, 'executive')) {
+            $packageTheme = 'vip';
+        } elseif (str_contains($pkgLower, 'gold') || str_contains($pkgLower, 'sultan') || str_contains($pkgLower, 'tahunan') || str_contains($pkgLower, 'annual') || str_contains($pkgLower, '12 bulan') || str_contains($pkgLower, '1 tahun')) {
+            $packageTheme = 'gold';
+        } elseif (str_contains($pkgLower, 'silver') || str_contains($pkgLower, 'pro') || str_contains($pkgLower, 'semester') || str_contains($pkgLower, '6 bulan')) {
+            $packageTheme = 'silver';
+        } elseif (str_contains($pkgLower, 'student') || str_contains($pkgLower, 'pelajar') || str_contains($pkgLower, 'mahasiswa') || str_contains($pkgLower, 'promo')) {
+            $packageTheme = 'student';
+        } else {
+            $packageTheme = 'basic';
+        }
+
+        // Hitung durasi sesi jika sudah checkout
+        $sessionDuration = null;
+        if ($attendance->check_in_at && $attendance->check_out_at) {
+            $diffSeconds = $attendance->check_in_at->diffInSeconds($attendance->check_out_at);
+            if ($diffSeconds < 60) {
+                $sessionDuration = $diffSeconds . ' Detik';
+            } elseif ($diffSeconds < 3600) {
+                $mins = floor($diffSeconds / 60);
+                $sessionDuration = $mins . ' Menit';
+            } else {
+                $hours = floor($diffSeconds / 3600);
+                $mins = floor(($diffSeconds % 3600) / 60);
+                $sessionDuration = $hours . ' Jam' . ($mins > 0 ? ' ' . $mins . ' Menit' : '');
+            }
         }
 
         /*
@@ -244,6 +277,9 @@ class DashboardController extends Controller
             'name' => $attendance->member->user->name,
             'member_code' => $attendance->member->member_code,
             'uid' => $attendance->rfidCard->uid ?? '-',
+            'package_name' => $packageName,
+            'package_theme' => $packageTheme,
+            'days_remaining' => $attendance->member?->daysRemaining(),
             'photo' => $photo,
             'time' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('H:i:s')
@@ -251,6 +287,7 @@ class DashboardController extends Controller
             'checkout_time' => $attendance->check_out_at
                 ? $attendance->check_out_at->format('H:i:s')
                 : null,
+            'session_duration' => $sessionDuration,
             'date' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('d M Y')
                 : '-',
