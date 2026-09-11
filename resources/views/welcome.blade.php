@@ -4,52 +4,55 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0F172A">
     <title>GymPulse · Pusat Kebugaran Modern & Smart RFID Gym</title>
     <meta name="description" content="GymPulse adalah pusat kebugaran modern berfasilitas lengkap dengan akses instan teknologi Smart RFID Tap-In, personal trainer bersertifikat, dan komunitas fitness terbaik.">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
-    <!-- Fonts -->
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Inter"', 'sans-serif'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#F7FEE7',
-                            100: '#ECFCCB',
-                            200: '#D9F99D',
-                            500: '#84CC16',
-                            600: '#65A30D',
-                            700: '#4D7C0F',
-                            900: '#1A2E05',
-                        },
-                        slate: {
-                            850: '#151E2E',
-                            900: '#0F172A',
-                            950: '#020617',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Preload LCP Hero Image -->
+    <link rel="preload" as="image" href="{{ asset('images/gym/hero.jpg') }}" fetchpriority="high">
+
+    <!-- Vite Assets (CSS + Tailwind via build) -->
     @vite(['resources/css/app.css', 'resources/css/landing.css'])
-    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
 
     <style>
+        /* Skip to content for accessibility */
+        .skip-to-content {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .skip-to-content:focus {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: auto;
+            height: auto;
+            padding: 12px 20px;
+            background: #0F172A;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            z-index: 9999;
+            outline: 2px solid #84CC16;
+            outline-offset: 2px;
+        }
         .nav-light-blur {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
@@ -60,6 +63,9 @@
 </head>
 
 <body class="landing-page bg-[#F8FAFC] text-slate-800 antialiased selection:bg-lime-200 selection:text-slate-900">
+
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-to-content">Lewati ke konten utama</a>
 
     <!-- =========================================================================
          TOP STATUS BAR
@@ -75,10 +81,11 @@
             </div>
             <div class="flex items-center gap-4 text-[12px]">
                 <span class="hidden md:inline text-slate-400">⚡ Akses Pintu Smart RFID Siap</span>
-                <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20untuk%20mendaftar%20membership" target="_blank" class="text-lime-400 hover:text-lime-300 font-semibold flex items-center gap-1">
-                    <span>Chat WhatsApp: +62 812-3456-7890</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </a>
+    <!-- Top Status Bar WhatsApp Link with aria-label -->
+    <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20untuk%20mendaftar%20membership" target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp GymPulse: +62 812-3456-7890 (buka tab baru)" class="text-lime-400 hover:text-lime-300 font-semibold flex items-center gap-1">
+                        <span>Chat WhatsApp: +62 812-3456-7890</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
             </div>
         </div>
     </div>
@@ -106,11 +113,11 @@
                 </a>
 
                 <!-- Desktop Navigation Links (Clean & Spacious) -->
-                <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-600">
+                <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-600" aria-label="Navigasi Utama">
                     <a href="#tentang" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition-colors whitespace-nowrap">Tentang</a>
                     <a href="#fasilitas" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition-colors whitespace-nowrap">Fasilitas</a>
                     <a href="#rfid-tech" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">
-                        <span class="w-2 h-2 rounded-full bg-lime-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-lime-500" aria-hidden="true"></span>
                         <span>Smart RFID</span>
                     </a>
                     <a href="#program" class="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-100/80 transition-colors whitespace-nowrap">Program</a>
@@ -124,15 +131,15 @@
                     @auth
                         <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard') }}" 
                            class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition whitespace-nowrap shadow-sm">
-                            <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse"></span>
+                            <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse" aria-hidden="true"></span>
                             <span class="hidden sm:inline">Dashboard ({{ Auth::user()->name }})</span>
                             <span class="sm:hidden">Dashboard</span>
-                            <svg class="w-3.5 h-3.5 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="w-3.5 h-3.5 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @else
                         <a href="{{ route('login') }}" 
                            class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:border-slate-300 transition text-xs sm:text-sm font-semibold whitespace-nowrap shadow-2xs">
-                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                             <span>Masuk</span>
                         </a>
 
@@ -143,9 +150,13 @@
                     @endauth
 
                     <!-- Mobile Menu Button -->
-                    <button type="button" id="mobileMenuBtn" aria-label="Buka Menu" class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menuIconClosed"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        <svg class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menuIconOpen"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button type="button" id="mobileMenuBtn" 
+                            aria-label="Buka Menu Navigasi" 
+                            aria-expanded="false" 
+                            aria-controls="mobileMenu" 
+                            class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menuIconClosed" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <svg class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menuIconOpen" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
@@ -180,7 +191,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main-content">
 
         <!-- =========================================================================
              HERO SECTION (LIGHT THEME)
@@ -248,7 +259,12 @@
                     <!-- Right Hero Visual -->
                     <div class="lg:col-span-5 relative">
                         <div class="relative rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-white">
-                            <img src="{{ asset('images/gym/hero.jpg') }}" alt="Pusat Gym Modern GymPulse" class="w-full h-[450px] sm:h-[500px] object-cover">
+                            <img src="{{ asset('images/gym/hero.jpg') }}" 
+                                 alt="Fasilitas gym modern GymPulse dengan peralatan lengkap berstandar internasional" 
+                                 class="w-full h-[450px] sm:h-[500px] object-cover"
+                                 width="900" height="500"
+                                 fetchpriority="high"
+                                 decoding="async">
                             
                             <!-- Bottom floating card -->
                             <div class="absolute bottom-5 left-5 right-5">
@@ -463,7 +479,12 @@
                     <!-- 1. Free Weights -->
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-52 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/facilities.jpg') }}" alt="Free Weights Zone" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/facilities.jpg') }}" 
+                                 alt="Area free weights dan power rack di GymPulse" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="208"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 left-3 px-3 py-1 rounded-md bg-slate-900/80 text-white text-[11px] font-bold">
                                 STRENGTH ZONE
                             </span>
@@ -477,7 +498,12 @@
                     <!-- 2. Cardio -->
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-52 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/hero.jpg') }}" alt="Cardio Zone" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/hero.jpg') }}" 
+                                 alt="Mesin kardio treadmill dan elliptical di GymPulse Cardio Theater" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="208"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 left-3 px-3 py-1 rounded-md bg-slate-900/80 text-white text-[11px] font-bold">
                                 CARDIO THEATER
                             </span>
@@ -491,7 +517,12 @@
                     <!-- 3. Functional Turf -->
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-52 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/facilities.jpg') }}" alt="Functional Turf" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/facilities.jpg') }}" 
+                                 alt="Area functional training dan sled track di GymPulse" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="208"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 left-3 px-3 py-1 rounded-md bg-slate-900/80 text-white text-[11px] font-bold">
                                 FUNCTIONAL ARENA
                             </span>
@@ -794,15 +825,27 @@
                         </div>
 
                         <!-- Form -->
-                        <div class="lg:col-span-6 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="lg:col-span-6 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4" role="form" aria-label="Kalkulator BMI">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="space-y-1">
                                     <label for="bmiHeight" class="text-xs font-semibold text-slate-700">Tinggi Badan (cm)</label>
-                                    <input type="number" id="bmiHeight" placeholder="Contoh: 170" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-lime-600">
+                                    <input type="number" id="bmiHeight" name="bmi-height"
+                                           placeholder="Contoh: 170" 
+                                           min="50" max="300" step="0.1"
+                                           aria-required="true"
+                                           aria-describedby="bmiHeightHint"
+                                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-lime-600">
+                                    <span id="bmiHeightHint" class="sr-only">Masukkan tinggi badan antara 50 hingga 300 sentimeter</span>
                                 </div>
                                 <div class="space-y-1">
                                     <label for="bmiWeight" class="text-xs font-semibold text-slate-700">Berat Badan (kg)</label>
-                                    <input type="number" id="bmiWeight" placeholder="Contoh: 65" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-lime-600">
+                                    <input type="number" id="bmiWeight" name="bmi-weight"
+                                           placeholder="Contoh: 65" 
+                                           min="10" max="500" step="0.1"
+                                           aria-required="true"
+                                           aria-describedby="bmiWeightHint"
+                                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:outline-none focus:border-lime-600">
+                                    <span id="bmiWeightHint" class="sr-only">Masukkan berat badan antara 10 hingga 500 kilogram</span>
                                 </div>
                             </div>
 
@@ -811,7 +854,7 @@
                             </button>
 
                             <!-- Result -->
-                            <div id="bmiResultBox" class="hidden p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+                            <div id="bmiResultBox" class="hidden p-4 rounded-xl bg-white border border-slate-200 space-y-2" aria-live="polite" aria-atomic="true">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-slate-500">Skor BMI:</span>
                                     <span id="bmiScoreText" class="font-display font-extrabold text-2xl text-slate-900">22.4</span>
@@ -853,7 +896,12 @@
                     
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-64 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/trainer.jpg') }}" alt="Coach Kevin Pratama" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/trainer.jpg') }}" 
+                                 alt="Head Coach Kevin Pratama, S.Or — Spesialis Hypertrophy & Body Recomposition" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="256"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 right-3 px-3 py-1 rounded-md bg-slate-900 text-white text-[11px] font-bold">
                                 HEAD COACH
                             </span>
@@ -867,7 +915,12 @@
 
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-64 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/facilities.jpg') }}" alt="Coach Sarah Amanda" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/facilities.jpg') }}" 
+                                 alt="Coach Sarah Amanda, CPT — Fat Loss Specialist & Functional Training Wanita" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="256"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 right-3 px-3 py-1 rounded-md bg-slate-900 text-white text-[11px] font-bold">
                                 FAT LOSS SPECIALIST
                             </span>
@@ -881,7 +934,12 @@
 
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-64 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/hero.jpg') }}" alt="Coach Dimas Wicaksono" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <img src="{{ asset('images/gym/hero.jpg') }}" 
+                                 alt="Coach Dimas Wicaksono — Strength & Powerlifting Specialist" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 width="600" height="256"
+                                 loading="lazy"
+                                 decoding="async">
                             <span class="absolute top-3 right-3 px-3 py-1 rounded-md bg-slate-900 text-white text-[11px] font-bold">
                                 STRENGTH COACH
                             </span>
@@ -988,44 +1046,60 @@
                     </h2>
                 </div>
 
-                <div class="space-y-3.5">
+                <div class="space-y-3.5" role="list">
                     
-                    <div class="faq-clean-item active">
-                        <button class="faq-clean-header" onclick="toggleFaq(this)">
+                    <div class="faq-clean-item active" role="listitem">
+                        <button class="faq-clean-header" 
+                                onclick="toggleFaq(this)" 
+                                aria-expanded="true" 
+                                aria-controls="faq-answer-1"
+                                type="button">
                             <span>Bagaimana cara mendaftar membership di GymPulse?</span>
-                            <div class="faq-clean-icon">↓</div>
+                            <div class="faq-clean-icon" aria-hidden="true">↓</div>
                         </button>
-                        <div class="faq-clean-content">
+                        <div class="faq-clean-content" id="faq-answer-1" role="region" aria-label="Jawaban: Cara mendaftar membership">
                             Pendaftaran sangat mudah! Anda dapat mendaftar langsung di resepsionis GymPulse atau menghubungi CS kami via WhatsApp. Setelah pendaftaran selesai, Anda akan menerima kartu RFID eksklusif dan akun portal member.
                         </div>
                     </div>
 
-                    <div class="faq-clean-item">
-                        <button class="faq-clean-header" onclick="toggleFaq(this)">
+                    <div class="faq-clean-item" role="listitem">
+                        <button class="faq-clean-header" 
+                                onclick="toggleFaq(this)" 
+                                aria-expanded="false" 
+                                aria-controls="faq-answer-2"
+                                type="button">
                             <span>Bagaimana cara kerja kartu RFID untuk masuk gym?</span>
-                            <div class="faq-clean-icon">↓</div>
+                            <div class="faq-clean-icon" aria-hidden="true">↓</div>
                         </button>
-                        <div class="faq-clean-content">
+                        <div class="faq-clean-content" id="faq-answer-2" role="region" aria-label="Jawaban: Cara kerja kartu RFID">
                             Cukup tempelkan kartu RFID Anda pada alat scanner di gate masuk. Pintu gate akan terbuka otomatis dalam 0.5 detik, absensi Anda tercatat di sistem, dan notifikasi konfirmasi dikirimkan ke WhatsApp Anda.
                         </div>
                     </div>
 
-                    <div class="faq-clean-item">
-                        <button class="faq-clean-header" onclick="toggleFaq(this)">
+                    <div class="faq-clean-item" role="listitem">
+                        <button class="faq-clean-header" 
+                                onclick="toggleFaq(this)" 
+                                aria-expanded="false" 
+                                aria-controls="faq-answer-3"
+                                type="button">
                             <span>Apakah pemula akan dibantu cara memakai alat gym?</span>
-                            <div class="faq-clean-icon">↓</div>
+                            <div class="faq-clean-icon" aria-hidden="true">↓</div>
                         </button>
-                        <div class="faq-clean-content">
+                        <div class="faq-clean-content" id="faq-answer-3" role="region" aria-label="Jawaban: Bantuan untuk pemula">
                             Tentu! Staf dan trainer kami selalu siap membantu member baru untuk memahami cara menggunakan setiap peralatan secara aman dan tepat.
                         </div>
                     </div>
 
-                    <div class="faq-clean-item">
-                        <button class="faq-clean-header" onclick="toggleFaq(this)">
+                    <div class="faq-clean-item" role="listitem">
+                        <button class="faq-clean-header" 
+                                onclick="toggleFaq(this)" 
+                                aria-expanded="false" 
+                                aria-controls="faq-answer-4"
+                                type="button">
                             <span>Bagaimana jika kartu RFID saya hilang?</span>
-                            <div class="faq-clean-icon">↓</div>
+                            <div class="faq-clean-icon" aria-hidden="true">↓</div>
                         </button>
-                        <div class="faq-clean-content">
+                        <div class="faq-clean-content" id="faq-answer-4" role="region" aria-label="Jawaban: Kartu RFID hilang">
                             Segera laporkan ke admin resepsionis. Kartu lama Anda akan diblokir di sistem agar tidak bisa digunakan orang lain, dan kami akan menerbitkan kartu baru untuk Anda.
                         </div>
                     </div>
@@ -1125,22 +1199,26 @@
 
                 <div class="space-y-2.5">
                     <div class="font-display font-bold text-sm text-slate-900">Navigasi</div>
-                    <ul class="space-y-1.5">
-                        <li><a href="#tentang" class="hover:text-slate-900 transition-colors">Tentang Kami</a></li>
-                        <li><a href="#fasilitas" class="hover:text-slate-900 transition-colors">Fasilitas</a></li>
-                        <li><a href="#program" class="hover:text-slate-900 transition-colors">Program Latihan</a></li>
-                        <li><a href="#paket" class="hover:text-slate-900 transition-colors">Paket Member</a></li>
-                    </ul>
+                    <nav aria-label="Navigasi Footer Halaman">
+                        <ul class="space-y-1.5">
+                            <li><a href="#tentang" class="hover:text-slate-900 transition-colors">Tentang Kami</a></li>
+                            <li><a href="#fasilitas" class="hover:text-slate-900 transition-colors">Fasilitas</a></li>
+                            <li><a href="#program" class="hover:text-slate-900 transition-colors">Program Latihan</a></li>
+                            <li><a href="#paket" class="hover:text-slate-900 transition-colors">Paket Member</a></li>
+                        </ul>
+                    </nav>
                 </div>
 
                 <div class="space-y-2.5">
                     <div class="font-display font-bold text-sm text-slate-900">Fitur & Layanan</div>
-                    <ul class="space-y-1.5">
-                        <li><a href="#rfid-tech" class="hover:text-slate-900 transition-colors">Teknologi RFID Gate</a></li>
-                        <li><a href="#kalkulator-bmi" class="hover:text-slate-900 transition-colors">Kalkulator BMI</a></li>
-                        <li><a href="#pelatih" class="hover:text-slate-900 transition-colors">Trainer Profesional</a></li>
-                        <li><a href="#jadwal" class="hover:text-slate-900 transition-colors">Jadwal Operasional</a></li>
-                    </ul>
+                    <nav aria-label="Navigasi Footer Fitur">
+                        <ul class="space-y-1.5">
+                            <li><a href="#rfid-tech" class="hover:text-slate-900 transition-colors">Teknologi RFID Gate</a></li>
+                            <li><a href="#kalkulator-bmi" class="hover:text-slate-900 transition-colors">Kalkulator BMI</a></li>
+                            <li><a href="#pelatih" class="hover:text-slate-900 transition-colors">Trainer Profesional</a></li>
+                            <li><a href="#jadwal" class="hover:text-slate-900 transition-colors">Jadwal Operasional</a></li>
+                        </ul>
+                    </nav>
                 </div>
 
                 <div class="space-y-3">
@@ -1170,26 +1248,37 @@
          JAVASCRIPT
          ========================================================================= -->
     <script>
-        // Mobile Menu
+        // Mobile Menu — with aria-expanded toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         const menuIconClosed = document.getElementById('menuIconClosed');
         const menuIconOpen = document.getElementById('menuIconOpen');
 
         mobileMenuBtn.addEventListener('click', () => {
+            const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+            mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
+            mobileMenuBtn.setAttribute('aria-label', isExpanded ? 'Buka Menu Navigasi' : 'Tutup Menu Navigasi');
             mobileMenu.classList.toggle('hidden');
             menuIconClosed.classList.toggle('hidden');
             menuIconOpen.classList.toggle('hidden');
         });
 
-        // FAQ Toggle
+        // FAQ Toggle — with aria-expanded toggle
         function toggleFaq(btn) {
             const item = btn.closest('.faq-clean-item');
             const isActive = item.classList.contains('active');
             
-            document.querySelectorAll('.faq-clean-item').forEach(el => el.classList.remove('active'));
+            // Close all
+            document.querySelectorAll('.faq-clean-item').forEach(el => {
+                el.classList.remove('active');
+                const elBtn = el.querySelector('.faq-clean-header');
+                if (elBtn) elBtn.setAttribute('aria-expanded', 'false');
+            });
+
+            // Open clicked if it was closed
             if (!isActive) {
                 item.classList.add('active');
+                btn.setAttribute('aria-expanded', 'true');
             }
         }
 
