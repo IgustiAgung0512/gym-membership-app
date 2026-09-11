@@ -76,6 +76,19 @@
         id="rfid-checkin-data"
         class="hidden p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-slate-100/50 border border-slate-200/80 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md"
     >
+        {{-- Background Themed Topographic & Fitness Wave Pattern --}}
+        <div class="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-45">
+            <svg class="absolute -right-12 -top-12 w-[520px] h-[340px] transition-all duration-700" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path class="rfid-topo-path" d="M30 0 C 140 70, 190 30, 310 110 C 410 170, 450 110, 500 190" stroke="#84cc16" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 6" opacity="0.45"/>
+                <path class="rfid-topo-path" d="M0 50 C 110 130, 210 70, 350 170 C 430 230, 470 150, 520 250" stroke="#84cc16" stroke-width="1.75" opacity="0.35"/>
+                <path class="rfid-topo-path" d="M70 90 C 170 170, 250 110, 370 210 C 440 270, 480 190, 530 290" stroke="#84cc16" stroke-width="2.5" opacity="0.5"/>
+                <path class="rfid-topo-path" d="M110 130 C 210 210, 290 150, 410 250 C 460 300, 500 230, 550 330" stroke="#84cc16" stroke-width="1.5" opacity="0.3"/>
+                <path class="rfid-topo-path" d="M150 170 C 250 250, 330 190, 450 290 C 490 330, 520 270, 570 370" stroke="#84cc16" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+                <circle class="rfid-topo-path" cx="410" cy="70" r="55" stroke="#84cc16" stroke-width="1" stroke-dasharray="3 5" opacity="0.25"/>
+                <circle class="rfid-topo-path" cx="410" cy="70" r="105" stroke="#84cc16" stroke-width="1" opacity="0.15"/>
+            </svg>
+        </div>
+
         <div class="flex flex-col md:flex-row md:items-center gap-5 lg:gap-6 relative z-10">
             {{-- FOTO MEMBER --}}
             <div class="shrink-0 flex items-center justify-center self-center md:self-auto">
@@ -115,7 +128,7 @@
                         </span>
                         <span 
                             id="rfid-package-badge"
-                            class="text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 shadow-2xs"
+                            class="text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center shadow-2xs"
                         >
                             -
                         </span>
@@ -131,26 +144,26 @@
                 {{-- Chip Data Kehadiran --}}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-0.5 text-xs">
                     <div class="p-2.5 sm:p-3 rounded-xl bg-white/90 hover:bg-white border border-slate-200/90 shadow-2xs transition">
-                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1">
-                            <span>💳</span> UID Kartu
+                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                            UID Kartu
                         </p>
                         <p id="rfid-member-uid" class="font-mono font-bold text-xs sm:text-sm text-slate-900 mt-1 truncate">-</p>
                     </div>
                     <div class="p-2.5 sm:p-3 rounded-xl bg-white/90 hover:bg-white border border-slate-200/90 shadow-2xs transition">
-                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1">
-                            <span>📥</span> Check-In
+                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                            Check-In
                         </p>
                         <p id="rfid-member-time" class="font-mono font-bold text-xs sm:text-sm text-slate-900 mt-1">-</p>
                     </div>
                     <div class="p-2.5 sm:p-3 rounded-xl bg-white/90 hover:bg-white border border-slate-200/90 shadow-2xs transition">
-                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1">
-                            <span>📤</span> Check-Out
+                        <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                            Check-Out
                         </p>
                         <p id="rfid-member-checkout-time" class="font-mono font-bold text-xs sm:text-sm text-slate-900 mt-1">-</p>
                     </div>
                     <div id="rfid-session-box" class="p-2.5 sm:p-3 rounded-xl bg-amber-50/90 hover:bg-amber-50 border border-amber-300/80 shadow-2xs transition hidden">
-                        <p class="text-[10px] uppercase font-bold tracking-wider text-amber-800 flex items-center gap-1 font-bold">
-                            <span>⏱️</span> Durasi Sesi
+                        <p class="text-[10px] uppercase font-bold tracking-wider text-amber-800 font-bold">
+                            Durasi Sesi
                         </p>
                         <p id="rfid-session-duration" class="font-mono font-extrabold text-xs sm:text-sm text-amber-950 mt-1">-</p>
                     </div>
@@ -262,10 +275,10 @@
 
         <div class="pt-4 grid grid-cols-2 gap-2">
             <a href="{{ route('admin.pos.index') }}" class="flex items-center justify-center gap-1.5 rounded-xl bg-lime-500 text-slate-950 text-xs font-bold py-2.5 hover:bg-lime-400 transition shadow-sm">
-                <span>🛒 Kasir POS</span>
+                <span>Kasir POS</span>
             </a>
             <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold py-2.5 hover:bg-slate-800 transition shadow-sm">
-                <span>📋 Riwayat Toko</span>
+                <span>Riwayat Toko</span>
             </a>
         </div>
     </div>
@@ -296,7 +309,7 @@
                         <p class="text-xs text-slate-400 font-mono">{{ $a->member->member_code }}</p>
                     </div>
                     <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-md shrink-0">
-                        {{ $a->check_in_at->format('H:i') }} WIB
+                        {{ $a->check_in_time?->format('H:i') ?? '-' }}
                     </span>
                 </div>
             @empty
@@ -306,28 +319,29 @@
     </div>
 
     <div class="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
-        <h2 class="font-display font-bold text-base text-slate-900 mb-4 flex items-center justify-between">
-            <span>Member Terbaru</span>
-            <span class="text-xs font-normal text-slate-400">Baru Bergabung</span>
-        </h2>
+        <h2 class="font-display font-bold text-base text-slate-900 mb-4">Member Baru</h2>
         <div class="space-y-3">
             @forelse ($recentMembers as $m)
-                <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
-                    @if ($m->photo)
-                        <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 hidden items-center justify-center font-bold text-sm shrink-0">
-                            {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                <div class="flex items-center justify-between text-sm p-2 rounded-xl hover:bg-slate-50 transition">
+                    <div class="flex items-center gap-3 min-w-0">
+                        @if ($m->photo)
+                            <img src="{{ route('admin.members.photo', $m) }}" alt="{{ $m->user->name }}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 hidden items-center justify-center font-bold text-sm shrink-0">
+                                {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                            </div>
+                        @else
+                            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm shrink-0">
+                                {{ strtoupper(substr($m->user->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <div class="min-w-0">
+                            <p class="text-slate-900 font-semibold truncate">{{ $m->user->name }}</p>
+                            <p class="text-xs text-slate-400 font-mono">{{ $m->member_code }}</p>
                         </div>
-                    @else
-                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-sm shrink-0">
-                            {{ strtoupper(substr($m->user->name, 0, 1)) }}
-                        </div>
-                    @endif
-                    <div class="min-w-0 flex-1">
-                        <p class="text-slate-900 font-semibold truncate">{{ $m->user->name }}</p>
-                        <p class="text-xs text-slate-500">{{ $m->package->name ?? '-' }}</p>
                     </div>
-                    <span class="text-xs text-slate-400 shrink-0">{{ $m->join_date->format('d M Y') }}</span>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full {{ $m->status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600' }} shrink-0">
+                        {{ ucfirst($m->status) }}
+                    </span>
                 </div>
             @empty
                 <p class="text-sm text-slate-400 py-4 text-center">Belum ada member terdaftar.</p>
@@ -337,7 +351,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const emptyState = document.getElementById('rfid-empty-state');
     const warningState = document.getElementById('rfid-warning-state');
     const checkinData = document.getElementById('rfid-checkin-data');
@@ -345,25 +359,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const warningTitle = document.getElementById('rfid-warning-title');
     const warningDetail = document.getElementById('rfid-warning-detail');
 
-    const memberPhoto = document.getElementById('rfid-member-photo');
-    const memberPhotoWrapper = document.getElementById('rfid-member-photo-wrapper');
-    const memberInitial = document.getElementById('rfid-member-initial');
-
     const memberName = document.getElementById('rfid-member-name');
     const memberCode = document.getElementById('rfid-member-code');
     const memberUid = document.getElementById('rfid-member-uid');
     const memberTime = document.getElementById('rfid-member-time');
     const memberCheckoutTime = document.getElementById('rfid-member-checkout-time');
     const memberDate = document.getElementById('rfid-member-date');
-    const memberValidity = document.getElementById('rfid-member-validity');
+    const memberPhoto = document.getElementById('rfid-member-photo');
+    const memberInitial = document.getElementById('rfid-member-initial');
+    const memberPhotoWrapper = document.getElementById('rfid-member-photo-wrapper');
     const packageBadge = document.getElementById('rfid-package-badge');
-    const sessionBox = document.getElementById('rfid-session-box');
-    const sessionDurationEl = document.getElementById('rfid-session-duration');
-    const ambientGlow = document.getElementById('rfid-ambient-glow');
-
+    const memberValidity = document.getElementById('rfid-member-validity');
     const statusBadge = document.getElementById('rfid-status-badge');
     const statusDot = document.getElementById('rfid-status-dot');
     const statusText = document.getElementById('rfid-status-text');
+    const sessionBox = document.getElementById('rfid-session-box');
+    const sessionDurationEl = document.getElementById('rfid-session-duration');
 
     const liveIndicator = document.getElementById('rfid-live-indicator');
     const liveDot = document.getElementById('rfid-live-dot');
@@ -376,32 +387,32 @@ document.addEventListener('DOMContentLoaded', function () {
         vip: {
             cardClasses: 'p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-purple-50/20 border border-purple-200/90 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md',
             photoWrapperClasses: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-slate-100 ring-4 ring-offset-2 ring-purple-300/60 border border-purple-300 flex items-center justify-center text-purple-900 shadow-sm transition-all duration-300 group hover:scale-105',
-            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-purple-100 text-purple-900 border border-purple-300/80 shadow-2xs',
-            badgeIcon: '✨',
+            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center bg-purple-100 text-purple-900 border border-purple-300/80 shadow-2xs uppercase tracking-wide',
+            strokeColor: '#a855f7',
         },
         gold: {
             cardClasses: 'p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-amber-50/20 border border-amber-200/90 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md',
             photoWrapperClasses: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-slate-100 ring-4 ring-offset-2 ring-amber-300/60 border border-amber-300 flex items-center justify-center text-amber-900 shadow-sm transition-all duration-300 group hover:scale-105',
-            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300/80 shadow-2xs',
-            badgeIcon: '👑',
+            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center bg-amber-100 text-amber-900 border border-amber-300/80 shadow-2xs uppercase tracking-wide',
+            strokeColor: '#f59e0b',
         },
         silver: {
             cardClasses: 'p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-cyan-50/20 border border-cyan-200/90 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md',
             photoWrapperClasses: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-slate-100 ring-4 ring-offset-2 ring-cyan-300/60 border border-cyan-300 flex items-center justify-center text-cyan-900 shadow-sm transition-all duration-300 group hover:scale-105',
-            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-cyan-100 text-cyan-900 border border-cyan-300/80 shadow-2xs',
-            badgeIcon: '🛡️',
+            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center bg-cyan-100 text-cyan-900 border border-cyan-300/80 shadow-2xs uppercase tracking-wide',
+            strokeColor: '#06b6d4',
         },
         student: {
             cardClasses: 'p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-rose-50/20 border border-rose-200/90 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md',
             photoWrapperClasses: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-slate-100 ring-4 ring-offset-2 ring-rose-300/60 border border-rose-300 flex items-center justify-center text-rose-900 shadow-sm transition-all duration-300 group hover:scale-105',
-            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-rose-100 text-rose-900 border border-rose-300/80 shadow-2xs',
-            badgeIcon: '🎓',
+            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center bg-rose-100 text-rose-900 border border-rose-300/80 shadow-2xs uppercase tracking-wide',
+            strokeColor: '#f43f5e',
         },
         basic: {
             cardClasses: 'p-5 sm:p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-white via-slate-50/70 to-lime-50/20 border border-lime-200/90 transition-all duration-500 relative overflow-hidden shadow-sm hover:shadow-md',
             photoWrapperClasses: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden bg-slate-100 ring-4 ring-offset-2 ring-lime-300/60 border border-lime-300 flex items-center justify-center text-lime-900 shadow-sm transition-all duration-300 group hover:scale-105',
-            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-lime-100 text-lime-900 border border-lime-300/80 shadow-2xs',
-            badgeIcon: '⚡',
+            badgeClasses: 'text-[11px] sm:text-xs font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center bg-lime-100 text-lime-900 border border-lime-300/80 shadow-2xs uppercase tracking-wide',
+            strokeColor: '#84cc16',
         }
     };
 
@@ -534,9 +545,15 @@ document.addEventListener('DOMContentLoaded', function () {
             checkinData.className = currentTheme.cardClasses;
             memberPhotoWrapper.className = currentTheme.photoWrapperClasses;
 
+            // Update warna SVG contour waves sesuai warna aksen tema
+            const topoPaths = document.querySelectorAll('.rfid-topo-path');
+            topoPaths.forEach(el => {
+                el.setAttribute('stroke', currentTheme.strokeColor || '#84cc16');
+            });
+
             if (packageBadge) {
                 packageBadge.className = currentTheme.badgeClasses;
-                packageBadge.innerHTML = `<span>${currentTheme.badgeIcon}</span> <span>${escapeHtml(data.package_name || 'Standard')}</span>`;
+                packageBadge.textContent = data.package_name || 'Standard';
             }
 
             // Info Masa Aktif
