@@ -290,9 +290,13 @@ class DashboardController extends Controller
             return response()->json(['success' => false], 404);
         }
 
-        $latest = $member->attendances()->latest('check_in_at')->first();
+        $attendances = $member->attendances()->latest('check_in_at')->limit(10)->get();
+        $latest = $attendances->first();
         $visitsThisMonth = $member->attendances()->whereMonth('check_in_at', now()->month)->count();
         $totalVisits = $member->attendances()->count();
+
+        $targetVisits = 12;
+        $progressPercent = min(round(($visitsThisMonth / $targetVisits) * 100), 100);
 
         return response()->json([
             'success' => true,
@@ -305,6 +309,20 @@ class DashboardController extends Controller
             'duration_formatted' => $latest ? $latest->duration_formatted : '-',
             'visits_this_month' => $visitsThisMonth,
             'total_visits' => $totalVisits,
+            'progress_percent' => $progressPercent,
+            'attendances' => $attendances->map(function ($a) {
+                return [
+                    'id' => $a->id,
+                    'date_formatted' => $a->check_in_at->translatedFormat('l, d F Y'),
+                    'method' => $a->method,
+                    'method_label' => $a->method === 'rfid' ? 'Kartu RFID' : 'Manual',
+                    'check_in_time' => $a->check_in_at->format('H:i') . ' WIB',
+                    'check_in_timestamp' => $a->check_in_at->timestamp,
+                    'check_out_time' => $a->check_out_at ? $a->check_out_at->format('H:i') . ' WIB' : null,
+                    'is_training' => (!$a->check_out_at && $a->check_in_at->isToday()),
+                    'duration_formatted' => $a->duration_formatted,
+                ];
+            }),
         ]);
     }
 }

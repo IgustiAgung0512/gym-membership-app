@@ -536,21 +536,21 @@
                     <div>
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Target Latihan Bulan Ini</p>
-                            <span class="text-xs font-bold text-lime-800 bg-lime-100 px-2.5 py-0.5 rounded-full">
+                            <span id="stat-visits-month-badge" class="text-xs font-bold text-lime-800 bg-lime-100 px-2.5 py-0.5 rounded-full">
                                 {{ $visitsThisMonth }}/{{ $targetVisits }} Sesi
                             </span>
                         </div>
                         <p class="font-display text-2xl font-extrabold text-slate-900 mt-2">
-                            {{ $progressPercent }}%
+                            <span id="stat-progress-percent">{{ $progressPercent }}</span>%
                             <span class="text-xs text-slate-500 font-sans font-normal">Tercapai</span>
                         </p>
                     </div>
                     <div class="mt-3">
                         <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="bg-lime-500 h-2 rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
+                            <div id="stat-progress-bar" class="bg-lime-500 h-2 rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-1.5">
-                            Total kehadiran keseluruhan: <strong>{{ $totalVisits }} kali</strong>
+                            Total kehadiran keseluruhan: <strong id="stat-total-visits">{{ $totalVisits }} kali</strong>
                         </p>
                     </div>
                 </div>
@@ -569,8 +569,11 @@
                     </span>
                 </div>
 
-                <div class="space-y-3">
+                <div id="member-attendance-history-list" class="space-y-3">
                     @forelse ($attendances as $a)
+                        @php
+                            $isTraining = (!$a->check_out_at && $a->check_in_at->isToday());
+                        @endphp
                         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition space-y-2">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
@@ -622,7 +625,7 @@
 
                                 <div class="bg-white p-2 rounded-lg border border-slate-200/70">
                                     <span class="text-[10px] uppercase font-semibold text-slate-400 block">Durasi Sesi</span>
-                                    <span class="font-mono font-extrabold text-lime-700">{{ $a->duration_formatted }}</span>
+                                    <span class="font-mono font-extrabold text-lime-700 {{ $isTraining ? 'live-duration-timer' : '' }}" {!! $isTraining ? 'data-start-time="' . $a->check_in_at->timestamp . '"' : '' !!}>{{ $a->duration_formatted }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1673,7 +1676,125 @@
 document.addEventListener('DOMContentLoaded', function () {
     const checkinEl = document.getElementById('member-card-checkin');
     const checkoutEl = document.getElementById('member-card-checkout');
-    let lastAttendanceState = '';
+    const historyListContainer = document.getElementById('member-attendance-history-list');
+    const badgeVisitsMonth = document.getElementById('stat-visits-month-badge');
+    const textProgressPercent = document.getElementById('stat-progress-percent');
+    const barProgress = document.getElementById('stat-progress-bar');
+    const textTotalVisits = document.getElementById('stat-total-visits');
+
+    let lastAttendanceSignature = '';
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatDuration(totalSeconds) {
+        if (totalSeconds < 0) totalSeconds = 0;
+        if (totalSeconds < 60) return totalSeconds + ' Detik';
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const parts = [];
+        if (hours > 0) parts.push(hours + ' Jam');
+        if (minutes > 0) parts.push(minutes + ' Menit');
+        if (seconds > 0) parts.push(seconds + ' Detik');
+        return parts.join(' ');
+    }
+
+    function tickLiveDurations() {
+        const liveTimerEls = document.querySelectorAll('.live-duration-timer');
+        if (!liveTimerEls.length) return;
+        const nowTimestamp = Math.floor(Date.now() / 1000);
+
+        liveTimerEls.forEach(el => {
+            const start = parseInt(el.getAttribute('data-start-time'), 10);
+            if (start && !isNaN(start)) {
+                const diff = nowTimestamp - start;
+                el.textContent = formatDuration(diff);
+            }
+        });
+    }
+
+    setInterval(tickLiveDurations, 1000);
+
+    function renderAttendanceHistory(items) {
+        if (!historyListContainer || !Array.isArray(items)) return;
+
+        if (items.length === 0) {
+            historyListContainer.innerHTML = `
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    <p class="text-2xl mb-1">🏷️</p>
+                    <p class="font-bold text-slate-700">Belum ada riwayat presensi tercatat.</p>
+                    <p class="mt-1 text-slate-500">Cukup tempelkan kartu RFID Anda di gate scanner saat tiba dan selesai latihan di gym!</p>
+                </div>
+            `;
+            return;
+        }
+
+        historyListContainer.innerHTML = items.map(a => {
+            const isTraining = a.is_training;
+            const iconHtml = isTraining
+                ? `<div class="w-9 h-9 rounded-xl bg-lime-400 text-slate-950 animate-pulse flex items-center justify-center shrink-0"><span class="text-xs font-black">🔥</span></div>`
+                : `<div class="w-9 h-9 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                   </div>`;
+
+            const badgeHtml = isTraining
+                ? `<span class="text-[11px] font-black text-slate-950 bg-lime-400 px-2.5 py-1 rounded-lg shadow-sm animate-pulse inline-flex items-center gap-1"><span>🔥 Sedang Latihan</span></span>`
+                : `<span class="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs inline-flex items-center gap-1"><span>✓ Selesai</span></span>`;
+
+            const checkoutValHtml = a.check_out_time
+                ? `<span class="font-mono font-bold text-slate-800">${escapeHtml(a.check_out_time)}</span>`
+                : `<span class="font-bold text-lime-700 italic">Belum Tap Out</span>`;
+
+            const durationClass = isTraining ? 'live-duration-timer' : '';
+            const durationDataAttr = isTraining ? `data-start-time="${a.check_in_timestamp}"` : '';
+
+            return `
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            ${iconHtml}
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">${escapeHtml(a.date_formatted)}</p>
+                                <p class="text-xs text-slate-500">
+                                    Akses: <span class="font-medium text-slate-700">${escapeHtml(a.method_label)}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div>${badgeHtml}</div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200/60 grid grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                            <span class="text-[10px] uppercase font-semibold text-slate-400 block">Jam Masuk</span>
+                            <span class="font-mono font-bold text-slate-800">${escapeHtml(a.check_in_time)}</span>
+                        </div>
+
+                        <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                            <span class="text-[10px] uppercase font-semibold text-slate-400 block">Jam Keluar</span>
+                            ${checkoutValHtml}
+                        </div>
+
+                        <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+                            <span class="text-[10px] uppercase font-semibold text-slate-400 block">Durasi Sesi</span>
+                            <span class="font-mono font-extrabold text-lime-700 ${durationClass}" ${durationDataAttr}>${escapeHtml(a.duration_formatted)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
     async function pollMemberAttendance() {
         if (document.hidden) return;
@@ -1685,38 +1806,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!response.ok) return;
             const data = await response.json();
+            if (!data.success) return;
 
-            if (!data.success || !data.has_attendance) return;
+            // Signature untuk mendeteksi perubahan data presensi
+            const signature = (data.attendances || []).map(a => `${a.id}_${a.check_in_time}_${a.check_out_time || ''}_${a.is_training ? '1' : '0'}`).join('|');
 
-            const stateKey = `${data.check_in_time}_${data.check_out_time || ''}_${data.is_training ? '1' : '0'}`;
-            if (stateKey === lastAttendanceState) return;
-            lastAttendanceState = stateKey;
+            if (signature !== lastAttendanceSignature) {
+                lastAttendanceSignature = signature;
 
-            if (checkinEl) {
-                let text = data.check_in_time;
-                if (!data.is_today && data.check_in_date) {
-                    text += ` <span class="text-[10px] text-slate-400 font-normal">(${data.check_in_date})</span>`;
-                }
-                checkinEl.innerHTML = text;
-            }
-
-            if (checkoutEl) {
-                if (data.check_out_time) {
-                    let text = data.check_out_time;
-                    if (!data.is_today && data.check_in_date) {
+                // 1. Update Card Member Pass
+                if (checkinEl) {
+                    let text = data.check_in_time || '-';
+                    if (!data.is_today && data.check_in_date && data.check_in_time !== '-') {
                         text += ` <span class="text-[10px] text-slate-400 font-normal">(${data.check_in_date})</span>`;
                     }
-                    checkoutEl.innerHTML = text;
-                } else if (data.is_training) {
-                    checkoutEl.innerHTML = `<span class="text-lime-400 font-bold text-xs inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>Sedang Latihan</span>`;
-                } else {
-                    checkoutEl.innerHTML = `<span class="text-slate-500 font-normal">-</span>`;
+                    checkinEl.innerHTML = text;
+                }
+
+                if (checkoutEl) {
+                    if (data.check_out_time) {
+                        let text = data.check_out_time;
+                        if (!data.is_today && data.check_in_date) {
+                            text += ` <span class="text-[10px] text-slate-400 font-normal">(${data.check_in_date})</span>`;
+                        }
+                        checkoutEl.innerHTML = text;
+                    } else if (data.is_training) {
+                        checkoutEl.innerHTML = `<span class="text-lime-400 font-bold text-xs inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>Sedang Latihan</span>`;
+                    } else {
+                        checkoutEl.innerHTML = `<span class="text-slate-500 font-normal">-</span>`;
+                    }
+                }
+
+                // 2. Update Stats Target Latihan
+                if (badgeVisitsMonth && data.visits_this_month !== undefined) {
+                    badgeVisitsMonth.textContent = `${data.visits_this_month}/12 Sesi`;
+                }
+                if (textProgressPercent && data.progress_percent !== undefined) {
+                    textProgressPercent.textContent = data.progress_percent;
+                }
+                if (barProgress && data.progress_percent !== undefined) {
+                    barProgress.style.width = `${data.progress_percent}%`;
+                }
+                if (textTotalVisits && data.total_visits !== undefined) {
+                    textTotalVisits.textContent = `${data.total_visits} kali`;
+                }
+
+                // 3. Render Riwayat Presensi & Sesi Latihan
+                if (Array.isArray(data.attendances)) {
+                    renderAttendanceHistory(data.attendances);
                 }
             }
         } catch (e) {}
     }
 
-    setInterval(pollMemberAttendance, 3000);
+    setInterval(pollMemberAttendance, 2000);
 });
 </script>
 @endsection
