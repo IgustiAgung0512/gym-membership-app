@@ -1588,10 +1588,15 @@
                         </div>
 
                         <!-- Next Actions -->
-                        <div class="pt-2">
+                        <div class="pt-2 space-y-2">
                             <a href="{{ route('login') }}" 
                                class="w-full py-3 px-4 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-lime-500/20">
                                 <span>Masuk ke Portal Member &rarr;</span>
+                            </a>
+                            <a :href="'https://wa.me/?text=' + encodeURIComponent('Halo Admin GymPulse, saya ' + successData.member_name + ' (' + successData.member_number + ') telah menyelesaikan pendaftaran & pembayaran online via QRIS untuk paket ' + successData.package_name + '. Saya ingin konfirmasi pengambilan kartu RFID. Terima kasih!')" 
+                               target="_blank"
+                               class="w-full py-2.5 px-4 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-2 transition">
+                                <span>💬 Buka WhatsApp / Chat Front-Desk</span>
                             </a>
                         </div>
 

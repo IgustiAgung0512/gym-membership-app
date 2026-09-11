@@ -333,14 +333,12 @@ class OnlineRegistrationController extends Controller
                 'paid_at' => now(),
             ]);
 
-            // 5. Kirim notifikasi WhatsApp pendaftaran sukses di latar belakang
-            dispatch(function () use ($member) {
-                try {
-                    app(WhatsAppService::class)->sendRegistrationNotice($member->fresh(['user', 'package']));
-                } catch (\Throwable $e) {
-                    Log::warning('Gagal kirim notifikasi WA pendaftaran online: ' . $e->getMessage());
-                }
-            })->afterResponse();
+            // 5. Kirim notifikasi WhatsApp pendaftaran sukses
+            try {
+                app(WhatsAppService::class)->sendRegistrationNotice($member->fresh(['user', 'package']));
+            } catch (\Throwable $e) {
+                Log::warning('Gagal kirim notifikasi WA pendaftaran online: ' . $e->getMessage());
+            }
 
             return $member;
         });

@@ -19,30 +19,33 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->apiUrl = config('services.whatsapp.url', 'https://api.fonnte.com/send');
-        $this->token = config('services.whatsapp.token');
+        $this->apiUrl = config('services.whatsapp.url') ?: env('WHATSAPP_API_URL', 'https://api.fonnte.com/send');
+        $this->token = config('services.whatsapp.token') ?: env('WHATSAPP_API_TOKEN') ?: env('WHATSAPP_TOKEN') ?: env('FONNTE_TOKEN');
     }
 
     public function sendRegistrationNotice(Member $member): bool
     {
         $expire = $member->expire_date?->translatedFormat('d M Y') ?? '-';
 
-        $loginInfo = '';
+        $loginInfo = "\n🔑 *Akun Login Portal Member:*\n"
+            . "• Email: *{$member->user->email}*\n"
+            . "• Link Portal: " . url('/login') . "\n";
+
         if (!empty($member->temp_password)) {
-            $loginInfo = "\n🔑 *Akun Login Portal Member:*\n"
-                . "• Email: *{$member->user->email}*\n"
-                . "• Password Sementara: *{$member->temp_password}*\n"
-                . "• Link Login: " . url('/login') . "\n";
+            $loginInfo .= "• Password Sementara: *{$member->temp_password}*\n";
         }
 
         $message = "Halo *{$member->user->name}* 👋\n\n"
-            . "Pendaftaran membership GymPulse kamu berhasil! 🎉\n\n"
-            . "Kode Member: *{$member->member_code}*\n"
-            . "Paket: *" . ($member->package->name ?? '-') . "*\n"
-            . "Aktif sampai: *{$expire}*\n"
+            . "Pendaftaran membership GymPulse kamu berhasil & telah lunas! 🎉\n\n"
+            . "📋 *Detail Keanggotaan:*\n"
+            . "• Nomor Member: *{$member->member_code}*\n"
+            . "• Paket: *" . ($member->package->name ?? '-') . "*\n"
+            . "• Masa Aktif s.d: *{$expire}*\n"
+            . "• Status: *Aktif* ✅\n"
             . $loginInfo . "\n"
-            . "Tunjukkan kartu RFID kamu di pintu masuk untuk check-in. "
-            . "Sampai jumpa di gym! 💪";
+            . "🏷️ *Pengambilan Kartu RFID:*\n"
+            . "Silakan datang ke front-desk GymPulse dan sebutkan No. Member (*{$member->member_code}*) untuk mengambil kartu akses RFID fisik kamu.\n\n"
+            . "Sampai jumpa di gym & selamat berlatih! 💪";
 
         return $this->send($member, $member->user->phone, $message, 'registration');
     }
@@ -170,13 +173,17 @@ class WhatsAppService
 
     protected function log(?Member $member, string $phone, string $type, string $message, string $status, ?string $response): void
     {
-        WhatsappLog::create([
-            'member_id' => $member?->id,
-            'phone' => $phone,
-            'type' => $type,
-            'message' => $message,
-            'status' => $status,
-            'response' => $response,
-        ]);
+        try {
+            WhatsappLog::create([
+                'member_id' => $member?->id,
+                'phone' => $phone,
+                'type' => $type,
+                'message' => $message,
+                'status' => $status,
+                'response' => $response,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Failed saving WhatsApp log to database: ' . $e->getMessage());
+        }
     }
 }
