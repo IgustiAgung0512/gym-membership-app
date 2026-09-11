@@ -132,8 +132,7 @@
                         <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard') }}" 
                            class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition whitespace-nowrap shadow-sm">
                             <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse" aria-hidden="true"></span>
-                            <span class="hidden sm:inline">Dashboard ({{ Auth::user()->name }})</span>
-                            <span class="sm:hidden">Dashboard</span>
+                            <span class="max-w-[120px] truncate">Dashboard</span>
                             <svg class="w-3.5 h-3.5 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @else
