@@ -10,6 +10,8 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <!-- DNS Prefetch & Preconnect -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
