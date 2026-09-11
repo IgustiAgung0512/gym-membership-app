@@ -126,4 +126,86 @@ class RfidScanSpeedTest extends TestCase
         ]);
         $res4->assertStatus(200);
     }
+
+    public function test_scan_supports_qr_code_member_code_fallback(): void
+    {
+        $package = MembershipPackage::create([
+            'name' => 'Monthly Pro',
+            'duration_months' => 1,
+            'price' => 150000,
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create([
+            'name' => 'Siti Nurhaliza',
+            'phone' => '081377779999',
+            'role' => 'member',
+        ]);
+
+        $member = Member::create([
+            'user_id' => $user->id,
+            'membership_package_id' => $package->id,
+            'member_code' => 'GYM-2026-9999',
+            'join_date' => now(),
+            'expire_date' => now()->addDays(30),
+            'status' => 'active',
+        ]);
+
+        // Test scan via member_code (QR digital e-card)
+        $res = $this->postJson('/api/rfid/scan', [
+            'uid' => 'GYM-2026-9999',
+        ], [
+            'X-Device-Key' => config('services.rfid.device_key') ?: '',
+        ]);
+
+        $res->assertStatus(200);
+        $res->assertJson([
+            'status' => 'success',
+            'action' => 'checkin',
+            'member_name' => 'Siti Nurhaliza',
+        ]);
+
+        $this->assertDatabaseHas('attendances', [
+            'member_id' => $member->id,
+            'method' => 'qr',
+        ]);
+    }
+
+    public function test_cashier_can_quick_checkin_by_identifier(): void
+    {
+        $package = MembershipPackage::create([
+            'name' => 'Monthly Pro',
+            'duration_months' => 1,
+            'price' => 150000,
+            'is_active' => true,
+        ]);
+
+        $cashier = User::factory()->create(['role' => 'cashier']);
+
+        $user = User::factory()->create([
+            'name' => 'Rahmat Hidayat',
+            'phone' => '081234445555',
+            'role' => 'member',
+        ]);
+
+        $member = Member::create([
+            'user_id' => $user->id,
+            'membership_package_id' => $package->id,
+            'member_code' => 'GYM-2026-8888',
+            'join_date' => now(),
+            'expire_date' => now()->addDays(30),
+            'status' => 'active',
+        ]);
+
+        $res = $this->actingAs($cashier)->post(route('cashier.attendance.manual'), [
+            'identifier' => '081234445555',
+        ]);
+
+        $res->assertRedirect(route('cashier.attendance.index'));
+        $this->assertDatabaseHas('attendances', [
+            'member_id' => $member->id,
+            'method' => 'manual',
+        ]);
+    }
 }
+

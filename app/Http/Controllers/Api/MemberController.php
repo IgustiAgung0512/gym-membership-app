@@ -62,18 +62,33 @@ class MemberController extends Controller
             })
             ->first();
 
-        // Kartu belum pernah didaftarkan, atau sudah didaftarkan tapi belum
-        // dihubungkan ke member manapun -> jangan buat attendance apa pun.
-        if (!$card || !$card->member) {
-            return response()->json([
-                'success' => false,
-                'reason' => 'unregistered',
-                'message' => 'Kartu belum terdaftar (' . ($cleanUid ?: $rawUid) . ').',
-                'scanned_uid' => $cleanUid ?: $rawUid,
-            ], 404);
-        }
+        $scanMethod = 'rfid';
 
-        $member = $card->member;
+        if (! $card || ! $card->member) {
+            // Fallback: Cek jika input adalah Kode Member QR atau No. HP
+            $matchedMember = \App\Models\Member::with(['user', 'rfidCard'])
+                ->where('member_code', $rawUid)
+                ->orWhere('member_code', $cleanUid)
+                ->orWhereHas('user', function ($q) use ($rawUid, $cleanUid) {
+                    $q->where('phone', $rawUid)->orWhere('phone', $cleanUid);
+                })
+                ->first();
+
+            if ($matchedMember) {
+                $member = $matchedMember;
+                $card = $matchedMember->rfidCard;
+                $scanMethod = 'qr';
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'reason' => 'unregistered',
+                    'message' => 'Kartu atau QR belum terdaftar (' . ($cleanUid ?: $rawUid) . ').',
+                    'scanned_uid' => $cleanUid ?: $rawUid,
+                ], 404);
+            }
+        } else {
+            $member = $card->member;
+        }
 
         // Member ditemukan tapi statusnya bukan aktif (expired/inactive)
         // -> jangan catat kehadiran.
@@ -94,8 +109,6 @@ class MemberController extends Controller
             'rfidCard',
         ])
             ->where('member_id', $member->id)
-            ->where('rfid_card_id', $card->id)
-            ->where('method', 'rfid')
             ->whereDate('check_in_at', today())
             ->whereNull('check_out_at')
             ->latest('id')
@@ -107,7 +120,7 @@ class MemberController extends Controller
                 return response()->json([
                     'success' => true,
                     'action'  => 'checkin_duplicate_ignored',
-                    'message' => 'Kartu baru saja di-tap (Check-in aktif). Mohon tunggu beberapa detik sebelum Check-out.',
+                    'message' => 'Kartu/QR baru saja di-scan (Check-in aktif). Mohon tunggu beberapa detik sebelum Check-out.',
                     'member_name' => $member->user->name,
                     'member_code' => $member->member_code,
                     'check_in_at' => $openAttendance->check_in_at->format('H:i:s'),
@@ -139,8 +152,8 @@ class MemberController extends Controller
             // Tidak ada sesi terbuka hari ini -> tap ini = CHECK-IN baru.
             $attendance = Attendance::create([
                 'member_id' => $member->id,
-                'rfid_card_id' => $card->id,
-                'method' => 'rfid',
+                'rfid_card_id' => $card?->id,
+                'method' => $scanMethod,
                 'check_in_at' => now(),
             ]);
             $attendance->load([

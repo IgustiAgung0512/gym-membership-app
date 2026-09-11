@@ -181,7 +181,7 @@
                                 class="flex-1 py-2 px-2 sm:px-3 rounded-xl bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 text-[11px] sm:text-xs font-display font-extrabold transition flex items-center justify-center gap-1 shadow-sm"
                             >
                                 <span>📱</span>
-                                <span class="font-extrabold" style="color: #020617 !important;">Beli QRIS</span>
+                                <span class="font-extrabold" style="color: #020617 !important;">Bayar QRIS</span>
                             </button>
                         </div>
                     @else

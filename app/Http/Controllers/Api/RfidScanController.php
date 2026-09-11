@@ -65,28 +65,45 @@ class RfidScanController extends Controller
             })
             ->first();
 
+        $scanMethod = 'rfid';
+
         if (! $card) {
-            return response()->json([
-                'status' => 'unknown_card',
-                'message' => 'Kartu tidak terdaftar (' . ($cleanUid ?: $rawUid) . ').',
-                'scanned_uid' => $cleanUid ?: $rawUid,
-            ], 404);
-        }
+            // Fallback: Cek jika input adalah Kode Member QR atau No. HP
+            $matchedMember = \App\Models\Member::with(['user', 'rfidCard'])
+                ->where('member_code', $rawUid)
+                ->orWhere('member_code', $cleanUid)
+                ->orWhereHas('user', function ($q) use ($rawUid, $cleanUid) {
+                    $q->where('phone', $rawUid)->orWhere('phone', $cleanUid);
+                })
+                ->first();
 
-        if ($card->status === 'blocked') {
-            return response()->json([
-                'status' => 'blocked',
-                'message' => 'Kartu diblokir. Hubungi admin.',
-            ], 403);
-        }
+            if ($matchedMember) {
+                $member = $matchedMember;
+                $card = $matchedMember->rfidCard;
+                $scanMethod = 'qr';
+            } else {
+                return response()->json([
+                    'status' => 'unknown_card',
+                    'message' => 'Kartu atau QR tidak terdaftar (' . ($cleanUid ?: $rawUid) . ').',
+                    'scanned_uid' => $cleanUid ?: $rawUid,
+                ], 404);
+            }
+        } else {
+            if ($card->status === 'blocked') {
+                return response()->json([
+                    'status' => 'blocked',
+                    'message' => 'Kartu diblokir. Hubungi admin.',
+                ], 403);
+            }
 
-        $member = $card->member;
+            $member = $card->member;
 
-        if (! $member) {
-            return response()->json([
-                'status' => 'unassigned',
-                'message' => 'Kartu belum ditautkan ke member.',
-            ], 404);
+            if (! $member) {
+                return response()->json([
+                    'status' => 'unassigned',
+                    'message' => 'Kartu belum ditautkan ke member.',
+                ], 404);
+            }
         }
 
         if ($member->status !== 'active' || ($member->expire_date && $member->expire_date->isPast())) {
@@ -104,10 +121,10 @@ class RfidScanController extends Controller
 
         // Cari sesi presensi terbuka untuk member ini pada hari ini
         $openAttendance = Attendance::where('member_id', $member->id)
-            ->where('rfid_card_id', $card->id)
-            ->where('method', 'rfid')
             ->whereDate('check_in_at', today())
             ->whereNull('check_out_at')
+            ->latest('id')
+            ->first();
             ->latest('id')
             ->first();
 
@@ -143,8 +160,8 @@ class RfidScanController extends Controller
 
         $attendance = Attendance::create([
             'member_id' => $member->id,
-            'rfid_card_id' => $card->id,
-            'method' => 'rfid',
+            'rfid_card_id' => $card?->id,
+            'method' => $scanMethod,
             'check_in_at' => now(),
         ]);
 

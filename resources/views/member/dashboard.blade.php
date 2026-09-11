@@ -123,6 +123,8 @@
 @endphp
 
 <div x-data="{ 
+    qrModal: false,
+    qrTime: '',
     invoiceModal: false, 
     renewModal: false,
     renewStep: 'select', // 'select', 'qris', 'success'
@@ -133,6 +135,15 @@
     onlinePaymentMethod: 'qris',
     packagesList: {{ Js::from($packages) }},
     copiedBank: null,
+
+    init() {
+        const updateTime = () => {
+            const now = new Date();
+            this.qrTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        };
+        updateTime();
+        setInterval(updateTime, 1000);
+    },
 
     // Renewal QRIS & Checkout state
     loadingRenewal: false,
@@ -586,6 +597,11 @@
             </div>
 
             <div class="flex items-center gap-2.5 ml-auto flex-wrap">
+                <button @click="qrModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-display font-extrabold border border-lime-400 transition shadow-md shadow-lime-500/20 active:scale-95">
+                    <span class="text-sm">📱</span>
+                    <span>QR Check-in (E-Card)</span>
+                </button>
+
                 <button @click="invoiceModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition shadow-sm">
                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Bukti Keanggotaan</span>
@@ -1349,6 +1365,69 @@
 
     </div>
 
+    </div>
+
+    {{-- =========================================================
+        MODAL: QR CHECK-IN (E-CARD DIGITAL PASSPORT)
+    ========================================================= --}}
+    <div x-show="qrModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md" @keydown.escape.window="qrModal = false">
+        <div @click.outside="qrModal = false" class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-700/80 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative text-center text-white overflow-hidden">
+            {{-- Background ambient glow --}}
+            <div class="absolute -top-16 -right-16 w-36 h-36 bg-lime-500/20 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-cyan-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <button @click="qrModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1.5 rounded-xl bg-slate-800/80 transition z-10" title="Tutup">✕</button>
+
+            {{-- Brand header --}}
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <div class="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 text-lime-400 font-display font-extrabold text-xs flex items-center justify-center">G</div>
+                <span class="font-display font-extrabold text-sm tracking-tight text-white">GymPulse <span class="text-lime-400 text-[10px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded bg-lime-400/10 border border-lime-400/30">E-Card</span></span>
+            </div>
+
+            <h3 class="font-display font-bold text-lg text-white">QR Akses Masuk Gym</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Tunjukkan QR ini ke scanner resepsionis jika tidak membawa kartu RFID.</p>
+
+            {{-- QR Container --}}
+            <div class="mt-4 p-3.5 rounded-2xl bg-white shadow-lg inline-block mx-auto border-2 border-slate-200 relative">
+                <img 
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode($member->member_code) }}&color=0f172a&bgcolor=ffffff&margin=1" 
+                    alt="QR Code Member {{ $member->member_code }}" 
+                    class="w-44 h-44 sm:w-48 sm:h-48 object-contain mx-auto"
+                >
+                <div class="mt-2 pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] font-mono font-black text-slate-900">
+                    <span>{{ $member->member_code }}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-lime-100 text-lime-900">AKTIF</span>
+                </div>
+            </div>
+
+            {{-- Live Security Clock (Anti-fraud) --}}
+            <div class="mt-3 flex items-center justify-center gap-2 text-xs text-lime-400 font-mono font-bold">
+                <span class="w-2 h-2 rounded-full bg-lime-400 animate-ping"></span>
+                <span x-text="qrTime || '{{ now()->format('H:i:s') }} WIB'"></span>
+            </div>
+
+            {{-- Member Info Card --}}
+            <div class="mt-4 p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-left text-xs space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 text-[11px]">Nama Member:</span>
+                    <strong class="text-white font-bold truncate max-w-[170px]">{{ $member->user->name }}</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 text-[11px]">Paket:</span>
+                    <span class="text-slate-200 font-medium">{{ $member->package->name ?? '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400 text-[11px]">Masa Aktif:</span>
+                    <span class="text-lime-300 font-semibold font-mono">{{ optional($member->expire_date)->format('d M Y') }}</span>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/80 text-center">
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    💡 <em>Petunjuk: Buka kecerahan layar HP Anda agar scanner dapat membaca barcode/QR dengan optimal.</em>
+                </p>
+            </div>
+        </div>
     </div>
 
     {{-- =========================================================
