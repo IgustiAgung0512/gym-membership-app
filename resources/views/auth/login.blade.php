@@ -45,10 +45,10 @@
 
             <div class="login-brand-text">
                 <span class="login-brand-name">
-                    GymPulse
+                    GymPulse<span style="color: #84CC16;">.</span>
                 </span>
                 <span class="login-brand-subtitle">
-                    SMART GYM MANAGEMENT
+                    SMART RFID FITNESS
                 </span>
             </div>
         </div>

@@ -314,4 +314,49 @@ class MemberController extends Controller
 
         return back()->with('success', 'Membership berhasil diperpanjang.');
     }
+
+    /**
+     * Tautkan kartu RFID fisik untuk member (khusus member pendaftaran online yang datang mengambil kartu)
+     */
+    public function assignRfid(Request $request, Member $member)
+    {
+        $rawUid = $request->input('rfid_uid') ?? $request->input('uid') ?? '';
+        $trimmedColonUid = strtoupper(trim((string) $rawUid, " :\t\n\r\0\x0B"));
+        $cleanUid = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $rawUid));
+        $uid = !empty($trimmedColonUid) ? $trimmedColonUid : $cleanUid;
+
+        if (empty($uid)) {
+            return back()->with('error', 'UID Kartu RFID tidak boleh kosong.');
+        }
+
+        // Cek apakah kartu sudah terpakai oleh member lain
+        $existing = RfidCard::with('member.user')->where(function ($q) use ($uid, $cleanUid, $trimmedColonUid) {
+            $q->where('uid', $uid)
+              ->orWhere('uid', $cleanUid)
+              ->orWhere('uid', $trimmedColonUid);
+        })->first();
+
+        if ($existing && $existing->member_id && $existing->member_id !== $member->id) {
+            return back()->with('error', "Kartu RFID {$uid} sudah terpakai oleh member lain (" . ($existing->member->user->name ?? 'Lain') . ").");
+        }
+
+        if ($member->rfidCard) {
+            $member->rfidCard->update([
+                'uid' => $uid,
+                'status' => 'assigned',
+                'assigned_at' => now(),
+            ]);
+        } else {
+            RfidCard::updateOrCreate(
+                ['uid' => $uid],
+                [
+                    'member_id' => $member->id,
+                    'status' => 'assigned',
+                    'assigned_at' => now(),
+                ]
+            );
+        }
+
+        return redirect()->route('admin.members.index')->with('success', "Kartu RFID {$uid} berhasil ditautkan ke member {$member->user->name}. Member sudah siap melakukan tap akses!");
+    }
 }

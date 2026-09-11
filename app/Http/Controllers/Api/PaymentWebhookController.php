@@ -40,7 +40,7 @@ class PaymentWebhookController extends Controller
             ], 400);
         }
 
-        // 1. Cari Order atau Renewal Payment di Database
+        // 1. Cari Order, Renewal Payment, atau Pending Registration di Database
         $order = Order::where('invoice_number', $orderId)->first();
         if (!$order) {
             $payment = \App\Models\Payment::with(['member.user', 'package'])->where('invoice_number', $orderId)->first();
@@ -48,10 +48,15 @@ class PaymentWebhookController extends Controller
                 return $this->handleRenewalPayment($payment, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, $request);
             }
 
+            $pendingReg = \App\Models\PendingRegistration::with('package')->where('invoice_number', $orderId)->first();
+            if ($pendingReg) {
+                return $this->handleRegistrationPayment($pendingReg, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, $request);
+            }
+
             Log::warning("Payment Webhook record not found: {$orderId}");
             return response()->json([
                 'success' => false,
-                'message' => 'Order or Payment record not found',
+                'message' => 'Order, Payment, or Registration record not found',
             ], 404);
         }
 
@@ -278,5 +283,77 @@ class PaymentWebhookController extends Controller
                 'message' => 'Renewal payment status received: ' . $transactionStatus,
             ]);
         });
+    }
+
+    /**
+     * Handle Webhook Verification & Settlement for Online Member Registration
+     */
+    protected function handleRegistrationPayment(\App\Models\PendingRegistration $pending, string $orderId, string $statusCode, string $grossAmount, string $transactionStatus, string $fraudStatus, ?string $receivedSignature, Request $request)
+    {
+        $serverKey = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY'));
+        $isProduction = config('services.midtrans.is_production', env('MIDTRANS_IS_PRODUCTION', false));
+
+        // 1. Verifikasi Tanda Tangan Kriptografis
+        if (!empty($serverKey) && !empty($receivedSignature)) {
+            $isValidSignature = QrisService::verifyMidtransNotification(
+                $orderId,
+                $statusCode,
+                $grossAmount,
+                $receivedSignature,
+                $serverKey
+            );
+
+            if (!$isValidSignature) {
+                Log::critical("SECURITY ALERT: Invalid Midtrans Signature on Online Registration {$orderId}!");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Security Error: Invalid cryptographic signature',
+                ], 403);
+            }
+        }
+
+        // 2. Validasi Nominal
+        if ($grossAmount !== '0' && (int) round((float) $grossAmount) !== (int) $pending->amount) {
+            Log::critical("SECURITY ALERT: Amount mismatch on Registration {$orderId}! DB: {$pending->amount}, Paid: {$grossAmount}");
+            return response()->json([
+                'success' => false,
+                'message' => 'Security Error: Gross amount mismatch with registration total',
+            ], 422);
+        }
+
+        // 3. State Machine
+        if ($pending->status === 'paid') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration payment was already marked as paid (Idempotent OK)',
+            ]);
+        }
+
+        if (in_array($transactionStatus, ['settlement', 'paid', 'success']) ||
+            ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
+
+            $member = \App\Http\Controllers\OnlineRegistrationController::settleRegistration($pending);
+
+            Log::info("Online Registration {$pending->invoice_number} successfully SETTLED for Member {$member->member_code}.");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Online registration payment verified and member account activated',
+                'member_code' => $member->member_code,
+            ]);
+        }
+
+        if (in_array($transactionStatus, ['cancel', 'deny', 'expire', 'cancelled'])) {
+            $pending->update(['status' => 'cancelled']);
+            return response()->json([
+                'success' => true,
+                'message' => "Online registration marked as cancelled ({$transactionStatus})",
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration payment status received: ' . $transactionStatus,
+        ]);
     }
 }

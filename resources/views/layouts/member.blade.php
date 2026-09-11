@@ -127,16 +127,23 @@
 <header class="print:hidden no-print sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-slate-200">
     <div class="max-w-6xl mx-auto flex items-center justify-between px-3.5 sm:px-6 h-14 sm:h-16">
         
-        <a href="{{ route('member.dashboard') }}" class="flex items-center gap-2">
-            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 text-lime-400 flex items-center justify-center font-display font-extrabold text-sm sm:text-base">
+        <a href="{{ route('member.dashboard') }}" class="flex items-center gap-3 group shrink-0">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900 flex items-center justify-center font-display font-extrabold text-lime-400 text-lg sm:text-xl shadow-sm group-hover:scale-105 transition-transform">
                 G
             </div>
-            <span class="font-display font-bold text-base sm:text-lg text-slate-900 tracking-tight">
-                GymPulse<span class="text-lime-600">.</span>
-            </span>
-            <span class="hidden md:inline text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-lime-100 text-lime-800 ml-1">
-                Portal Member
-            </span>
+            <div class="flex flex-col">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-display font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight leading-none">
+                        GymPulse<span class="text-lime-600">.</span>
+                    </span>
+                    <span class="hidden md:inline text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-lime-100 text-lime-800 border border-lime-200/60">
+                        Portal Member
+                    </span>
+                </div>
+                <span class="text-[9px] sm:text-[10px] tracking-wider text-slate-500 uppercase font-semibold mt-0.5 whitespace-nowrap">
+                    Smart RFID Fitness
+                </span>
+            </div>
         </a>
 
         <div class="flex items-center gap-1.5 sm:gap-2">

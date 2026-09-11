@@ -1483,7 +1483,7 @@
                                     <h4 class="font-display font-bold text-xs text-slate-900">{{ $pkg->name }}</h4>
                                 </div>
                                 <div class="mt-2 pt-2 border-t border-slate-200/60">
-                                    <p class="font-mono font-extrabold text-xs text-lime-700">Rp{{ number_format($pkg->price, 0, ',', '.') }}</p>
+                                    <p class="font-mono font-extrabold text-xs text-slate-900" style="color: #0f172a !important;">Rp{{ number_format($pkg->price, 0, ',', '.') }}</p>
                                 </div>
                             </div>
                         @endforeach
@@ -1537,7 +1537,7 @@
                     </div>
                     <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
                         <span class="text-xs text-slate-300 font-semibold uppercase">Total Tagihan</span>
-                        <span class="font-display font-black text-lg sm:text-xl text-lime-400 font-mono">
+                        <span class="font-display font-extrabold text-lg sm:text-xl text-lime-400 font-mono" style="color: #a3e635 !important;">
                             Rp<span x-text="Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
                         </span>
                     </div>
@@ -1655,13 +1655,13 @@
                 {{-- Total Tagihan Display --}}
                 <div class="p-2.5 bg-slate-900 text-white rounded-xl">
                     <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Tagihan Membership</p>
-                    <p class="font-display font-black text-xl text-lime-400 mt-0.5 font-mono">
+                    <p class="font-display font-extrabold text-2xl text-lime-400 mt-0.5 font-mono" style="color: #a3e635 !important;">
                         Rp<span x-text="renewPayment ? Number(renewPayment.amount).toLocaleString('id-ID') : Number(selectedPackagePrice).toLocaleString('id-ID')"></span>
                     </p>
                     <div class="flex items-center justify-center gap-2 text-[11px] text-slate-300 mt-0.5">
                         <span x-text="'Paket: ' + selectedPackageName"></span>
                         <span>•</span>
-                        <span class="text-lime-300 font-semibold" x-text="'Perpanjangan: ' + selectedPackageDuration + ' Bulan'"></span>
+                        <span class="text-lime-300 font-semibold" style="color: #bef264 !important;" x-text="'Perpanjangan: ' + selectedPackageDuration + ' Bulan'"></span>
                     </div>
                 </div>
 

@@ -4,15 +4,56 @@
 @section('content')
 <div x-data="{
     renewModal: false,
+    assignModal: false,
     selectedMember: null,
     packageId: '',
     paymentMethod: 'cash',
+    rfidUid: '',
+    pollInterval: null,
+    isScanning: false,
 
     openRenew(member) {
         this.selectedMember = member;
         this.packageId = member.membership_package_id || '';
         this.paymentMethod = 'cash';
         this.renewModal = true;
+    },
+
+    openAssign(member) {
+        this.selectedMember = member;
+        this.rfidUid = '';
+        this.assignModal = true;
+        this.startRfidPolling();
+    },
+
+    closeAssign() {
+        this.assignModal = false;
+        this.selectedMember = null;
+        this.stopRfidPolling();
+    },
+
+    startRfidPolling() {
+        this.stopRfidPolling();
+        this.isScanning = true;
+        this.pollInterval = setInterval(async () => {
+            if (!this.assignModal) return;
+            try {
+                const res = await fetch('{{ route('admin.members.latest-rfid') }}');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data.uid) {
+                    this.rfidUid = data.uid;
+                }
+            } catch (e) {}
+        }, 1000);
+    },
+
+    stopRfidPolling() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+        }
+        this.isScanning = false;
     }
 }" class="space-y-6">
 
@@ -20,7 +61,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-display font-bold text-slate-900">Member & Layanan Resepsionis</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Daftarkan member baru atau perpanjang paket membership pelanggan di meja kasir.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Daftarkan member baru, tautkan kartu Smart RFID, atau perpanjang paket membership di meja kasir.</p>
         </div>
         <a href="{{ route('cashier.members.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm self-start">
             <span>+ Daftar Member Baru</span>
@@ -106,7 +147,11 @@
                                         {{ $m->rfidCard->uid }}
                                     </span>
                                 @else
-                                    <span class="text-slate-400">-</span>
+                                    <button type="button" 
+                                            @click="openAssign({{ Js::from(['id' => $m->id, 'member_code' => $m->member_code, 'name' => $m->user->name]) }})" 
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold text-[10px] transition border border-amber-300">
+                                        <span>⚠️ Tautkan RFID</span>
+                                    </button>
                                 @endif
                             </td>
                             <td class="py-3 px-4">
@@ -118,7 +163,16 @@
                                     <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px]">NONAKTIF</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-3 px-4 text-right space-x-1">
+                                @if (!$m->rfidCard)
+                                    <button 
+                                        type="button" 
+                                        @click="openAssign({{ Js::from(['id' => $m->id, 'member_code' => $m->member_code, 'name' => $m->user->name]) }})"
+                                        class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition shadow-sm"
+                                    >
+                                        Tautkan Kartu
+                                    </button>
+                                @endif
                                 <button 
                                     type="button" 
                                     @click="openRenew({{ Js::from($m) }})"
@@ -196,6 +250,61 @@
                     </button>
                     <button type="submit" class="py-2.5 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
                         Proses Pembayaran
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- MODAL TAUTKAN KARTU RFID KASIR --}}
+    <div x-show="assignModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         style="display: none;">
+        <div @click.away="closeAssign()" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">
+                        🪪
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-sm text-slate-900">Tautkan Kartu RFID Member</h3>
+                        <p class="text-[11px] text-slate-500">Serahkan kartu fisik Smart RFID ke member baru</p>
+                    </div>
+                </div>
+                <button type="button" @click="closeAssign()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1" x-show="selectedMember">
+                <p class="text-slate-400 uppercase font-bold text-[10px]">Member Terpilih</p>
+                <p class="font-bold text-sm text-slate-900" x-text="selectedMember?.name"></p>
+                <p class="text-[11px] text-slate-500 font-mono" x-text="selectedMember?.member_code"></p>
+            </div>
+
+            <form method="POST" :action="'/cashier/members/' + (selectedMember ? selectedMember.id : '') + '/assign-rfid'" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">UID Kartu RFID <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="rfid_uid" 
+                               x-model="rfidUid" 
+                               required 
+                               placeholder="Contoh: C1:B8:C8:A3"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-lime-500">
+                    </div>
+                    <div class="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
+                        <span class="w-2 h-2 rounded-full bg-lime-500 animate-ping"></span>
+                        <span>Tempelkan kartu pada scanner RFID USB/ESP untuk auto-fill.</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button type="button" @click="closeAssign()" class="py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shadow-sm transition">
+                        Simpan & Tautkan
                     </button>
                 </div>
             </form>

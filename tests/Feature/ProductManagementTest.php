@@ -13,6 +13,12 @@ class ProductManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['filesystems.default' => 'public']);
+    }
+
     public function test_admin_product_page_contains_image_upload_fields(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);

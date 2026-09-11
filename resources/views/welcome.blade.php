@@ -22,6 +22,12 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Preload LCP Hero Image -->
     <link rel="preload" as="image" href="{{ asset('images/gym/hero.jpg') }}" fetchpriority="high">
 
@@ -64,7 +70,7 @@
     </style>
 </head>
 
-<body class="landing-page bg-[#F8FAFC] text-slate-800 antialiased selection:bg-lime-200 selection:text-slate-900">
+<body class="landing-page bg-[#F8FAFC] text-slate-800 antialiased selection:bg-lime-200 selection:text-slate-900" x-data="onlineRegistrationApp()">
 
     <!-- Skip to main content (Accessibility) -->
     <a href="#main-content" class="skip-to-content">Lewati ke konten utama</a>
@@ -692,7 +698,7 @@
                                     </div>
 
                                     <ul class="space-y-2 text-xs text-slate-600 pt-3 border-t border-slate-100">
-                                        <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Gratis Kartu RFID Tap</li>
+                                        <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Gratis Kartu RFID Tap (Ambil di Gym)</li>
                                         <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Akses 7 Hari Seminggu</li>
                                         <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Loker & Hot Shower</li>
                                         <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Notifikasi WhatsApp Check-In</li>
@@ -700,10 +706,17 @@
                                     </ul>
                                 </div>
 
-                                <div class="pt-6">
-                                    <a href="https://wa.me/?text={{ urlencode('Halo GymPulse, saya ingin mendaftar paket: ' . $pkg->name) }}" target="_blank" class="{{ $isPopular ? 'btn-lime-action' : 'btn-secondary-action' }} w-full justify-center text-xs py-2.5">
-                                        Daftar via WhatsApp
-                                    </a>
+                                <div class="pt-6 space-y-2">
+                                    <button type="button" 
+                                            @click="openModal({{ $pkg->id }}, '{{ addslashes($pkg->name) }}', {{ $pkg->price }}, {{ $pkg->duration_months }}, '{{ addslashes($pkg->description ?? '') }}')"
+                                            class="{{ $isPopular ? 'btn-lime-action' : 'btn-secondary-action' }} w-full justify-center text-xs py-2.5 cursor-pointer shadow-sm">
+                                        <span>⚡ Daftar Online Sekarang</span>
+                                    </button>
+                                    <div class="text-center">
+                                        <a href="https://wa.me/?text={{ urlencode('Halo GymPulse, saya ingin tanya seputar paket: ' . $pkg->name) }}" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-600 transition">
+                                            Atau tanya via WhatsApp &rarr;
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -720,13 +733,20 @@
                                     <span class="font-display font-extrabold text-3xl text-slate-900">250.000</span>
                                 </div>
                                 <ul class="space-y-2 text-xs text-slate-600 pt-3 border-t border-slate-100">
-                                    <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Kartu RFID Tap</li>
+                                    <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Kartu RFID Tap (Ambil di Gym)</li>
                                     <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Akses 7 Hari / Minggu</li>
                                     <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Loker & Hot Shower</li>
                                 </ul>
                             </div>
-                            <div class="pt-6">
-                                <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%201%20Bulan" target="_blank" class="btn-secondary-action w-full justify-center text-xs py-2.5">Daftar Sekarang</a>
+                            <div class="pt-6 space-y-2">
+                                <button type="button" 
+                                        @click="openModal(1, '1 Bulan Starter', 250000, 1, 'Starter Pass untuk pemula')"
+                                        class="btn-secondary-action w-full justify-center text-xs py-2.5 cursor-pointer shadow-sm">
+                                    <span>⚡ Daftar Online</span>
+                                </button>
+                                <div class="text-center">
+                                    <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%201%20Bulan" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-600">Atau via WhatsApp &rarr;</a>
+                                </div>
                             </div>
                         </div>
 
@@ -749,8 +769,15 @@
                                     <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Notifikasi WA Check-in</li>
                                 </ul>
                             </div>
-                            <div class="pt-6">
-                                <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%203%20Bulan" target="_blank" class="btn-lime-action w-full justify-center text-xs py-2.5">Daftar Sekarang</a>
+                            <div class="pt-6 space-y-2">
+                                <button type="button" 
+                                        @click="openModal(2, '3 Bulan Popular', 650000, 3, 'Paling disukai untuk hasil nyata')"
+                                        class="btn-lime-action w-full justify-center text-xs py-2.5 cursor-pointer shadow-sm">
+                                    <span>⚡ Daftar Online</span>
+                                </button>
+                                <div class="text-center">
+                                    <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%203%20Bulan" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-600">Atau via WhatsApp &rarr;</a>
+                                </div>
                             </div>
                         </div>
 
@@ -769,8 +796,15 @@
                                     <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> 2x Sesi Personal Trainer</li>
                                 </ul>
                             </div>
-                            <div class="pt-6">
-                                <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%206%20Bulan" target="_blank" class="btn-secondary-action w-full justify-center text-xs py-2.5">Daftar Sekarang</a>
+                            <div class="pt-6 space-y-2">
+                                <button type="button" 
+                                        @click="openModal(3, '6 Bulan Commitment', 1200000, 6, 'Komitmen pembentukan fisik')"
+                                        class="btn-secondary-action w-full justify-center text-xs py-2.5 cursor-pointer shadow-sm">
+                                    <span>⚡ Daftar Online</span>
+                                </button>
+                                <div class="text-center">
+                                    <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%206%20Bulan" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-600">Atau via WhatsApp &rarr;</a>
+                                </div>
                             </div>
                         </div>
 
@@ -790,8 +824,15 @@
                                     <li class="flex items-center gap-2"><span class="text-lime-600 font-bold">✓</span> Free Kaos GymPulse</li>
                                 </ul>
                             </div>
-                            <div class="pt-6">
-                                <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%2012%20Bulan" target="_blank" class="btn-secondary-action w-full justify-center text-xs py-2.5">Daftar Sekarang</a>
+                            <div class="pt-6 space-y-2">
+                                <button type="button" 
+                                        @click="openModal(4, '12 Bulan Ultimate', 2100000, 12, 'Nilai paling hemat per bulan')"
+                                        class="btn-secondary-action w-full justify-center text-xs py-2.5 cursor-pointer shadow-sm">
+                                    <span>⚡ Daftar Online</span>
+                                </button>
+                                <div class="text-center">
+                                    <a href="https://wa.me/?text=Halo%20GymPulse,%20saya%20tertarik%20paket%2012%20Bulan" target="_blank" class="text-[11px] text-slate-400 hover:text-slate-600">Atau via WhatsApp &rarr;</a>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -1246,7 +1287,6 @@
                 </div>
 
             </div>
-
             <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-400">
                 <div>
                     &copy; {{ date('Y') }} <strong>GymPulse</strong>. Hak Cipta Dilindungi.
@@ -1259,25 +1299,566 @@
         </div>
     </footer>
 
+    <!-- =========================================================================
+         MODAL PENDAFTARAN ONLINE & PEMBAYARAN QRIS (ALPINE.JS)
+         ========================================================================= -->
+    <div x-show="isOpen" 
+         x-cloak 
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         style="display: none;"
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true">
+         
+        <!-- Backdrop with Blur -->
+        <div x-show="isOpen" 
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" 
+             @click="step !== 2 ? closeModal() : null"></div>
+
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
+            <div x-show="isOpen" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative transform overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 text-left shadow-2xl transition-all w-full max-w-lg text-slate-100 my-6">
+                 
+                <!-- Modal Top Header & Close Button -->
+                <div class="px-6 pt-6 pb-4 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-lime-500/20 border border-lime-500/30 text-lime-400 flex items-center justify-center font-bold text-sm">
+                            ⚡
+                        </div>
+                        <div>
+                            <h3 class="font-display font-bold text-base text-white" id="modal-title">
+                                <span x-show="step === 1">Daftar Membership Online</span>
+                                <span x-show="step === 2">Pembayaran QRIS Instan</span>
+                                <span x-show="step === 3">Pendaftaran Berhasil!</span>
+                            </h3>
+                            <p class="text-[11px] text-slate-400">GymPulse Smart RFID Fitness</p>
+                        </div>
+                    </div>
+                    <button type="button" 
+                            @click="closeModal()" 
+                            class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="px-6 py-3 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                              :class="step >= 1 ? 'bg-lime-500 text-slate-950' : 'bg-slate-800 text-slate-400'">1</span>
+                        <span :class="step === 1 ? 'font-bold text-lime-400' : 'text-slate-400'">Isi Data</span>
+                    </div>
+                    <span class="text-slate-600">&rarr;</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                              :class="step >= 2 ? 'bg-lime-500 text-slate-950' : 'bg-slate-800 text-slate-400'">2</span>
+                        <span :class="step === 2 ? 'font-bold text-lime-400' : 'text-slate-400'">Bayar QRIS</span>
+                    </div>
+                    <span class="text-slate-600">&rarr;</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
+                              :class="step === 3 ? 'bg-lime-500 text-slate-950' : 'bg-slate-800 text-slate-400'">3</span>
+                        <span :class="step === 3 ? 'font-bold text-lime-400' : 'text-slate-400'">Ambil Kartu</span>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-5">
+                    
+                    <!-- =================== STEP 1: FORM PENDAFTARAN =================== -->
+                    <div x-show="step === 1" class="space-y-4">
+                        <!-- Selected Package Summary Banner -->
+                        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-lime-500/10 to-emerald-500/10 border border-lime-500/30 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-lime-400">Paket Dipilih</span>
+                                <h4 class="font-display font-bold text-sm text-white" x-text="packageName"></h4>
+                                <span class="text-[11px] text-slate-400" x-text="packageDuration + ' Bulan Akses Penuh'"></span>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-display font-extrabold text-base text-lime-400" x-text="formatRupiah(packagePrice)"></div>
+                                <span class="text-[10px] text-slate-400">Gratis Kartu RFID</span>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div x-show="errorMessage" x-cloak class="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2">
+                            <span>⚠️</span>
+                            <span x-text="errorMessage"></span>
+                        </div>
+
+                        <!-- Form Inputs -->
+                        <form @submit.prevent="submitForm" class="space-y-3.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Lengkap <span class="text-rose-400">*</span></label>
+                                <input type="text" x-model="form.name" required placeholder="Contoh: Budi Pratama"
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">No. WhatsApp <span class="text-rose-400">*</span></label>
+                                    <input type="tel" x-model="form.phone" required placeholder="081234567890"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Aktif <span class="text-rose-400">*</span></label>
+                                    <input type="email" x-model="form.email" required placeholder="budi@example.com"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password Portal <span class="text-rose-400">*</span></label>
+                                    <input type="password" x-model="form.password" required minlength="6" placeholder="Min. 6 Karakter"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent">
+                                    <p class="text-[10px] text-slate-400 mt-1">Untuk login portal member.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Jenis Kelamin <span class="text-rose-400">*</span></label>
+                                    <select x-model="form.gender" required
+                                            class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent">
+                                        <option value="male">Pria</option>
+                                        <option value="female">Wanita</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Alamat (Opsional)</label>
+                                <textarea x-model="form.address" rows="2" placeholder="Alamat domisili Anda"
+                                          class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"></textarea>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" 
+                                        :disabled="loading"
+                                        class="w-full py-3 px-4 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-lime-500/20 cursor-pointer disabled:opacity-50">
+                                    <span x-show="!loading">Lanjut ke Pembayaran QRIS &rarr;</span>
+                                    <span x-show="loading" class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4 text-slate-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                        <span>Membuat Invoice & QRIS...</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- =================== STEP 2: DYNAMIC QRIS PAYMENT =================== -->
+                    <div x-show="step === 2" x-cloak class="space-y-4 text-center">
+                        
+                        <!-- Header info -->
+                        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs">
+                            <div class="text-left">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">No. Invoice</span>
+                                <span class="font-mono font-bold text-white text-xs" x-text="invoice"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Batas Waktu</span>
+                                <span class="font-mono font-bold text-amber-400 text-xs" x-text="formatTime(timeLeft)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Amount to pay -->
+                        <div>
+                            <span class="text-xs text-slate-400">Total Tagihan Membership</span>
+                            <div class="font-display font-extrabold text-2xl text-lime-400 mt-0.5" x-text="formatRupiah(packagePrice)"></div>
+                            <span class="text-[11px] text-slate-400" x-text="packageName"></span>
+                        </div>
+
+                        <!-- QR Code Container -->
+                        <div class="flex justify-center my-2">
+                            <div class="p-3 bg-white rounded-2xl shadow-xl border-4 border-lime-500/40 relative inline-block">
+                                <img :src="qrisQrUrl" alt="QRIS GymPulse" class="w-48 h-48 sm:w-56 sm:h-56 mx-auto object-contain">
+                                <div class="mt-1 text-center">
+                                    <span class="text-[10px] font-bold font-mono tracking-widest text-slate-800">QRIS STANDAR INDONESIA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Polling Radar Indicator -->
+                        <div class="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-center gap-2 text-xs text-slate-300">
+                            <span class="w-2.5 h-2.5 rounded-full bg-lime-400 animate-ping"></span>
+                            <span>Menunggu Pembayaran (Sistem Otomatis Mendeteksi)...</span>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="text-[11px] text-slate-400 text-left bg-slate-950/40 p-3 rounded-xl border border-slate-800 space-y-1">
+                            <p class="font-semibold text-slate-300">Cara Pembayaran:</p>
+                            <ol class="list-decimal list-inside space-y-0.5">
+                                <li>Buka aplikasi m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay).</li>
+                                <li>Pilih menu <strong>Scan QRIS</strong> dan arahkan kamera ke kode QR di atas.</li>
+                                <li>Periksa nama merchant <strong>GymPulse</strong> dan konfirmasi pembayaran.</li>
+                                <li>Halaman ini akan otomatis beralih setelah pembayaran berhasil.</li>
+                            </ol>
+                        </div>
+
+                        <!-- Test Simulator / Cancel Buttons -->
+                        <div class="pt-2 space-y-2">
+                            <button type="button" 
+                                    @click="simulatePayment()" 
+                                    :disabled="simulating"
+                                    class="w-full py-2.5 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50">
+                                <span x-show="!simulating">⚡ Simulasi Bayar Instan (Demo Mode)</span>
+                                <span x-show="simulating">Memproses Simulasi...</span>
+                            </button>
+
+                            <button type="button" 
+                                    @click="cancelRegistration()" 
+                                    class="w-full py-2 text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+                                Batalkan Pendaftaran
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- =================== STEP 3: SUCCESS & IN-GYM PICKUP GUIDANCE =================== -->
+                    <div x-show="step === 3" x-cloak class="space-y-4 text-center">
+                        
+                        <!-- Celebration Icon -->
+                        <div class="w-16 h-16 rounded-full bg-lime-500/20 border-2 border-lime-400 text-lime-400 flex items-center justify-center text-3xl mx-auto shadow-lg shadow-lime-500/20 animate-bounce">
+                            ✓
+                        </div>
+
+                        <div>
+                            <h4 class="font-display font-bold text-xl text-white">Pendaftaran & Pembayaran Berhasil!</h4>
+                            <p class="text-xs text-slate-400 mt-1">Selamat datang di keluarga besar GymPulse.</p>
+                        </div>
+
+                        <!-- Member Details Card -->
+                        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-left space-y-2 text-xs">
+                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
+                                <span class="text-slate-400">Nama Member:</span>
+                                <strong class="text-white" x-text="successData.member_name"></strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
+                                <span class="text-slate-400">Nomor Anggota:</span>
+                                <strong class="text-lime-400 font-mono" x-text="successData.member_number"></strong>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
+                                <span class="text-slate-400">Paket Membership:</span>
+                                <strong class="text-white" x-text="successData.package_name"></strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Status Akun:</span>
+                                <span class="px-2 py-0.5 rounded-full bg-lime-500/20 text-lime-400 font-bold text-[10px]">AKTIF</span>
+                            </div>
+                        </div>
+
+                        <!-- In-Gym RFID Card Pickup Instructions (Crucial UX Requirement) -->
+                        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-2">
+                            <div class="flex items-center gap-2 text-amber-300 font-bold text-xs">
+                                <span>🪪</span>
+                                <span>Pengambilan Kartu Akses Fisik Smart RFID:</span>
+                            </div>
+                            <ol class="text-[11px] text-slate-300 list-decimal list-inside space-y-1">
+                                <li>Datang ke resepsionis GymPulse kapan saja saat jam operasional.</li>
+                                <li>Sebutkan nama Anda atau tunjukkan <strong>Nomor Anggota (<span class="text-amber-400 font-mono" x-text="successData.member_number"></span>)</strong>.</li>
+                                <li>Kasir / Admin kami akan langsung men-scan & menyerahkan kartu fisik Smart RFID Anda dalam 5 detik!</li>
+                            </ol>
+                        </div>
+
+                        <!-- WhatsApp Notification Notice -->
+                        <p class="text-[11px] text-slate-400">
+                            💬 Rincian tanda terima & instruksi telah kami kirimkan ke WhatsApp Anda.
+                        </p>
+
+                        <!-- CTA to Member Portal -->
+                        <div class="pt-2">
+                            <a href="{{ route('login') }}" 
+                               class="w-full py-3 px-4 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-lime-500/20">
+                                <span>Masuk ke Portal Member &rarr;</span>
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <!-- =========================================================================
          JAVASCRIPT
          ========================================================================= -->
     <script>
+        // Alpine.js Online Registration Application Store / Component
+        function onlineRegistrationApp() {
+            return {
+                isOpen: false,
+                step: 1, // 1: form, 2: qris, 3: success
+                packageId: null,
+                packageName: '',
+                packagePrice: 0,
+                packageDuration: 1,
+                packageDesc: '',
+                
+                form: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    password: '',
+                    gender: 'male',
+                    address: ''
+                },
+
+                invoice: '',
+                qrisData: '',
+                qrisQrUrl: '',
+                timeLeft: 900,
+                timerInterval: null,
+                pollInterval: null,
+                loading: false,
+                simulating: false,
+                errorMessage: '',
+
+                successData: {
+                    member_name: '',
+                    member_number: '',
+                    package_name: '',
+                    phone: '',
+                    email: ''
+                },
+
+                openModal(id, name, price, duration, desc) {
+                    this.packageId = id;
+                    this.packageName = name;
+                    this.packagePrice = price;
+                    this.packageDuration = duration;
+                    this.packageDesc = desc || '';
+                    this.step = 1;
+                    this.errorMessage = '';
+                    this.loading = false;
+                    this.simulating = false;
+                    this.isOpen = true;
+                },
+
+                closeModal() {
+                    this.stopPolling();
+                    this.stopTimer();
+                    this.isOpen = false;
+                },
+
+                formatRupiah(num) {
+                    return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+                },
+
+                formatTime(seconds) {
+                    const m = Math.floor(seconds / 60);
+                    const s = seconds % 60;
+                    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                },
+
+                startTimer() {
+                    this.stopTimer();
+                    this.timeLeft = 900;
+                    this.timerInterval = setInterval(() => {
+                        if (this.timeLeft > 0) {
+                            this.timeLeft--;
+                        } else {
+                            this.stopTimer();
+                            this.stopPolling();
+                            this.errorMessage = 'Waktu pembayaran telah habis. Silakan coba kembali.';
+                            this.step = 1;
+                        }
+                    }, 1000);
+                },
+
+                stopTimer() {
+                    if (this.timerInterval) {
+                        clearInterval(this.timerInterval);
+                        this.timerInterval = null;
+                    }
+                },
+
+                startPolling() {
+                    this.stopPolling();
+                    this.pollInterval = setInterval(async () => {
+                        if (!this.invoice) return;
+                        try {
+                            const res = await fetch(`/register/online/${this.invoice}/status`);
+                            if (!res.ok) return;
+                            const data = await res.json();
+                            
+                            if (data.status === 'paid') {
+                                this.stopPolling();
+                                this.stopTimer();
+                                this.successData = {
+                                    member_name: data.member_name || this.form.name,
+                                    member_number: data.member_number || '-',
+                                    package_name: data.package_name || this.packageName,
+                                    phone: data.phone || this.form.phone,
+                                    email: data.email || this.form.email
+                                };
+                                this.step = 3;
+                            } else if (data.status === 'expired' || data.status === 'cancelled') {
+                                this.stopPolling();
+                                this.stopTimer();
+                                this.errorMessage = 'Pendaftaran telah dibatalkan atau kedaluwarsa.';
+                                this.step = 1;
+                            }
+                        } catch (e) {
+                            console.error('Polling error:', e);
+                        }
+                    }, 2500);
+                },
+
+                stopPolling() {
+                    if (this.pollInterval) {
+                        clearInterval(this.pollInterval);
+                        this.pollInterval = null;
+                    }
+                },
+
+                async submitForm() {
+                    this.loading = true;
+                    this.errorMessage = '';
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                    try {
+                        const response = await fetch('/register/online/initiate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify({
+                                membership_package_id: this.packageId,
+                                name: this.form.name,
+                                email: this.form.email,
+                                phone: this.form.phone,
+                                password: this.form.password,
+                                gender: this.form.gender,
+                                address: this.form.address
+                            })
+                        });
+
+                        const res = await response.json();
+
+                        if (!response.ok || !res.success) {
+                            if (res.errors) {
+                                const firstKey = Object.keys(res.errors)[0];
+                                this.errorMessage = res.errors[firstKey][0];
+                            } else {
+                                this.errorMessage = res.message || 'Terjadi kesalahan saat memproses pendaftaran.';
+                            }
+                            this.loading = false;
+                            return;
+                        }
+
+                        this.invoice = res.invoice;
+                        this.qrisData = res.qris_data;
+                        this.qrisQrUrl = res.qris_qr_url;
+                        this.step = 2;
+                        this.loading = false;
+                        this.startTimer();
+                        this.startPolling();
+
+                    } catch (err) {
+                        console.error('Submit error:', err);
+                        this.errorMessage = 'Koneksi gagal. Silakan periksa koneksi internet Anda.';
+                        this.loading = false;
+                    }
+                },
+
+                async simulatePayment() {
+                    if (!this.invoice || this.simulating) return;
+                    this.simulating = true;
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                    try {
+                        const response = await fetch(`/register/online/${this.invoice}/simulate`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        });
+
+                        const res = await response.json();
+                        this.simulating = false;
+
+                        if (response.ok && res.success) {
+                            this.stopPolling();
+                            this.stopTimer();
+                            this.successData = {
+                                member_name: res.member_name || this.form.name,
+                                member_number: res.member_number || '-',
+                                package_name: res.package_name || this.packageName,
+                                phone: this.form.phone,
+                                email: this.form.email
+                            };
+                            this.step = 3;
+                        } else {
+                            alert(res.message || 'Gagal simulasi pembayaran.');
+                        }
+                    } catch (err) {
+                        this.simulating = false;
+                        console.error('Simulate error:', err);
+                    }
+                },
+
+                async cancelRegistration() {
+                    if (!this.invoice) {
+                        this.step = 1;
+                        return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                    try {
+                        await fetch(`/register/online/${this.invoice}/cancel`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        });
+                    } catch (e) {}
+
+                    this.stopPolling();
+                    this.stopTimer();
+                    this.invoice = '';
+                    this.step = 1;
+                }
+            };
+        }
+
         // Mobile Menu — with aria-expanded toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         const menuIconClosed = document.getElementById('menuIconClosed');
         const menuIconOpen = document.getElementById('menuIconOpen');
 
-        mobileMenuBtn.addEventListener('click', () => {
-            const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-            mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
-            mobileMenuBtn.setAttribute('aria-label', isExpanded ? 'Buka Menu Navigasi' : 'Tutup Menu Navigasi');
-            mobileMenu.classList.toggle('hidden');
-            menuIconClosed.classList.toggle('hidden');
-            menuIconOpen.classList.toggle('hidden');
-        });
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
+                mobileMenuBtn.setAttribute('aria-label', isExpanded ? 'Buka Menu Navigasi' : 'Tutup Menu Navigasi');
+                mobileMenu.classList.toggle('hidden');
+                menuIconClosed?.classList.toggle('hidden');
+                menuIconOpen?.classList.toggle('hidden');
+            });
+        }
 
         // FAQ Toggle — with aria-expanded toggle
         function toggleFaq(btn) {
@@ -1304,6 +1885,8 @@
             const tapFeedback = document.getElementById('tapFeedback');
             const tapButton = document.getElementById('tapButton');
 
+            if (!tapButton || !demoCard || !tapFeedback) return;
+
             tapButton.disabled = true;
             tapButton.innerHTML = '⚡ Membaca Kartu...';
             demoCard.style.transform = 'scale(1.05) rotate(2deg)';
@@ -1322,12 +1905,14 @@
 
         // BMI Calculator
         function calculateBMI() {
-            const heightInput = document.getElementById('bmiHeight').value;
-            const weightInput = document.getElementById('bmiWeight').value;
+            const heightInput = document.getElementById('bmiHeight')?.value;
+            const weightInput = document.getElementById('bmiWeight')?.value;
             const resultBox = document.getElementById('bmiResultBox');
             const scoreText = document.getElementById('bmiScoreText');
             const categoryText = document.getElementById('bmiCategoryText');
             const adviceText = document.getElementById('bmiAdviceText');
+
+            if (!heightInput || !weightInput) return;
 
             const heightM = parseFloat(heightInput) / 100;
             const weightKg = parseFloat(weightInput);
@@ -1338,25 +1923,27 @@
             }
 
             const bmi = (weightKg / (heightM * heightM)).toFixed(1);
-            scoreText.innerText = bmi;
-            resultBox.classList.remove('hidden');
+            if (scoreText) scoreText.innerText = bmi;
+            resultBox?.classList.remove('hidden');
 
-            if (bmi < 18.5) {
-                categoryText.innerText = 'Berat Badan Kurang (Underweight)';
-                categoryText.className = 'font-bold text-blue-700';
-                adviceText.innerText = 'Disarankan program Hypertrophy & asupan nutrisi terukur di GymPulse untuk menambah massa otot.';
-            } else if (bmi >= 18.5 && bmi <= 24.9) {
-                categoryText.innerText = 'Berat Badan Ideal (Normal)';
-                categoryText.className = 'font-bold text-lime-700';
-                adviceText.innerText = 'Sangat baik! Pertahankan komposisi tubuh dengan latihan kekuatan & kardio teratur.';
-            } else if (bmi >= 25.0 && bmi <= 29.9) {
-                categoryText.innerText = 'Kelebihan Berat Badan (Overweight)';
-                categoryText.className = 'font-bold text-amber-700';
-                adviceText.innerText = 'Disarankan kombinasi latihan beban dan Functional HIIT untuk optimalisasi pembakaran kalori.';
-            } else {
-                categoryText.innerText = 'Kategori Obesitas';
-                categoryText.className = 'font-bold text-rose-700';
-                adviceText.innerText = 'Mulai perjalanan sehat dengan pendampingan Personal Trainer bersertifikat di GymPulse.';
+            if (categoryText && adviceText) {
+                if (bmi < 18.5) {
+                    categoryText.innerText = 'Berat Badan Kurang (Underweight)';
+                    categoryText.className = 'font-bold text-blue-700';
+                    adviceText.innerText = 'Disarankan program Hypertrophy & asupan nutrisi terukur di GymPulse untuk menambah massa otot.';
+                } else if (bmi >= 18.5 && bmi <= 24.9) {
+                    categoryText.innerText = 'Berat Badan Ideal (Normal)';
+                    categoryText.className = 'font-bold text-lime-700';
+                    adviceText.innerText = 'Sangat baik! Pertahankan komposisi tubuh dengan latihan kekuatan & kardio teratur.';
+                } else if (bmi >= 25.0 && bmi <= 29.9) {
+                    categoryText.innerText = 'Kelebihan Berat Badan (Overweight)';
+                    categoryText.className = 'font-bold text-amber-700';
+                    adviceText.innerText = 'Disarankan kombinasi latihan beban dan Functional HIIT untuk optimalisasi pembakaran kalori.';
+                } else {
+                    categoryText.innerText = 'Kategori Obesitas';
+                    categoryText.className = 'font-bold text-rose-700';
+                    adviceText.innerText = 'Mulai perjalanan sehat dengan pendampingan Personal Trainer bersertifikat di GymPulse.';
+                }
             }
         }
     </script>

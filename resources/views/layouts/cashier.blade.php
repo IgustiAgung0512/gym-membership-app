@@ -49,16 +49,21 @@
                 
                 {{-- LEFT: BRAND & BADGE --}}
                 <div class="flex items-center gap-6">
-                    <a href="{{ route('cashier.pos.index') }}" class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-lime-400 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-sm">
+                    <a href="{{ route('cashier.pos.index') }}" class="flex items-center gap-3 group">
+                        <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700/80 text-lime-400 flex items-center justify-center font-display font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform">
                             G
                         </div>
-                        <div class="leading-tight">
-                            <span class="font-display font-bold text-lg text-white tracking-tight">
-                                GymPulse<span class="text-lime-400">.</span>
-                            </span>
-                            <span class="block text-[10px] uppercase font-bold tracking-widest text-lime-400">
-                                POS Kasir
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-display font-extrabold text-lg text-white tracking-tight leading-none">
+                                    GymPulse<span class="text-lime-400">.</span>
+                                </span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-lime-500/20 text-lime-400 border border-lime-500/30">
+                                    Kasir POS
+                                </span>
+                            </div>
+                            <span class="text-[9px] tracking-wider text-slate-400 uppercase font-semibold mt-0.5 whitespace-nowrap">
+                                Smart RFID Fitness
                             </span>
                         </div>
                     </a>

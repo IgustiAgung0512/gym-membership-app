@@ -153,13 +153,15 @@
                 </div>
 
                 {{-- Price & Action Buttons --}}
-                <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 space-y-2">
+                <div class="mt-2.5 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100 space-y-2">
                     <div class="flex items-baseline justify-between">
-                        <span class="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Harga</span>
-                        <span class="font-display font-black text-xs sm:text-base text-slate-900 font-mono">
-                            Rp{{ number_format($product->price, 0, ',', '.') }}
-                            <span class="text-[9px] sm:text-[10px] text-slate-400 font-normal font-sans">/ {{ $product->unit }}</span>
-                        </span>
+                        <span class="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider" style="color: #64748b !important;">HARGA</span>
+                        <div class="text-right">
+                            <span class="font-display font-extrabold text-sm sm:text-base font-mono" style="color: #0f172a !important;">
+                                Rp{{ number_format($product->price, 0, ',', '.') }}
+                            </span>
+                            <span class="text-[10px] sm:text-xs font-semibold font-sans" style="color: #64748b !important;"> / {{ $product->unit }}</span>
+                        </div>
                     </div>
 
                     @if ($product->stock > 0)
@@ -167,11 +169,11 @@
                             <button 
                                 type="button" 
                                 @click="addToCart({{ json_encode($product) }})"
-                                class="p-2 sm:px-2.5 sm:py-2 rounded-xl border border-slate-200 hover:bg-slate-100 active:scale-95 text-slate-700 text-xs font-bold transition flex items-center justify-center"
+                                class="p-2 sm:px-2.5 sm:py-2 rounded-xl border border-slate-300 hover:bg-slate-100 active:scale-95 text-slate-800 text-xs font-bold transition flex items-center justify-center shadow-xs"
                                 title="Tambah ke keranjang"
                             >
                                 <span>🛒</span>
-                                <span class="hidden sm:inline ml-1 text-xs">Keranjang</span>
+                                <span class="hidden sm:inline ml-1 text-xs font-bold" style="color: #1e293b !important;">Keranjang</span>
                             </button>
                             <button 
                                 type="button" 
@@ -179,11 +181,11 @@
                                 class="flex-1 py-2 px-2 sm:px-3 rounded-xl bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 text-[11px] sm:text-xs font-display font-extrabold transition flex items-center justify-center gap-1 shadow-sm"
                             >
                                 <span>📱</span>
-                                <span>Beli QRIS</span>
+                                <span class="font-extrabold" style="color: #020617 !important;">Beli QRIS</span>
                             </button>
                         </div>
                     @else
-                        <button disabled class="w-full py-2 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold cursor-not-allowed text-center">
+                        <button disabled class="w-full py-2 rounded-xl bg-slate-100 text-slate-500 text-xs font-bold cursor-not-allowed text-center">
                             Stok Habis
                         </button>
                     @endif
@@ -275,8 +277,8 @@
                                 <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 flex items-center justify-center text-base shrink-0">📦</span>
                             </template>
                             <div class="truncate">
-                                <p class="font-bold text-slate-900 truncate text-[11px] sm:text-xs" x-text="item.name"></p>
-                                <p class="text-slate-500 text-[10px] sm:text-[11px] font-mono">Rp<span x-text="Number(item.price).toLocaleString('id-ID')"></span> / <span x-text="item.unit"></span></p>
+                                <p class="font-bold text-slate-900 truncate text-[11px] sm:text-xs" style="color: #0f172a !important;" x-text="item.name"></p>
+                                <p class="text-slate-600 text-[10px] sm:text-[11px] font-mono font-bold" style="color: #334155 !important;">Rp<span x-text="Number(item.price).toLocaleString('id-ID')"></span> <span class="text-slate-400 font-normal">/ <span x-text="item.unit"></span></span></p>
                             </div>
                         </div>
 
@@ -284,18 +286,18 @@
                         <div class="flex items-center gap-1 shrink-0">
                             <button 
                                 type="button" 
-                                @click="decreaseQty(index)"
-                                class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition"
+                                @click="decreaseQty(index)" 
+                                class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition"
                             >-</button>
-                            <span class="w-5 sm:w-6 text-center font-bold font-mono text-slate-900 text-xs" x-text="item.quantity"></span>
+                            <span class="w-5 sm:w-6 text-center font-bold font-mono text-slate-900 text-xs" style="color: #0f172a !important;" x-text="item.quantity"></span>
                             <button 
                                 type="button" 
-                                @click="increaseQty(index)"
-                                class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition"
+                                @click="increaseQty(index)" 
+                                class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold flex items-center justify-center transition"
                             >+</button>
                             <button 
                                 type="button" 
-                                @click="removeItem(index)"
+                                @click="removeItem(index)" 
                                 class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold flex items-center justify-center ml-0.5 transition"
                                 title="Hapus item"
                             >&times;</button>
@@ -306,24 +308,24 @@
 
             {{-- NOTES INPUT --}}
             <div class="mt-3.5 pt-2.5 border-t border-slate-100">
-                <label class="block text-[10px] sm:text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Catatan Tambahan (Opsional)</label>
+                <label class="block text-[10px] sm:text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1" style="color: #334155 !important;">Catatan Tambahan (Opsional)</label>
                 <input 
                     type="text" 
                     x-model="orderNotes" 
                     placeholder="Contoh: Suplemen scoop rasa vanila / botol dingin"
-                    class="w-full px-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-lime-500"
+                    class="w-full px-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500"
                 >
             </div>
 
             {{-- TOTAL & SUBMIT BUTTON --}}
-            <div class="mt-3.5 p-3 bg-slate-950 text-white rounded-xl sm:rounded-2xl">
-                <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <div class="mt-3.5 p-3 bg-slate-950 text-white rounded-xl sm:rounded-2xl border border-slate-800">
+                <div class="flex items-center justify-between text-[11px] text-slate-300">
                     <span>Metode Pembayaran</span>
-                    <span class="font-bold text-lime-400">📱 QRIS Dinamis</span>
+                    <span class="font-bold text-lime-400" style="color: #a3e635 !important;">📱 QRIS Dinamis</span>
                 </div>
                 <div class="mt-1.5 pt-1.5 border-t border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-slate-300 font-semibold uppercase">Total Bayar</span>
-                    <span class="font-display font-black text-lg sm:text-xl text-lime-400 font-mono">
+                    <span class="font-display font-extrabold text-lg sm:text-xl text-lime-400 font-mono" style="color: #a3e635 !important;">
                         Rp<span x-text="cartTotalAmount.toLocaleString('id-ID')"></span>
                     </span>
                 </div>
@@ -382,12 +384,12 @@
             </div>
 
             {{-- Total Tagihan Display --}}
-            <div class="mt-2 p-2.5 bg-slate-900 text-white rounded-xl">
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Tagihan QRIS</p>
-                <p class="font-display font-black text-xl text-lime-400 mt-0.5 font-mono">
+            <div class="mt-2 p-3 bg-slate-900 text-white rounded-2xl border border-slate-800">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Tagihan QRIS</p>
+                <p class="font-display font-extrabold text-2xl text-lime-400 mt-0.5 font-mono" style="color: #a3e635 !important;">
                     Rp<span x-text="lastOrder ? Number(lastOrder.total_amount).toLocaleString('id-ID') : '0'"></span>
                 </p>
-                <p class="text-[10px] text-slate-300 mt-0.5" x-text="'Member: ' + (lastOrder ? lastOrder.customer_name : '')"></p>
+                <p class="text-xs text-slate-300 mt-1 font-semibold" style="color: #cbd5e1 !important;" x-text="'Member: ' + (lastOrder ? lastOrder.customer_name : '')"></p>
             </div>
 
             {{-- Live Status Indicator --}}
@@ -448,36 +450,36 @@
                 Lunas via QRIS
             </span>
 
-            <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900 mt-1">Pembayaran Berhasil!</h3>
-            <p class="font-mono text-xs text-slate-500 font-bold" x-text="lastOrder ? lastOrder.invoice_number : ''"></p>
+            <h3 class="font-display font-extrabold text-base sm:text-lg text-slate-900 mt-1" style="color: #0f172a !important;">Pembayaran Berhasil!</h3>
+            <p class="font-mono text-xs text-slate-600 font-bold" style="color: #475569 !important;" x-text="lastOrder ? lastOrder.invoice_number : ''"></p>
 
             {{-- PICKUP INSTRUCTION CARD --}}
             <div class="mt-2.5 sm:mt-3 p-3 rounded-xl sm:rounded-2xl bg-lime-50 border border-lime-200 text-left space-y-1">
-                <div class="flex items-center gap-1.5 text-slate-950 font-bold text-xs">
+                <div class="flex items-center gap-1.5 text-slate-950 font-bold text-xs" style="color: #020617 !important;">
                     <span>📦</span>
                     <span>Siap Diambil di Kasir</span>
                 </div>
-                <p class="text-[11px] text-slate-600 leading-snug">
+                <p class="text-[11px] text-slate-700 leading-snug" style="color: #334155 !important;">
                     Tunjukkan bukti ini atau sebutkan nama Anda kepada kasir front-desk gym untuk mengambil pesanan.
                 </p>
             </div>
 
             {{-- ITEMS SUMMARY --}}
-            <div class="mt-2.5 sm:mt-3 p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 text-left text-xs space-y-1.5">
-                <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Ringkasan Barang</p>
+            <div class="mt-2.5 sm:mt-3 p-3 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1.5">
+                <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wider" style="color: #64748b !important;">Ringkasan Barang</p>
                 <template x-if="lastOrder && lastOrder.items">
-                    <div class="space-y-1 divide-y divide-slate-100">
+                    <div class="space-y-1 divide-y divide-slate-200">
                         <template x-for="item in lastOrder.items" :key="item.id">
                             <div class="pt-1 first:pt-0 flex justify-between items-center text-[11px]">
-                                <span class="font-semibold text-slate-800" x-text="item.quantity + 'x ' + item.product_name"></span>
-                                <span class="font-mono text-slate-600 font-bold">Rp<span x-text="Number(item.subtotal).toLocaleString('id-ID')"></span></span>
+                                <span class="font-semibold text-slate-800" style="color: #1e293b !important;" x-text="item.quantity + 'x ' + item.product_name"></span>
+                                <span class="font-mono font-bold text-slate-700" style="color: #334155 !important;">Rp<span x-text="Number(item.subtotal).toLocaleString('id-ID')"></span></span>
                             </div>
                         </template>
                     </div>
                 </template>
                 <div class="pt-2 border-t border-slate-200 flex justify-between items-center font-bold text-xs">
-                    <span class="text-slate-700">Total Dibayar:</span>
-                    <span class="text-emerald-700 font-mono font-black">
+                    <span class="text-slate-700" style="color: #334155 !important;">Total Dibayar:</span>
+                    <span class="font-mono font-black text-emerald-700" style="color: #047857 !important;">
                         Rp<span x-text="lastOrder ? Number(lastOrder.total_amount).toLocaleString('id-ID') : '0'"></span>
                     </span>
                 </div>

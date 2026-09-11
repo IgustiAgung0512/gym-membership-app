@@ -52,16 +52,21 @@
         class="fixed z-40 inset-y-0 left-0 w-64 bg-[#0F172A] border-r border-slate-800 transform transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shrink-0 flex flex-col shadow-lg"
     >
         {{-- LOGO --}}
-        <div class="h-16 flex items-center justify-between px-5 border-b border-slate-800 bg-slate-950/40">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-lime-400 text-slate-950 flex items-center justify-center font-display font-extrabold text-base">
+        <div class="h-16 flex items-center justify-between px-4 border-b border-slate-800 bg-slate-950/50">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 group">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700/80 text-lime-400 flex items-center justify-center font-display font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform">
                     G
                 </div>
-                <span class="font-display font-bold text-lg text-white tracking-tight">
-                    GymPulse<span class="text-lime-400">.</span>
-                </span>
+                <div class="flex flex-col">
+                    <span class="font-display font-extrabold text-lg text-white tracking-tight leading-none">
+                        GymPulse<span class="text-lime-400">.</span>
+                    </span>
+                    <span class="text-[9px] tracking-wider text-slate-400 uppercase font-semibold mt-0.5 whitespace-nowrap">
+                        Smart RFID Fitness
+                    </span>
+                </div>
             </a>
-            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+            <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                 Admin
             </span>
         </div>

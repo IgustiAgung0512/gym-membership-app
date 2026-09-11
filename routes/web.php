@@ -20,6 +20,7 @@ use App\Http\Controllers\Member\DashboardController as MemberDashboardController
 use App\Http\Controllers\Member\PasswordController as MemberPasswordController;
 use App\Http\Controllers\Member\PhotoController as MemberPhotoController;
 use App\Http\Controllers\Member\StoreController as MemberStoreController;
+use App\Http\Controllers\OnlineRegistrationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,14 @@ Route::get('/', function () {
 
     return view('welcome', compact('packages'));
 })->name('home');
+
+// --- ONLINE MEMBER REGISTRATION (LANDING PAGE CHECKOUT) ---
+Route::prefix('register/online')->name('register.online.')->group(function () {
+    Route::post('/initiate', [OnlineRegistrationController::class, 'initiate'])->name('initiate')->middleware('throttle:checkout');
+    Route::get('/{invoice}/status', [OnlineRegistrationController::class, 'status'])->name('status');
+    Route::post('/{invoice}/simulate', [OnlineRegistrationController::class, 'simulate'])->name('simulate');
+    Route::post('/{invoice}/cancel', [OnlineRegistrationController::class, 'cancel'])->name('cancel');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -53,6 +62,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
     Route::post('/members/{member}/renew', [MemberController::class, 'renew'])->name('members.renew');
     Route::post('/members/{member}/reset-password', [MemberController::class, 'resetPassword'])->name('members.reset-password');
+    Route::post('/members/{member}/assign-rfid', [MemberController::class, 'assignRfid'])->name('members.assign-rfid');
 
     Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
     Route::post('/packages', [PackageController::class, 'store'])->name('packages.store');
@@ -137,6 +147,7 @@ Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cash
     Route::post('/members', [CashierMemberController::class, 'store'])->name('members.store');
     Route::get('/members/{member}/photo', [CashierMemberController::class, 'photo'])->name('members.photo');
     Route::post('/members/{member}/renew', [CashierMemberController::class, 'renew'])->name('members.renew');
+    Route::post('/members/{member}/assign-rfid', [CashierMemberController::class, 'assignRfid'])->name('members.assign-rfid');
 
     Route::get('/attendance', [CashierAttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance/manual', [CashierAttendanceController::class, 'storeManual'])->name('attendance.manual');
