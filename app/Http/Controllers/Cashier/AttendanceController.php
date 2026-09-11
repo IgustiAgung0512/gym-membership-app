@@ -48,6 +48,13 @@ class AttendanceController extends Controller
                 'rfid_card_id' => $member->rfidCard?->id,
                 'check_in_at' => now(),
             ]);
+
+            try {
+                app(\App\Services\WhatsAppService::class)->sendCheckInNotice($member);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi check-in WA: ' . $e->getMessage());
+            }
+
             $message = 'Check-in manual berhasil dicatat untuk ' . $member->user->name . '.';
         }
 

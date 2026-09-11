@@ -148,6 +148,13 @@ class MemberController extends Controller
                 'rfidCard',
             ]);
 
+            // Kirim notifikasi WA check-in ke member
+            try {
+                app(\App\Services\WhatsAppService::class)->sendCheckInNotice($member);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi check-in WA: ' . $e->getMessage());
+            }
+
             return response()->json([
                 'success'     => true,
                 'action'      => 'checkin',

@@ -57,41 +57,6 @@
     </div>
 </div>
 
-{{-- CARD TEST KIRIM WHATSAPP --}}
-<div class="mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm" x-data="{ openTest: false }">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">📲</span>
-            <div>
-                <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Uji Coba Kirim Pesan WhatsApp</h4>
-                <p class="text-slate-500 text-[11px]">Tes apakah nomor gateway dan token Fonnte aktif & terhubung.</p>
-            </div>
-        </div>
-        <button type="button" @click="openTest = !openTest" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
-            <span x-text="openTest ? 'Tutup Form' : 'Buka Form Tes'"></span>
-        </button>
-    </div>
-
-    <form x-show="openTest" x-cloak method="POST" action="{{ route('admin.whatsapp.test-send') }}" class="mt-4 pt-4 border-t border-slate-100 space-y-3">
-        @csrf
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Nomor WhatsApp Tujuan</label>
-                <input type="text" name="phone" placeholder="08xxxxxxxxxx" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-emerald-500">
-            </div>
-            <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-slate-700 mb-1">Isi Pesan Uji Coba</label>
-                <input type="text" name="message" value="Halo! Ini adalah pesan uji coba dari GymPulse Gateway WhatsApp. ✅" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500">
-            </div>
-        </div>
-        <div class="flex justify-end">
-            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
-                <span>⚡ Kirim Pesan Uji Coba</span>
-            </button>
-        </div>
-    </form>
-</div>
-
 {{-- MOBILE CARDS VIEW (Responsif di HP) --}}
 <div class="grid gap-3 lg:hidden">
     @forelse ($logs as $log)

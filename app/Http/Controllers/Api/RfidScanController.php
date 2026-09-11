@@ -148,14 +148,12 @@ class RfidScanController extends Controller
             'check_in_at' => now(),
         ]);
 
-        // Kirim notifikasi WA di latar belakang setelah response dikirim ke scanner agar respon secepat kilat (< 0.2 detik)
-        dispatch(function () use ($member) {
-            try {
-                app(\App\Services\WhatsAppService::class)->sendCheckInNotice($member);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi check-in WA: ' . $e->getMessage());
-            }
-        })->afterResponse();
+        // Kirim notifikasi WA check-in ke member
+        try {
+            app(\App\Services\WhatsAppService::class)->sendCheckInNotice($member);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi check-in WA: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => 'success',
