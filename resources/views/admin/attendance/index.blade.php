@@ -8,13 +8,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {{-- QUICK SEARCH CHECK-IN CARD (2 COLS) --}}
-        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative">
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative" @click.outside="showDropdown = false">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-8 h-8 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm">⚡</span>
                     <div>
                         <h3 class="font-display font-bold text-slate-900 text-sm" style="color: #0f172a !important;">Quick Check-in Fallback (Lupa Kartu)</h3>
-                        <p class="text-[11px] text-slate-500">Cari nama, no. HP, atau kode member, lalu klik untuk presensi instan.</p>
+                        <p class="text-[11px] text-slate-500">Klik kolom pencarian untuk memilih member aktif atau ketik Nama / No. HP / Kode Member.</p>
                     </div>
                 </div>
                 <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-mono">
@@ -29,12 +29,23 @@
                         type="text" 
                         x-model="searchQuery" 
                         @focus="showDropdown = true"
+                        @input="showDropdown = true"
                         @keydown.escape="showDropdown = false"
                         @keydown.enter.prevent="submitSelectedOrFirst()"
-                        placeholder="Ketik Nama Member, No. HP, atau Kode Member (Contoh: Budi / 0812... / GYM-2026)..."
+                        placeholder="Klik disini / ketik Nama Member, No. HP, atau Kode Member..."
                         class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-28 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-lime-500 focus:bg-white text-slate-900 shadow-inner"
                     >
                     <span class="absolute left-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
+
+                    <button 
+                        type="button"
+                        x-show="searchQuery"
+                        @click="searchQuery = ''; showDropdown = true"
+                        class="absolute right-24 top-3 text-slate-400 hover:text-slate-600 text-xs px-1"
+                        title="Bersihkan pencarian"
+                    >
+                        ✕
+                    </button>
                     
                     <button 
                         type="button"
@@ -48,30 +59,34 @@
                 </div>
             </form>
 
-            {{-- LIVE SEARCH RESULTS DROPDOWN / LIST --}}
+            {{-- LIVE SEARCH RESULTS DROPDOWN / LIST (MUNCUL INSTAN SAAT DIKLIK) --}}
             <div 
-                x-show="showDropdown && filteredMembers.length > 0 && searchQuery.length > 0" 
+                x-show="showDropdown && filteredMembers.length > 0" 
                 x-cloak 
-                @click.outside="showDropdown = false"
-                class="absolute left-5 right-5 z-30 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100"
+                class="absolute left-5 right-5 z-30 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-64 overflow-y-auto divide-y divide-slate-100"
             >
+                <div class="px-3.5 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                    <span x-text="searchQuery ? 'Hasil Pencarian Member' : 'Pilih Member Cepat (Aktif)'"></span>
+                    <span x-text="filteredMembers.length + ' ditampilkan'"></span>
+                </div>
+
                 <template x-for="m in filteredMembers" :key="m.id">
                     <div 
                         @click="selectAndCheckin(m)"
-                        class="p-3 hover:bg-lime-50/60 cursor-pointer transition flex items-center justify-between gap-3 text-xs"
+                        class="p-3 hover:bg-lime-50/70 cursor-pointer transition flex items-center justify-between gap-3 text-xs group"
                     >
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-700 shrink-0 overflow-hidden border border-slate-200">
-                                <span x-text="m.user.name.charAt(0).toUpperCase()"></span>
+                            <div class="w-8 h-8 rounded-xl bg-slate-100 group-hover:bg-lime-100 flex items-center justify-center font-bold text-slate-700 group-hover:text-lime-900 shrink-0 overflow-hidden border border-slate-200 transition">
+                                <span x-text="(m.user?.name || '?').charAt(0).toUpperCase()"></span>
                             </div>
                             <div class="min-w-0">
-                                <p class="font-bold text-slate-900 truncate" style="color: #0f172a !important;" x-text="m.user.name"></p>
-                                <p class="text-[11px] text-slate-500 font-mono" x-text="(m.member_code || '-') + ' · ' + (m.user.phone || '-')"></p>
+                                <p class="font-bold text-slate-900 truncate group-hover:text-lime-950" style="color: #0f172a !important;" x-text="m.user?.name || '-'"></p>
+                                <p class="text-[11px] text-slate-500 font-mono" x-text="(m.member_code || '-') + ' · ' + (m.user?.phone || '-')"></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700" x-text="m.package ? m.package.name : 'Paket Gym'"></span>
-                            <span class="text-xs font-bold text-lime-800 bg-lime-100 px-2.5 py-1 rounded-lg hover:bg-lime-200 transition">
+                            <span class="text-xs font-bold text-lime-900 bg-lime-200 group-hover:bg-lime-300 px-2.5 py-1 rounded-lg transition shadow-xs">
                                 ⚡ Check-in
                             </span>
                         </div>
@@ -79,16 +94,26 @@
                 </template>
             </div>
 
+            {{-- JIKA PENCARIAN TIDAK DITEMUKAN --}}
+            <div 
+                x-show="showDropdown && filteredMembers.length === 0 && searchQuery.length > 0" 
+                x-cloak 
+                class="absolute left-5 right-5 z-30 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 text-center text-xs text-slate-500"
+            >
+                <p class="font-bold text-slate-800">Tidak ada member aktif yang cocok dengan "<span x-text="searchQuery"></span>"</p>
+                <p class="text-[11px] text-slate-400 mt-1">Tekan tombol <strong>Presensi (Enter)</strong> untuk mencoba verifikasi langsung ke database.</p>
+            </div>
+
             {{-- SELECTED MEMBER CARD PREVIEW --}}
             <template x-if="selectedMember">
                 <div class="mt-3.5 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-10 h-10 rounded-xl bg-slate-900 text-lime-400 flex items-center justify-center font-bold text-sm shrink-0">
-                            <span x-text="selectedMember.user.name.charAt(0).toUpperCase()"></span>
+                            <span x-text="(selectedMember.user?.name || '?').charAt(0).toUpperCase()"></span>
                         </div>
                         <div class="min-w-0">
-                            <p class="font-bold text-slate-900 text-sm truncate" style="color: #0f172a !important;" x-text="selectedMember.user.name"></p>
-                            <p class="text-[11px] text-slate-500 font-mono" x-text="'Kode: ' + selectedMember.member_code + ' | Telp: ' + (selectedMember.user.phone || '-')"></p>
+                            <p class="font-bold text-slate-900 text-sm truncate" style="color: #0f172a !important;" x-text="selectedMember.user?.name"></p>
+                            <p class="text-[11px] text-slate-500 font-mono" x-text="'Kode: ' + selectedMember.member_code + ' | Telp: ' + (selectedMember.user?.phone || '-')"></p>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('attendance.manual') }}">
@@ -252,19 +277,22 @@ function adminQuickAttendanceApp() {
         members: @json($activeMembers),
 
         get filteredMembers() {
-            if (!this.searchQuery) return [];
+            if (!this.searchQuery || !this.searchQuery.trim()) {
+                return this.members.slice(0, 10);
+            }
             const q = this.searchQuery.toLowerCase().trim();
             return this.members.filter(m => {
                 const name = (m.user?.name || '').toLowerCase();
                 const code = (m.member_code || '').toLowerCase();
                 const phone = (m.user?.phone || '').toLowerCase();
-                return name.includes(q) || code.includes(q) || phone.includes(q);
-            }).slice(0, 8);
+                const uid = (m.rfid_card?.uid || '').toLowerCase();
+                return name.includes(q) || code.includes(q) || phone.includes(q) || uid.includes(q);
+            }).slice(0, 15);
         },
 
         selectAndCheckin(member) {
             this.selectedMember = member;
-            this.searchQuery = member.user.name;
+            this.searchQuery = member.user?.name || member.member_code;
             this.showDropdown = false;
             
             const form = document.createElement('form');
@@ -292,7 +320,7 @@ function adminQuickAttendanceApp() {
                 this.selectAndCheckin(this.selectedMember);
                 return;
             }
-            if (this.filteredMembers.length > 0) {
+            if (this.filteredMembers.length > 0 && this.searchQuery.trim()) {
                 this.selectAndCheckin(this.filteredMembers[0]);
                 return;
             }

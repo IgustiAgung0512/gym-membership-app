@@ -125,8 +125,6 @@ class RfidScanController extends Controller
             ->whereNull('check_out_at')
             ->latest('id')
             ->first();
-            ->latest('id')
-            ->first();
 
         if ($openAttendance) {
             // Proteksi double-tap kartu (jika tap kedua terjadi dalam jeda < 3 detik)

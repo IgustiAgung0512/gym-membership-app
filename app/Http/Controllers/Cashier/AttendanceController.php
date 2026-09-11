@@ -19,9 +19,13 @@ class AttendanceController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $activeMembers = Member::with(['user', 'package', 'rfidCard'])
+        $activeMembers = Member::with([
+                'user:id,name,phone,email',
+                'package:id,name',
+                'rfidCard:id,member_id,uid'
+            ])
             ->where('status', 'active')
-            ->get();
+            ->get(['id', 'user_id', 'membership_package_id', 'member_code', 'status']);
 
         return view('cashier.attendance.index', compact('attendances', 'activeMembers', 'date'));
     }
