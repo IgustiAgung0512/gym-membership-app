@@ -9,19 +9,62 @@ use App\Models\PendingRegistration;
 use App\Models\User;
 use App\Services\QrisService;
 use App\Services\WhatsAppService;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class OnlineRegistrationController extends Controller
 {
     /**
+     * Memastikan tabel pending_registrations ada (Self-healing untuk Vercel/Production)
+     */
+    public static function ensureTableExists(): void
+    {
+        try {
+            if (!Schema::hasTable('pending_registrations')) {
+                try {
+                    Artisan::call('migrate', ['--force' => true]);
+                } catch (\Throwable $e) {
+                    Log::warning('Auto-migration command failed, falling back to Schema::create: ' . $e->getMessage());
+                }
+
+                if (!Schema::hasTable('pending_registrations')) {
+                    Schema::create('pending_registrations', function (Blueprint $table) {
+                        $table->id();
+                        $table->string('invoice_number', 50)->unique();
+                        $table->foreignId('membership_package_id')->constrained('membership_packages')->cascadeOnDelete();
+                        $table->string('name');
+                        $table->string('email');
+                        $table->string('phone', 30);
+                        $table->string('gender', 5)->nullable();
+                        $table->date('birth_date')->nullable();
+                        $table->text('address')->nullable();
+                        $table->string('password');
+                        $table->decimal('amount', 12, 2);
+                        $table->string('payment_method', 30)->default('qris');
+                        $table->string('status', 20)->default('pending');
+                        $table->timestamp('paid_at')->nullable();
+                        $table->timestamp('expires_at')->nullable();
+                        $table->timestamps();
+                    });
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed to ensure pending_registrations table: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Memulai checkout pendaftaran member online (Generate QRIS Dinamis)
      */
     public function initiate(Request $request)
     {
+        self::ensureTableExists();
         $data = $request->validate([
             'membership_package_id' => ['required', 'exists:membership_packages,id'],
             'name'                  => ['required', 'string', 'max:255'],
@@ -105,6 +148,8 @@ class OnlineRegistrationController extends Controller
      */
     public function status(string $invoiceNumber)
     {
+        self::ensureTableExists();
+
         $pending = PendingRegistration::with('package')
             ->where('invoice_number', $invoiceNumber)
             ->first();
@@ -154,6 +199,8 @@ class OnlineRegistrationController extends Controller
      */
     public function simulate(string $invoiceNumber)
     {
+        self::ensureTableExists();
+
         $isProduction = config('services.midtrans.is_production', env('MIDTRANS_IS_PRODUCTION', false));
         if (app()->environment('production') && $isProduction) {
             return response()->json([
@@ -197,6 +244,8 @@ class OnlineRegistrationController extends Controller
      */
     public function cancel(string $invoiceNumber)
     {
+        self::ensureTableExists();
+
         $pending = PendingRegistration::where('invoice_number', $invoiceNumber)->first();
 
         if (!$pending) {

@@ -48,6 +48,7 @@ class PaymentWebhookController extends Controller
                 return $this->handleRenewalPayment($payment, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, $request);
             }
 
+            \App\Http\Controllers\OnlineRegistrationController::ensureTableExists();
             $pendingReg = \App\Models\PendingRegistration::with('package')->where('invoice_number', $orderId)->first();
             if ($pendingReg) {
                 return $this->handleRegistrationPayment($pendingReg, $orderId, $statusCode, $grossAmount, $transactionStatus, $fraudStatus, $receivedSignature, $request);

@@ -125,6 +125,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::delete('/admin/{user}', [AdminUserController::class, 'destroyAdmin'])->name('admin.destroy');
         Route::delete('/cashier/{user}', [AdminUserController::class, 'destroyCashier'])->name('cashier.destroy');
     });
+
+    // --- SYSTEM MIGRATIONS RUNNER ---
+    Route::get('/system/migrate', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            return response()->json([
+                'success' => true,
+                'message' => 'Migrasi database berhasil dijalankan!',
+                'output'  => $output,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menjalankan migrasi: ' . $e->getMessage(),
+            ], 500);
+        }
+    })->name('system.migrate');
 });
 
 // --- CASHIER WORKSTATION (Direct entry to POS) ---
