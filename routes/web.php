@@ -173,4 +173,16 @@ Route::middleware(['auth', 'role:admin,cashier'])->group(function () {
     )->name('admin.members.check-rfid');
 });
 
+// Endpoint hardware reader fallback (jika alat ESP32/Arduino memanggil URL langsung tanpa /api)
+Route::middleware('throttle:api')->group(function () {
+    Route::match(['get', 'post'], '/rfid/scan', [\App\Http\Controllers\Api\RfidScanController::class, 'scan']);
+    Route::match(['get', 'post'], '/scan_uid', [\App\Http\Controllers\Api\MemberController::class, 'store']);
+    Route::match(['get', 'post'], '/members/add', [\App\Http\Controllers\Api\MemberController::class, 'store']);
+    Route::match(['get', 'post'], '/scan', [\App\Http\Controllers\Api\RfidScanController::class, 'scan']);
+    Route::match(['get', 'post'], '/v1/rfid/scan', [\App\Http\Controllers\Api\RfidScanController::class, 'scan']);
+    Route::match(['get', 'post'], '/v1/scan_uid', [\App\Http\Controllers\Api\MemberController::class, 'store']);
+    Route::match(['get', 'post'], '/v1/members/add', [\App\Http\Controllers\Api\MemberController::class, 'store']);
+});
+
+
 

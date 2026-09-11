@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Route;
 // Dipanggil oleh alat/perangkat RFID reader (ESP32 dsb).
 // Dilindungi dengan rate limiter 120 req/menit untuk mencegah flooding/DoS.
 Route::middleware('throttle:api')->group(function () {
-    Route::post('/rfid/scan', [RfidScanController::class, 'scan']);
-    Route::post('/members/add', [MemberController::class, 'store']);
-    Route::post('/scan_uid', [MemberController::class, 'store']);
+    Route::match(['get', 'post'], '/rfid/scan', [RfidScanController::class, 'scan']);
+    Route::match(['get', 'post'], '/scan', [RfidScanController::class, 'scan']);
+    Route::match(['get', 'post'], '/members/add', [MemberController::class, 'store']);
+    Route::match(['get', 'post'], '/scan_uid', [MemberController::class, 'store']);
 });
 
 // Endpoint Webhook Payment Gateway (Midtrans dsb)

@@ -13,38 +13,53 @@ class MemberController extends Controller
 {
     public function store(Request $request)
     {
-        $deviceKey = $request->header('X-Device-Key');
+        $deviceKey = $request->header('X-Device-Key') 
+            ?? $request->header('x-device-key') 
+            ?? $request->input('device_key') 
+            ?? $request->query('device_key');
 
-        if (config('services.rfid.device_key') && $deviceKey !== config('services.rfid.device_key')) {
+        $configuredKey = config('services.rfid.device_key');
+        if (!empty($configuredKey) && $deviceKey !== $configuredKey) {
             return response()->json([
                 'success' => false,
                 'reason' => 'unauthorized_device',
-                'message' => 'Perangkat tidak dikenali.',
+                'message' => 'Perangkat tidak dikenali. Pastikan header X-Device-Key atau parameter device_key sesuai.',
             ], 401);
         }
 
-        $request->validate([
-            'uid' => 'required|string|max:255',
-        ]);
+        $rawUid = $request->input('uid') ?? $request->query('uid') ?? '';
+        $rawUid = trim((string) $rawUid);
+
+        if (empty($rawUid)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parameter UID tidak boleh kosong.',
+            ], 400);
+        }
+
+        $trimmedColonUid = strtoupper(trim($rawUid, " :\t\n\r\0\x0B"));
+        $cleanUid = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $rawUid));
+        $storedUid = !empty($trimmedColonUid) ? $trimmedColonUid : $cleanUid;
 
         $checkUid = ScanUid::find(1);
-
         if (!$checkUid) {
             $checkUid = ScanUid::create([
-                'uid' => $request->uid,
+                'uid' => $storedUid,
             ]);
         } else {
-            $checkUid->uid = $request->uid;
+            $checkUid->uid = $storedUid;
             $checkUid->touch();
             $checkUid->save();
         }
 
-        $uid = trim($checkUid->uid);
-
         $card = RfidCard::with([
             'member.user',
         ])
-            ->where('uid', $uid)
+            ->where(function ($query) use ($rawUid, $cleanUid, $trimmedColonUid) {
+                $query->where('uid', $rawUid)
+                    ->orWhere('uid', $trimmedColonUid)
+                    ->orWhere('uid', $cleanUid);
+            })
             ->first();
 
         // Kartu belum pernah didaftarkan, atau sudah didaftarkan tapi belum
@@ -53,7 +68,8 @@ class MemberController extends Controller
             return response()->json([
                 'success' => false,
                 'reason' => 'unregistered',
-                'message' => 'Kartu belum terdaftar.',
+                'message' => 'Kartu belum terdaftar (' . ($cleanUid ?: $rawUid) . ').',
+                'scanned_uid' => $cleanUid ?: $rawUid,
             ], 404);
         }
 

@@ -25,27 +25,51 @@ class RfidScanController extends Controller
 {
     public function scan(Request $request, WhatsAppService $whatsapp)
     {
-        $deviceKey = $request->header('X-Device-Key');
+        $deviceKey = $request->header('X-Device-Key') 
+            ?? $request->header('x-device-key') 
+            ?? $request->input('device_key') 
+            ?? $request->query('device_key');
 
-        if (config('services.rfid.device_key') && $deviceKey !== config('services.rfid.device_key')) {
-            return response()->json(['status' => 'error', 'message' => 'Perangkat tidak dikenali.'], 401);
+        $configuredKey = config('services.rfid.device_key');
+        if (!empty($configuredKey) && $deviceKey !== $configuredKey) {
+            return response()->json(['status' => 'error', 'message' => 'Perangkat tidak dikenali. Pastikan header X-Device-Key atau parameter device_key sesuai.'], 401);
         }
 
-        $data = $request->validate([
-            'uid' => ['required', 'string', 'max:50'],
-        ]);
+        $rawUid = $request->input('uid') ?? $request->query('uid') ?? '';
+        $rawUid = trim((string) $rawUid);
 
+        if (empty($rawUid)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Parameter UID tidak boleh kosong.',
+            ], 400);
+        }
+
+        // Bersihkan jika ada titik dua di awal/akhir atau spasi (:C1:B8:C8:A3 -> C1:B8:C8:A3)
+        $trimmedColonUid = strtoupper(trim($rawUid, " :\t\n\r\0\x0B"));
+        $cleanUid = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $rawUid));
+
+        // Simpan format standar bertitik dua (C1:B8:C8:A3) ke ScanUid untuk pendaftaran di web
+        $storedUid = !empty($trimmedColonUid) ? $trimmedColonUid : $cleanUid;
         \App\Models\ScanUid::updateOrCreate(
             ['id' => 1],
-            ['uid' => trim($data['uid'])]
+            ['uid' => $storedUid]
         );
 
-        $card = RfidCard::with('member.user')->where('uid', $data['uid'])->first();
+        // Cari kartu berdasarkan variasi UID (raw, tanpa colon, atau format colon)
+        $card = RfidCard::with('member.user')
+            ->where(function ($query) use ($rawUid, $cleanUid, $trimmedColonUid) {
+                $query->where('uid', $rawUid)
+                    ->orWhere('uid', $trimmedColonUid)
+                    ->orWhere('uid', $cleanUid);
+            })
+            ->first();
 
         if (! $card) {
             return response()->json([
                 'status' => 'unknown_card',
-                'message' => 'Kartu tidak terdaftar.',
+                'message' => 'Kartu tidak terdaftar (' . ($cleanUid ?: $rawUid) . ').',
+                'scanned_uid' => $cleanUid ?: $rawUid,
             ], 404);
         }
 
