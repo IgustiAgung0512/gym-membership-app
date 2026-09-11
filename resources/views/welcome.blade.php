@@ -512,7 +512,7 @@
                     <!-- 2. Cardio -->
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-52 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/hero.jpg') }}" 
+                            <img src="{{ asset('images/gym/cardio.jpg') }}" 
                                  alt="Mesin kardio treadmill dan elliptical di GymPulse Cardio Theater" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  width="600" height="208"
@@ -531,7 +531,7 @@
                     <!-- 3. Functional Turf -->
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-52 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/facilities.jpg') }}" 
+                            <img src="{{ asset('images/gym/functional.jpg') }}" 
                                  alt="Area functional training dan sled track di GymPulse" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  width="600" height="208"
@@ -929,7 +929,7 @@
 
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-64 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/facilities.jpg') }}" 
+                            <img src="{{ asset('images/gym/trainer-sarah.jpg') }}" 
                                  alt="Coach Sarah Amanda, CPT — Fat Loss Specialist & Functional Training Wanita" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  width="600" height="256"
@@ -948,7 +948,7 @@
 
                     <div class="clean-panel-interactive overflow-hidden group">
                         <div class="h-64 overflow-hidden relative">
-                            <img src="{{ asset('images/gym/hero.jpg') }}" 
+                            <img src="{{ asset('images/gym/trainer-dimas.jpg') }}" 
                                  alt="Coach Dimas Wicaksono — Strength & Powerlifting Specialist" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                  width="600" height="256"
