@@ -74,17 +74,18 @@
     {{-- HASIL CHECK-IN --}}
     <div
         id="rfid-checkin-data"
-        class="hidden p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden"
+        class="hidden p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden shadow-xl"
+        style="background: #0f172a;"
     >
         {{-- Ambient background glow --}}
-        <div id="rfid-ambient-glow" class="absolute -right-10 -bottom-10 w-56 h-56 rounded-full blur-3xl opacity-25 pointer-events-none transition-all duration-500"></div>
+        <div id="rfid-ambient-glow" class="absolute -right-12 -bottom-12 w-80 h-80 rounded-full blur-3xl opacity-35 pointer-events-none transition-all duration-500"></div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center gap-5 relative z-10">
+        <div class="flex flex-col md:flex-row md:items-center gap-6 relative z-10">
             {{-- FOTO --}}
-            <div class="shrink-0">
+            <div class="shrink-0 flex items-center justify-center">
                 <div
                     id="rfid-member-photo-wrapper"
-                    class="w-20 h-20 rounded-2xl overflow-hidden bg-slate-800 border-2 flex items-center justify-center text-white shadow-md transition-all duration-500"
+                    class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 flex items-center justify-center text-white shadow-lg transition-all duration-500"
                 >
                     <img
                         id="rfid-member-photo"
@@ -94,7 +95,8 @@
                     >
                     <span
                         id="rfid-member-initial"
-                        class="text-3xl font-display font-bold text-white"
+                        class="text-4xl font-display font-black text-white"
+                        style="color: #ffffff !important;"
                     >
                         -
                     </span>
@@ -102,58 +104,59 @@
             </div>
 
             {{-- INFO MEMBER --}}
-            <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
+            <div class="min-w-0 flex-1 space-y-3">
+                <div class="flex flex-wrap items-center gap-2.5">
                     <h3
                         id="rfid-member-name"
-                        class="font-display text-xl font-bold tracking-tight text-white"
+                        class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight"
+                        style="color: #ffffff !important;"
                     >
                         -
                     </h3>
-                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800/90 border border-slate-700 text-slate-300">
+                    <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-800 text-slate-200 border border-slate-700 uppercase tracking-wider shadow-xs">
                         RFID TAP
                     </span>
                     <span 
                         id="rfid-package-badge"
-                        class="text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 shadow-xs"
+                        class="text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 shadow-md uppercase tracking-wider"
                     >
                         -
                     </span>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-x-3 text-xs text-slate-400 font-mono">
-                    <span id="rfid-member-code">-</span>
-                    <span class="text-slate-600">•</span>
-                    <span id="rfid-member-validity" class="text-slate-300 font-sans font-medium">-</span>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-mono">
+                    <span id="rfid-member-code" class="font-bold tracking-wide" style="color: #cbd5e1 !important;">-</span>
+                    <span class="text-slate-500">•</span>
+                    <span id="rfid-member-validity" class="font-sans font-semibold text-sm" style="color: #38bdf8 !important;">-</span>
                 </div>
 
-                <div class="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-xs">
-                    <div>
-                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">UID Kartu</p>
-                        <p id="rfid-member-uid" class="font-mono font-bold text-slate-200 mt-0.5">-</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs">
+                    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-xs">
+                        <p class="text-[11px] uppercase font-bold tracking-wider" style="color: #94a3b8 !important;">UID Kartu</p>
+                        <p id="rfid-member-uid" class="font-mono font-extrabold text-sm sm:text-base mt-0.5 truncate" style="color: #ffffff !important;">-</p>
                     </div>
-                    <div>
-                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-In</p>
-                        <p id="rfid-member-time" class="font-semibold text-slate-100 mt-0.5">-</p>
+                    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-xs">
+                        <p class="text-[11px] uppercase font-bold tracking-wider" style="color: #94a3b8 !important;">Check-In</p>
+                        <p id="rfid-member-time" class="font-mono font-extrabold text-sm sm:text-base mt-0.5" style="color: #ffffff !important;">-</p>
                     </div>
-                    <div>
-                        <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-400">Check-Out</p>
-                        <p id="rfid-member-checkout-time" class="font-semibold text-slate-100 mt-0.5">-</p>
+                    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/90 shadow-xs">
+                        <p class="text-[11px] uppercase font-bold tracking-wider" style="color: #94a3b8 !important;">Check-Out</p>
+                        <p id="rfid-member-checkout-time" class="font-mono font-extrabold text-sm sm:text-base mt-0.5" style="color: #ffffff !important;">-</p>
                     </div>
-                    <div id="rfid-session-box" class="hidden">
-                        <p class="text-[10px] uppercase font-semibold tracking-wider text-amber-300 font-bold">⏱️ Durasi Latihan</p>
-                        <p id="rfid-session-duration" class="font-bold text-amber-200 mt-0.5 font-mono text-[13px]">-</p>
+                    <div id="rfid-session-box" class="p-2.5 rounded-xl bg-amber-950/50 border border-amber-400/60 shadow-xs hidden">
+                        <p class="text-[11px] uppercase font-bold tracking-wider" style="color: #fcd34d !important;">⏱️ Durasi Sesi</p>
+                        <p id="rfid-session-duration" class="font-mono font-black text-sm sm:text-base mt-0.5" style="color: #fef08a !important;">-</p>
                     </div>
                 </div>
             </div>
 
             {{-- STATUS --}}
-            <div class="sm:ml-auto shrink-0 text-left sm:text-right">
-                <div id="rfid-status-badge" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs shadow-xs transition-all duration-300">
-                    <span id="rfid-status-dot" class="w-2 h-2 rounded-full"></span>
+            <div class="md:ml-auto shrink-0 flex flex-col md:items-end justify-between self-start md:self-center gap-2">
+                <div id="rfid-status-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-black text-xs sm:text-sm shadow-lg transition-all duration-300 uppercase tracking-wider">
+                    <span id="rfid-status-dot" class="w-2.5 h-2.5 rounded-full"></span>
                     <span id="rfid-status-text">Check-in berhasil</span>
                 </div>
-                <p id="rfid-member-date" class="text-xs text-slate-400 mt-1.5 font-mono">
+                <p id="rfid-member-date" class="text-xs font-mono mt-1" style="color: #94a3b8 !important;">
                     -
                 </p>
             </div>
@@ -364,37 +367,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const themePresets = {
         vip: {
-            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-purple-950/80 to-indigo-950 border-purple-500/50 shadow-lg shadow-purple-950/30 text-white',
-            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-purple-400 ring-2 ring-purple-400/40 bg-purple-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
-            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-purple-500/25 text-purple-200 border border-purple-400/40 shadow-xs',
+            cardClasses: 'p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border-purple-500/70 shadow-2xl shadow-purple-950/50 text-white',
+            photoWrapperClasses: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-purple-400 ring-4 ring-purple-500/30 bg-purple-950 flex items-center justify-center text-white shadow-lg transition-all duration-500',
+            badgeClasses: 'text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-purple-500 text-white border border-purple-300 shadow-md uppercase tracking-wider',
             badgeIcon: '✨',
             glowColor: 'bg-purple-600',
         },
         gold: {
-            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-amber-950/80 to-yellow-950 border-amber-500/50 shadow-lg shadow-amber-950/30 text-white',
-            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-400 ring-2 ring-amber-400/40 bg-amber-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
-            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-amber-500/25 text-amber-200 border border-amber-400/40 shadow-xs',
+            cardClasses: 'p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/80 border-amber-400/90 shadow-2xl shadow-amber-950/50 text-white',
+            photoWrapperClasses: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-amber-400 ring-4 ring-amber-400/30 bg-amber-950 flex items-center justify-center text-white shadow-lg transition-all duration-500',
+            badgeClasses: 'text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-amber-400 text-slate-950 border border-amber-200 shadow-md uppercase tracking-wider',
             badgeIcon: '👑',
             glowColor: 'bg-amber-500',
         },
         silver: {
-            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950 border-cyan-500/50 shadow-lg shadow-cyan-950/30 text-white',
-            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-400 ring-2 ring-cyan-400/40 bg-slate-900 flex items-center justify-center text-white shadow-md transition-all duration-500',
-            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 shadow-xs',
+            cardClasses: 'p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950/80 border-cyan-400/90 shadow-2xl shadow-cyan-950/50 text-white',
+            photoWrapperClasses: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-cyan-400 ring-4 ring-cyan-400/30 bg-slate-900 flex items-center justify-center text-white shadow-lg transition-all duration-500',
+            badgeClasses: 'text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-cyan-400 text-slate-950 border border-cyan-200 shadow-md uppercase tracking-wider',
             badgeIcon: '🛡️',
             glowColor: 'bg-cyan-500',
         },
         student: {
-            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-rose-950/80 to-pink-950 border-rose-500/50 shadow-lg shadow-rose-950/30 text-white',
-            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-rose-400 ring-2 ring-rose-400/40 bg-rose-950 flex items-center justify-center text-white shadow-md transition-all duration-500',
-            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-rose-500/25 text-rose-200 border border-rose-400/40 shadow-xs',
+            cardClasses: 'p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-rose-950/80 border-rose-400/90 shadow-2xl shadow-rose-950/50 text-white',
+            photoWrapperClasses: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-rose-400 ring-4 ring-rose-400/30 bg-rose-950 flex items-center justify-center text-white shadow-lg transition-all duration-500',
+            badgeClasses: 'text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-rose-500 text-white border border-rose-300 shadow-md uppercase tracking-wider',
             badgeIcon: '🎓',
             glowColor: 'bg-rose-500',
         },
         basic: {
-            cardClasses: 'p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-lime-950/80 border-lime-500/50 shadow-lg shadow-lime-950/30 text-white',
-            photoWrapperClasses: 'w-20 h-20 rounded-2xl overflow-hidden border-2 border-lime-400 ring-2 ring-lime-400/40 bg-slate-900 flex items-center justify-center text-white shadow-md transition-all duration-500',
-            badgeClasses: 'text-[11px] font-bold px-3 py-0.5 rounded-full transition-all duration-300 inline-flex items-center gap-1 bg-lime-500/25 text-lime-200 border border-lime-400/40 shadow-xs',
+            cardClasses: 'p-6 lg:p-7 rounded-2xl border-2 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950/80 border-lime-400/90 shadow-2xl shadow-lime-950/50 text-white',
+            photoWrapperClasses: 'w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-lime-400 ring-4 ring-lime-400/30 bg-slate-900 flex items-center justify-center text-white shadow-lg transition-all duration-500',
+            badgeClasses: 'text-xs font-black px-3.5 py-1 rounded-full transition-all duration-300 inline-flex items-center gap-1.5 bg-lime-400 text-slate-950 border border-lime-200 shadow-md uppercase tracking-wider',
             badgeIcon: '⚡',
             glowColor: 'bg-lime-500',
         }
@@ -556,8 +559,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Status Check-in vs Check-out Visual
             if (data.action === 'checkout') {
-                statusBadge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs bg-sky-500/25 text-sky-200 border border-sky-400/40 shadow-xs';
-                statusDot.className = 'w-2 h-2 rounded-full bg-sky-400';
+                statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full font-black text-xs sm:text-sm bg-sky-500 text-white border border-sky-300 shadow-lg uppercase tracking-wider';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-white';
                 statusText.textContent = 'Check-out berhasil';
 
                 if (data.session_duration && sessionBox && sessionDurationEl) {
@@ -567,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     sessionBox.classList.add('hidden');
                 }
             } else {
-                statusBadge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full font-bold text-xs bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 shadow-xs';
-                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full font-black text-xs sm:text-sm bg-emerald-500 text-white border border-emerald-300 shadow-lg uppercase tracking-wider';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-white animate-pulse';
                 statusText.textContent = 'Check-in berhasil';
 
                 if (sessionBox) {
