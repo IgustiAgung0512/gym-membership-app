@@ -127,6 +127,7 @@ class OnlineRegistrationController extends Controller
             'success' => true,
             'message' => 'Tagihan pendaftaran berhasil dibuat. Silakan selesaikan pembayaran.',
             'invoice_number' => $invoiceNumber,
+            'invoice' => $invoiceNumber,
             'package' => [
                 'id' => $package->id,
                 'name' => $package->name,
@@ -140,6 +141,8 @@ class OnlineRegistrationController extends Controller
                 'phone' => $pending->phone,
             ],
             'qris' => $qrisData,
+            'qris_data' => $qrisData['qr_string'] ?? '',
+            'qris_qr_url' => $qrisData['qr_url'] ?? '',
         ]);
     }
 
@@ -171,6 +174,7 @@ class OnlineRegistrationController extends Controller
                 'status'        => 'paid',
                 'message'       => 'Pembayaran terkonfirmasi! Akun member Anda telah aktif.',
                 'member_code'   => $member?->member_code,
+                'member_number' => $member?->member_code,
                 'member_name'   => $pending->name,
                 'package_name'  => $pending->package?->name,
                 'expire_date'   => optional($member?->expire_date)->translatedFormat('d F Y'),
@@ -222,20 +226,23 @@ class OnlineRegistrationController extends Controller
 
         if ($pending->status === 'paid') {
             return response()->json([
-                'success' => true,
-                'message' => 'Pendaftaran sudah berstatus lunas.',
+                'success'       => true,
+                'message'       => 'Pendaftaran sudah berstatus lunas.',
+                'member_code'   => $pending->email,
+                'member_number' => $pending->email,
             ]);
         }
 
         $member = self::settleRegistration($pending);
 
         return response()->json([
-            'success'      => true,
-            'message'      => 'Pembayaran pendaftaran berhasil diverifikasi & akun member telah aktif!',
-            'member_code'  => $member->member_code,
-            'member_name'  => $member->user->name,
-            'package_name' => $pending->package?->name,
-            'expire_date'  => optional($member->expire_date)->translatedFormat('d F Y'),
+            'success'       => true,
+            'message'       => 'Pembayaran pendaftaran berhasil diverifikasi & akun member telah aktif!',
+            'member_code'   => $member->member_code,
+            'member_number' => $member->member_code,
+            'member_name'   => $member->user->name,
+            'package_name'  => $pending->package?->name,
+            'expire_date'   => optional($member->expire_date)->translatedFormat('d F Y'),
         ]);
     }
 

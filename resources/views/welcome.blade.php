@@ -1460,68 +1460,87 @@
                     <div x-show="step === 2" x-cloak class="space-y-4 text-center">
                         
                         <!-- Header info -->
-                        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs">
-                            <div class="text-left">
-                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">No. Invoice</span>
-                                <span class="font-mono font-bold text-white text-xs" x-text="invoice"></span>
+                        <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-md bg-slate-950 text-white font-black text-[11px] tracking-wider border border-slate-700">QRIS</span>
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Dinamis Otomatis</span>
                             </div>
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Batas Waktu</span>
-                                <span class="font-mono font-bold text-amber-400 text-xs" x-text="formatTime(timeLeft)"></span>
+                            <div class="flex items-center gap-1 text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-lg border border-amber-500/30">
+                                <svg class="w-3.5 h-3.5 text-amber-400 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span x-text="formatTime(timeLeft)"></span>
                             </div>
-                        </div>
-
-                        <!-- Amount to pay -->
-                        <div>
-                            <span class="text-xs text-slate-400">Total Tagihan Membership</span>
-                            <div class="font-display font-extrabold text-2xl text-lime-400 mt-0.5" x-text="formatRupiah(packagePrice)"></div>
-                            <span class="text-[11px] text-slate-400" x-text="packageName"></span>
                         </div>
 
                         <!-- QR Code Container -->
-                        <div class="flex justify-center my-2">
-                            <div class="p-3 bg-white rounded-2xl shadow-xl border-4 border-lime-500/40 relative inline-block">
-                                <img :src="qrisQrUrl" alt="QRIS GymPulse" class="w-48 h-48 sm:w-56 sm:h-56 mx-auto object-contain">
-                                <div class="mt-1 text-center">
-                                    <span class="text-[10px] font-bold font-mono tracking-widest text-slate-800">QRIS STANDAR INDONESIA</span>
-                                </div>
+                        <div class="bg-gradient-to-b from-slate-100 to-slate-200 p-3 rounded-2xl border border-slate-300 shadow-inner inline-block mx-auto">
+                            <div class="w-48 h-48 sm:w-56 sm:h-56 bg-white rounded-xl p-2 shadow-sm flex items-center justify-center mx-auto border border-slate-200">
+                                <template x-if="qrisQrUrl">
+                                    <img :src="qrisQrUrl" alt="QRIS Code GymPulse" class="w-full h-full object-contain">
+                                </template>
+                            </div>
+                            <p class="font-mono text-[11px] text-slate-600 mt-1 font-semibold" x-text="invoice"></p>
+                        </div>
+
+                        <!-- Amount to pay -->
+                        <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl text-white">
+                            <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Total Tagihan Membership</span>
+                            <div class="font-display font-extrabold text-2xl text-lime-400 mt-0.5 font-mono" style="color: #a3e635 !important;" x-text="formatRupiah(packagePrice)"></div>
+                            <div class="flex items-center justify-center gap-2 text-[11px] text-slate-300 mt-0.5">
+                                <span x-text="'Paket: ' + packageName"></span>
+                                <span>•</span>
+                                <span class="text-lime-300 font-semibold" x-text="'Durasi: ' + packageDuration + ' Bulan'"></span>
                             </div>
                         </div>
 
                         <!-- Live Polling Radar Indicator -->
-                        <div class="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-center gap-2 text-xs text-slate-300">
-                            <span class="w-2.5 h-2.5 rounded-full bg-lime-400 animate-ping"></span>
+                        <div class="py-2 px-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center gap-2 text-xs font-bold text-emerald-400">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
                             <span>Menunggu Pembayaran (Sistem Otomatis Mendeteksi)...</span>
                         </div>
 
-                        <!-- Instructions -->
-                        <div class="text-[11px] text-slate-400 text-left bg-slate-950/40 p-3 rounded-xl border border-slate-800 space-y-1">
-                            <p class="font-semibold text-slate-300">Cara Pembayaran:</p>
-                            <ol class="list-decimal list-inside space-y-0.5">
-                                <li>Buka aplikasi m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay).</li>
-                                <li>Pilih menu <strong>Scan QRIS</strong> dan arahkan kamera ke kode QR di atas.</li>
-                                <li>Periksa nama merchant <strong>GymPulse</strong> dan konfirmasi pembayaran.</li>
-                                <li>Halaman ini akan otomatis beralih setelah pembayaran berhasil.</li>
+                        <!-- SIMULATOR TEST ACTION BOX -->
+                        <div class="p-3 bg-gradient-to-br from-indigo-950/60 via-purple-950/40 to-slate-900 border border-indigo-500/30 rounded-2xl text-left space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+                                    <span>🧪</span> Mode Uji Coba (Simulator)
+                                </span>
+                                <span class="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-bold">Midtrans Ready</span>
+                            </div>
+                            <p class="text-[11px] text-indigo-200/80 leading-snug">
+                                Klik tombol di bawah untuk simulasi telah bayar via BCA Mobile / GoPay / OVO:
+                            </p>
+                            <button 
+                                type="button" 
+                                @click="simulatePayment()"
+                                :disabled="simulating"
+                                class="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                                <span x-show="!simulating">⚡ Simulasi: Bayar QRIS Sukses</span>
+                                <span x-show="simulating">Memverifikasi Pembayaran...</span>
+                            </button>
+                        </div>
+
+                        <!-- Cara Pembayaran Collapse/Card -->
+                        <div class="text-[11px] text-slate-400 text-left bg-slate-950/60 p-3 rounded-xl border border-slate-800 space-y-1">
+                            <p class="font-semibold text-slate-300">Petunjuk Pembayaran:</p>
+                            <ol class="list-decimal list-inside space-y-0.5 text-slate-400">
+                                <li>Buka aplikasi m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana).</li>
+                                <li>Pilih menu <strong>Scan QRIS</strong> dan scan kode QR di atas.</li>
+                                <li>Periksa nama merchant <strong>GYMPULSE</strong> dan konfirmasi bayar.</li>
+                                <li>Sistem otomatis mengaktifkan keanggotaan Anda dalam hitungan detik.</li>
                             </ol>
                         </div>
 
-                        <!-- Test Simulator / Cancel Buttons -->
-                        <div class="pt-2 space-y-2">
-                            <button type="button" 
-                                    @click="simulatePayment()" 
-                                    :disabled="simulating"
-                                    class="w-full py-2.5 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50">
-                                <span x-show="!simulating">⚡ Simulasi Bayar Instan (Demo Mode)</span>
-                                <span x-show="simulating">Memproses Simulasi...</span>
-                            </button>
-
-                            <button type="button" 
-                                    @click="cancelRegistration()" 
-                                    class="w-full py-2 text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
-                                Batalkan Pendaftaran
+                        <!-- Cancel Action -->
+                        <div class="pt-1">
+                            <button 
+                                type="button" 
+                                @click="cancelRegistration()" 
+                                class="text-xs text-rose-400 hover:text-rose-300 font-bold hover:underline transition"
+                            >
+                                ✕ Batalkan Pendaftaran
                             </button>
                         </div>
-
                     </div>
 
                     <!-- =================== STEP 3: SUCCESS & IN-GYM PICKUP GUIDANCE =================== -->
@@ -1538,44 +1557,37 @@
                         </div>
 
                         <!-- Member Details Card -->
-                        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-left space-y-2 text-xs">
-                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
-                                <span class="text-slate-400">Nama Member:</span>
-                                <strong class="text-white" x-text="successData.member_name"></strong>
+                        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                                <span class="text-slate-400">Nama Member</span>
+                                <span class="font-bold text-white" x-text="successData.member_name"></span>
                             </div>
-                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
-                                <span class="text-slate-400">Nomor Anggota:</span>
-                                <strong class="text-lime-400 font-mono" x-text="successData.member_number"></strong>
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                                <span class="text-slate-400">Nomor Member ID</span>
+                                <span class="font-mono font-bold text-lime-400" x-text="successData.member_number"></span>
                             </div>
-                            <div class="flex justify-between border-b border-slate-700/60 pb-2">
-                                <span class="text-slate-400">Paket Membership:</span>
-                                <strong class="text-white" x-text="successData.package_name"></strong>
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                                <span class="text-slate-400">Paket Dipilih</span>
+                                <span class="font-semibold text-slate-200" x-text="successData.package_name"></span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-400">Status Akun:</span>
-                                <span class="px-2 py-0.5 rounded-full bg-lime-500/20 text-lime-400 font-bold text-[10px]">AKTIF</span>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Status Akun</span>
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">LUNAS & AKTIF</span>
                             </div>
                         </div>
 
-                        <!-- In-Gym RFID Card Pickup Instructions (Crucial UX Requirement) -->
+                        <!-- Important Note: In-Gym RFID Card Pickup -->
                         <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-2">
-                            <div class="flex items-center gap-2 text-amber-300 font-bold text-xs">
-                                <span>🪪</span>
-                                <span>Pengambilan Kartu Akses Fisik Smart RFID:</span>
+                            <div class="flex items-center gap-2 text-amber-400 font-bold text-xs sm:text-sm">
+                                <span class="text-base">🏷️</span>
+                                <span>Pengambilan Kartu RFID Akses Gate:</span>
                             </div>
-                            <ol class="text-[11px] text-slate-300 list-decimal list-inside space-y-1">
-                                <li>Datang ke resepsionis GymPulse kapan saja saat jam operasional.</li>
-                                <li>Sebutkan nama Anda atau tunjukkan <strong>Nomor Anggota (<span class="text-amber-400 font-mono" x-text="successData.member_number"></span>)</strong>.</li>
-                                <li>Kasir / Admin kami akan langsung men-scan & menyerahkan kartu fisik Smart RFID Anda dalam 5 detik!</li>
-                            </ol>
+                            <p class="text-xs text-amber-200/90 leading-relaxed">
+                                Silakan datang langsung ke front-desk GymPulse dan sebutkan <strong>Nama</strong> atau <strong>ID Member (<span class="font-mono font-bold" x-text="successData.member_number"></span>)</strong>. Petugas kasir/admin akan langsung memprogram & menyerahkan kartu RFID fisik Anda untuk akses gate masuk & gym!
+                            </p>
                         </div>
 
-                        <!-- WhatsApp Notification Notice -->
-                        <p class="text-[11px] text-slate-400">
-                            💬 Rincian tanda terima & instruksi telah kami kirimkan ke WhatsApp Anda.
-                        </p>
-
-                        <!-- CTA to Member Portal -->
+                        <!-- Next Actions -->
                         <div class="pt-2">
                             <a href="{{ route('login') }}" 
                                class="w-full py-3 px-4 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-lime-500/20">
@@ -1699,7 +1711,7 @@
                                 this.stopTimer();
                                 this.successData = {
                                     member_name: data.member_name || this.form.name,
-                                    member_number: data.member_number || '-',
+                                    member_number: data.member_number || data.member_code || '-',
                                     package_name: data.package_name || this.packageName,
                                     phone: data.phone || this.form.phone,
                                     email: data.email || this.form.email
@@ -1762,9 +1774,9 @@
                             return;
                         }
 
-                        this.invoice = res.invoice;
-                        this.qrisData = res.qris_data;
-                        this.qrisQrUrl = res.qris_qr_url;
+                        this.invoice = res.invoice_number || res.invoice || '';
+                        this.qrisData = (res.qris && res.qris.qr_string) ? res.qris.qr_string : (res.qris_data || '');
+                        this.qrisQrUrl = (res.qris && res.qris.qr_url) ? res.qris.qr_url : (res.qris_qr_url || '');
                         this.step = 2;
                         this.loading = false;
                         this.startTimer();
@@ -1801,7 +1813,7 @@
                             this.stopTimer();
                             this.successData = {
                                 member_name: res.member_name || this.form.name,
-                                member_number: res.member_number || '-',
+                                member_number: res.member_number || res.member_code || '-',
                                 package_name: res.package_name || this.packageName,
                                 phone: this.form.phone,
                                 email: this.form.email
