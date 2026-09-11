@@ -128,23 +128,33 @@ class WhatsAppService
 
         if (! $this->token) {
             // Belum dikonfigurasi -> dicatat sebagai gagal supaya kelihatan di dashboard admin
-            $this->log($member, $phone, $type, $message, 'failed', 'WHATSAPP_TOKEN belum diatur di .env');
+            $this->log($member, $phone, $type, $message, 'failed', 'WHATSAPP_API_TOKEN belum diatur di Environment Variables (.env / Vercel)');
             return false;
         }
 
         try {
             $response = Http::asForm()
-                ->withHeaders(['Authorization' => $this->token])
-                ->timeout(10)
+                ->withHeaders([
+                    'Authorization' => $this->token,
+                ])
+                ->timeout(12)
                 ->post($this->apiUrl, [
                     'target' => $phone,
                     'message' => $message,
+                    'countryCode' => '62',
                 ]);
 
-            $status = $response->successful() ? 'sent' : 'failed';
-            $this->log($member, $phone, $type, $message, $status, $response->body());
+            $body = $response->body();
+            $data = $response->json();
 
-            return $status === 'sent';
+            // Fonnte returns JSON with status: true/false
+            $isSuccess = $response->successful() && (!isset($data['status']) || $data['status'] === true || $data['status'] === 'true');
+            $status = $isSuccess ? 'sent' : 'failed';
+            $reason = $isSuccess ? ($data['message'] ?? 'Terkirim') : ($data['reason'] ?? $data['message'] ?? $body);
+
+            $this->log($member, $phone, $type, $message, $status, $reason);
+
+            return $isSuccess;
         } catch (\Throwable $e) {
             Log::error('WhatsApp send failed: ' . $e->getMessage());
             $this->log($member, $phone, $type, $message, 'failed', $e->getMessage());

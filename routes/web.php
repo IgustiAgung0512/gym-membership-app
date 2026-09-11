@@ -80,6 +80,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/attendance/manual', [AttendanceController::class, 'storeManual'])->name('attendance.manual');
 
     Route::get('/whatsapp-logs', [WhatsappLogController::class, 'index'])->name('whatsapp.index');
+    Route::post('/whatsapp-logs/test-send', [WhatsappLogController::class, 'testSend'])->name('whatsapp.test-send');
     Route::delete('/whatsapp-logs/clear-sent', [WhatsappLogController::class, 'clearSent'])->name('whatsapp.clear-sent');
     Route::delete('/whatsapp-logs/clear-all', [WhatsappLogController::class, 'clearAll'])->name('whatsapp.clear-all');
     Route::delete('/whatsapp-logs/{log}', [WhatsappLogController::class, 'destroy'])->name('whatsapp.destroy');

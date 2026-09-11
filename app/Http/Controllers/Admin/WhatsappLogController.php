@@ -20,8 +20,34 @@ class WhatsappLogController extends Controller
 
         $totalSent = WhatsappLog::where('status', 'sent')->count();
         $totalFailed = WhatsappLog::where('status', 'failed')->count();
+        $hasToken = !empty(config('services.whatsapp.token') ?: env('WHATSAPP_API_TOKEN') ?: env('WHATSAPP_TOKEN') ?: env('FONNTE_TOKEN'));
 
-        return view('admin.whatsapp.index', compact('logs', 'totalSent', 'totalFailed'));
+        return view('admin.whatsapp.index', compact('logs', 'totalSent', 'totalFailed', 'hasToken'));
+    }
+
+    /**
+     * Test kirim pesan WhatsApp dari admin dashboard
+     */
+    public function testSend(Request $request, \App\Services\WhatsAppService $whatsApp)
+    {
+        $data = $request->validate([
+            'phone' => ['required', 'string', 'max:25'],
+            'message' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $reflection = new \ReflectionClass($whatsApp);
+        $method = $reflection->getMethod('send');
+        $method->setAccessible(true);
+        $sent = $method->invoke($whatsApp, null, $data['phone'], $data['message'], 'test');
+
+        if ($sent) {
+            return back()->with('success', 'Uji coba pesan WhatsApp BERHASIL dikirim ke ' . $data['phone'] . '!');
+        }
+
+        $lastLog = WhatsappLog::latest()->first();
+        $reason = $lastLog?->response ?: 'Periksa konfigurasi token WhatsApp Anda.';
+
+        return back()->with('error', 'Gagal kirim WhatsApp: ' . $reason);
     }
 
     /**
