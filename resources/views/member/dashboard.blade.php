@@ -54,6 +54,72 @@
     $todayWorkout = $dailySplits[$dayOfWeek] ?? $dailySplits[1];
 
     $whatsappRenewUrl = "https://wa.me/?text=" . urlencode("Halo Admin GymPulse, saya ingin memperpanjang membership atas nama " . $member->user->name . " (Kode: " . $member->member_code . ", Paket: " . ($member->package->name ?? '-') . "). Mohon info langkah selanjutnya. Terima kasih!");
+
+    // Theme Card Styling Berdasarkan Paket Member
+    $duration = $member->package->duration_months ?? 1;
+    $packageName = strtolower($member->package->name ?? '');
+
+    if ($duration >= 12 || str_contains($packageName, 'tahun') || str_contains($packageName, 'vip') || str_contains($packageName, 'annual') || str_contains($packageName, 'gold')) {
+        // TIER TAHUNAN / VIP - ROYAL GOLD & OBSIDIAN TITANIUM
+        $cardTheme = [
+            'tier_title' => 'VIP ANNUAL PASS',
+            'tier_badge' => 'VIP ELITE TIER',
+            'tier_icon' => '👑',
+            'bg_gradient' => 'from-slate-950 via-zinc-900 to-amber-950/70',
+            'border' => 'border-amber-500/40 shadow-2xl shadow-amber-950/50',
+            'glow_1' => 'bg-amber-500/20',
+            'glow_2' => 'bg-yellow-400/10',
+            'accent_text' => 'text-amber-400',
+            'accent_light' => 'text-amber-300',
+            'badge_bg' => 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-sm shadow-amber-500/10',
+            'chip_gradient' => 'from-amber-200 via-yellow-400 to-amber-600',
+            'chip_border' => 'border-amber-600/70',
+            'avatar_border' => 'border-amber-400/60 ring-4 ring-amber-400/15',
+            'code_badge' => 'bg-amber-950/70 text-amber-400 border-amber-500/40',
+            'btn_renew' => 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 hover:from-amber-300 hover:to-yellow-300 shadow-lg shadow-amber-500/25',
+            'watermark_color' => 'text-amber-500/5',
+        ];
+    } elseif ($duration >= 3 || str_contains($packageName, '3 bulan') || str_contains($packageName, '6 bulan') || str_contains($packageName, 'pro') || str_contains($packageName, 'triwulan') || str_contains($packageName, 'sapphire')) {
+        // TIER 3-6 BULAN / PRO - CYBER SAPPHIRE & ELECTRIC CYAN
+        $cardTheme = [
+            'tier_title' => 'PRO QUARTERLY PASS',
+            'tier_badge' => 'PRO SAPPHIRE TIER',
+            'tier_icon' => '⚡',
+            'bg_gradient' => 'from-slate-950 via-slate-900 to-cyan-950/70',
+            'border' => 'border-cyan-500/40 shadow-2xl shadow-cyan-950/50',
+            'glow_1' => 'bg-cyan-500/20',
+            'glow_2' => 'bg-sky-400/10',
+            'accent_text' => 'text-cyan-400',
+            'accent_light' => 'text-cyan-300',
+            'badge_bg' => 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10',
+            'chip_gradient' => 'from-cyan-100 via-sky-300 to-cyan-600',
+            'chip_border' => 'border-cyan-600/70',
+            'avatar_border' => 'border-cyan-400/60 ring-4 ring-cyan-400/15',
+            'code_badge' => 'bg-cyan-950/70 text-cyan-400 border-cyan-500/40',
+            'btn_renew' => 'bg-gradient-to-r from-cyan-400 via-sky-400 to-cyan-500 text-slate-950 hover:from-cyan-300 hover:to-sky-300 shadow-lg shadow-cyan-500/25',
+            'watermark_color' => 'text-cyan-500/5',
+        ];
+    } else {
+        // TIER BULANAN / STANDARD - HYPER LIME & MATTE OBSIDIAN (SIGNATURE GYMPULSE)
+        $cardTheme = [
+            'tier_title' => 'STANDARD ACTIVE PASS',
+            'tier_badge' => 'MEMBER PASS',
+            'tier_icon' => '🔥',
+            'bg_gradient' => 'from-slate-950 via-slate-900 to-lime-950/60',
+            'border' => 'border-lime-500/40 shadow-2xl shadow-lime-950/50',
+            'glow_1' => 'bg-lime-500/20',
+            'glow_2' => 'bg-emerald-400/10',
+            'accent_text' => 'text-lime-400',
+            'accent_light' => 'text-lime-300',
+            'badge_bg' => 'bg-lime-500/15 text-lime-300 border-lime-500/40 shadow-sm shadow-lime-500/10',
+            'chip_gradient' => 'from-lime-100 via-lime-400 to-emerald-600',
+            'chip_border' => 'border-lime-600/70',
+            'avatar_border' => 'border-lime-400/60 ring-4 ring-lime-400/15',
+            'code_badge' => 'bg-lime-950/70 text-lime-400 border-lime-500/40',
+            'btn_renew' => 'bg-lime-500 hover:bg-lime-400 text-slate-950 shadow-lg shadow-lime-500/25',
+            'watermark_color' => 'text-lime-500/5',
+        ];
+    }
 @endphp
 
 <div x-data="{ 
@@ -349,12 +415,21 @@
     @endif
 
     {{-- =========================================================
-        1. DIGITAL MEMBER PASS CARD (EXECUTIVE RFID PASS)
+        1. DIGITAL MEMBER PASS CARD (LUXURY PACKAGE-THEMED RFID PASS)
     ========================================================= --}}
-    <div class="rounded-3xl p-6 sm:p-7 bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 text-white border border-slate-800 shadow-xl relative overflow-hidden">
+    <div class="rounded-3xl p-6 sm:p-7 bg-gradient-to-br {{ $cardTheme['bg_gradient'] }} text-white border {{ $cardTheme['border'] }} relative overflow-hidden transition-all duration-300">
         
-        {{-- Subtle Glow Ambient --}}
-        <div class="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-lime-500/10 blur-3xl pointer-events-none"></div>
+        {{-- Subtle Ambient Glows --}}
+        <div class="absolute -right-12 -bottom-12 w-72 h-72 rounded-full {{ $cardTheme['glow_1'] }} blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -top-12 w-48 h-48 rounded-full {{ $cardTheme['glow_2'] }} blur-2xl pointer-events-none"></div>
+
+        {{-- Background Geometric Texture Watermark --}}
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+        
+        {{-- Watermark Big Emblem --}}
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 font-display font-black text-8xl {{ $cardTheme['watermark_color'] }} select-none pointer-events-none tracking-tighter">
+            PULSE
+        </div>
 
         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-5 relative z-10">
             
@@ -376,7 +451,7 @@
                 >
                     <form method="POST" action="{{ route('member.photo.update') }}" enctype="multipart/form-data" x-ref="photoForm" class="contents">
                         @csrf
-                        <label for="photo-input" class="block w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-800 cursor-pointer group relative shadow-md" title="Klik untuk ganti foto profil">
+                        <label for="photo-input" class="block w-20 h-20 rounded-2xl overflow-hidden {{ $cardTheme['avatar_border'] }} bg-slate-800 cursor-pointer group relative shadow-lg" title="Klik untuk ganti foto profil">
                             <template x-if="preview">
                                 <img :src="preview" class="w-full h-full object-cover">
                             </template>
@@ -384,13 +459,13 @@
                                 @if ($currentPhotoUrl)
                                     <img src="{{ $currentPhotoUrl }}" alt="Foto {{ $member->user->name }}" class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center bg-slate-800 text-lime-400 font-display font-bold text-2xl">
+                                    <div class="w-full h-full flex items-center justify-center bg-slate-800 {{ $cardTheme['accent_text'] }} font-display font-bold text-2xl">
                                         {{ strtoupper(substr($member->user->name, 0, 1)) }}
                                     </div>
                                 @endif
                             </template>
-                            <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-[10px] text-white">
-                                <svg class="w-5 h-5 mb-0.5 text-lime-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-[10px] text-white backdrop-blur-[2px]">
+                                <svg class="w-5 h-5 mb-0.5 {{ $cardTheme['accent_text'] }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
@@ -399,8 +474,8 @@
                         </label>
                         <input id="photo-input" type="file" name="photo" accept="image/png,image/jpeg,image/webp" class="hidden" @change="setFile($event.target)">
 
-                        <div x-show="hasFile" x-cloak class="absolute top-full left-0 mt-2 flex items-center gap-2 z-20 whitespace-nowrap bg-slate-900 p-1.5 rounded-xl border border-slate-700 shadow-xl">
-                            <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-lime-500 text-slate-950 font-bold hover:bg-lime-400 transition">
+                        <div x-show="hasFile" x-cloak class="absolute top-full left-0 mt-2 flex items-center gap-2 z-20 whitespace-nowrap bg-slate-900/95 backdrop-blur-md p-1.5 rounded-xl border border-slate-700 shadow-xl">
+                            <button type="submit" class="text-xs px-3 py-1.5 rounded-lg {{ $cardTheme['btn_renew'] }} font-bold transition">
                                 Simpan
                             </button>
                             <button type="button" @click="hasFile = false; preview = null; $refs.photoForm.querySelector('#photo-input').value = ''"
@@ -412,15 +487,39 @@
                 </div>
 
                 <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MEMBER PASS</span>
-                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white mt-0.5">{{ $member->user->name }}</h2>
-                    <p class="text-xs text-lime-400 font-mono mt-1 font-bold">{{ $member->member_code }}</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold {{ $cardTheme['accent_text'] }} uppercase tracking-widest">{{ $cardTheme['tier_title'] }}</span>
+                        <span class="text-xs">{{ $cardTheme['tier_icon'] }}</span>
+                    </div>
+                    <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white mt-0.5 tracking-tight">{{ $member->user->name }}</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-xs {{ $cardTheme['accent_text'] }} font-mono font-bold px-2 py-0.5 rounded-md {{ $cardTheme['code_badge'] }} border">{{ $member->member_code }}</span>
+                        <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">&bull; GymPulse Member</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-                <span class="text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 {{ $member->status == 'active' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30' }}">
-                    <span class="w-2 h-2 rounded-full {{ $member->status == 'active' ? 'bg-lime-400 animate-pulse' : 'bg-rose-400' }}"></span>
+            <div class="flex items-center gap-3 self-start sm:self-auto">
+                {{-- RFID Smart Chip & Contactless Icon --}}
+                <div class="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+                    {{-- Mini EMV Smart Chip --}}
+                    <div class="w-7 h-5 rounded bg-gradient-to-br {{ $cardTheme['chip_gradient'] }} p-[1px] shadow-sm border {{ $cardTheme['chip_border'] }} flex items-center justify-center" title="RFID Smart Card Access">
+                        <div class="w-full h-full border border-black/25 rounded-[2px] grid grid-cols-2 gap-[1px] p-[1px]">
+                            <div class="border-r border-b border-black/30"></div>
+                            <div class="border-b border-black/30"></div>
+                            <div class="border-r border-black/30"></div>
+                            <div></div>
+                        </div>
+                    </div>
+                    {{-- Contactless / NFC Wave --}}
+                    <svg class="w-4 h-4 {{ $cardTheme['accent_text'] }} opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 16.5a5 5 0 010-9M12 19a8.5 8.5 0 000-14M15.5 21.5a12 12 0 000-19" />
+                    </svg>
+                </div>
+
+                {{-- Status Badge --}}
+                <span class="text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 {{ $member->status == 'active' ? $cardTheme['badge_bg'] . ' border' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30' }}">
+                    <span class="w-2 h-2 rounded-full {{ $member->status == 'active' ? 'bg-current animate-pulse' : 'bg-rose-400' }}"></span>
                     {{ strtoupper($member->status) }}
                 </span>
             </div>
@@ -431,14 +530,16 @@
             $latestAttendance = $attendances->first();
         @endphp
         {{-- Meta Info --}}
-        <div class="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-xs">
+        <div class="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-xs relative z-10">
             <div>
                 <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Paket Keanggotaan</p>
-                <p class="text-white font-bold text-sm sm:text-base mt-0.5">{{ $member->package->name ?? '-' }}</p>
+                <p class="text-white font-bold text-sm sm:text-base mt-0.5 flex items-center gap-1.5">
+                    <span>{{ $member->package->name ?? '-' }}</span>
+                </p>
             </div>
             <div>
                 <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">UID Kartu RFID</p>
-                <p class="text-lime-400 font-mono font-bold text-sm sm:text-base mt-0.5">{{ $member->rfidCard->uid ?? 'Belum terhubung' }}</p>
+                <p class="{{ $cardTheme['accent_text'] }} font-mono font-bold text-sm sm:text-base mt-0.5">{{ $member->rfidCard->uid ?? 'Belum terhubung' }}</p>
             </div>
             <div>
                 <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Check-In</p>
@@ -462,8 +563,8 @@
                             <span class="text-[10px] text-slate-400 font-normal">({{ $latestAttendance->check_out_at->format('d/m') }})</span>
                         @endif
                     @elseif ($latestAttendance && !$latestAttendance->check_out_at && $latestAttendance->check_in_at->isToday())
-                        <span class="text-lime-400 font-bold text-xs inline-flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>
+                        <span class="{{ $cardTheme['accent_text'] }} font-bold text-xs inline-flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
                             Sedang Latihan
                         </span>
                     @else
@@ -478,24 +579,24 @@
         </div>
 
         {{-- Action Bar --}}
-        <div class="mt-6 pt-4 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-                <span class="w-2 h-2 rounded-full bg-lime-400"></span>
+        <div class="mt-6 pt-4 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3 relative z-10">
+            <div class="flex items-center gap-2 text-xs text-slate-300">
+                <span class="w-2 h-2 rounded-full {{ $cardTheme['accent_text'] }} bg-current"></span>
                 <span>Tempelkan kartu fisik RFID Anda pada alat scanner gate saat tiba.</span>
             </div>
 
             <div class="flex items-center gap-2.5 ml-auto flex-wrap">
-                <button @click="invoiceModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                <button @click="invoiceModal = true" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition shadow-sm">
                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Bukti Keanggotaan</span>
                 </button>
 
-                <button @click="openRenewModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 text-xs font-bold transition shadow-sm">
+                <button @click="openRenewModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl {{ $cardTheme['btn_renew'] }} font-bold text-xs transition">
                     <span class="text-sm">⚡</span>
                     <span>Perpanjang Online</span>
                 </button>
 
-                <a href="{{ $whatsappRenewUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                <a href="{{ $whatsappRenewUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
                     <span>Chat WA</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </a>
