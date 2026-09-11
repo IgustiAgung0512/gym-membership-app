@@ -10,8 +10,12 @@
         {{-- QUICK SEARCH CHECK-IN CARD (2 COLS) --}}
         <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative" @click.outside="showDropdown = false">
             <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm">⚡</span>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
                     <div>
                         <h3 class="font-display font-bold text-slate-900 text-sm" style="color: #0f172a !important;">Quick Check-in Fallback (Lupa Kartu)</h3>
                         <p class="text-[11px] text-slate-500">Klik kolom pencarian untuk memilih member aktif atau ketik Nama / No. HP / Kode Member.</p>
@@ -22,7 +26,7 @@
                 </span>
             </div>
 
-            <form method="POST" action="{{ route('attendance.manual') }}" @submit.prevent="submitDirect()">
+            <form method="POST" action="{{ route('admin.attendance.manual') }}" @submit.prevent="submitDirect()">
                 @csrf
                 <div class="relative">
                     <input 
@@ -35,7 +39,11 @@
                         placeholder="Klik disini / ketik Nama Member, No. HP, atau Kode Member..."
                         class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-28 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-lime-500 focus:bg-white text-slate-900 shadow-inner"
                     >
-                    <span class="absolute left-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
+                    <span class="absolute left-3.5 top-3.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
 
                     <button 
                         type="button"
@@ -87,7 +95,7 @@
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700" x-text="m.package ? m.package.name : 'Paket Gym'"></span>
                             <span class="text-xs font-bold text-lime-900 bg-lime-200 group-hover:bg-lime-300 px-2.5 py-1 rounded-lg transition shadow-xs">
-                                ⚡ Check-in
+                                Check-in
                             </span>
                         </div>
                     </div>
@@ -116,7 +124,7 @@
                             <p class="text-[11px] text-slate-500 font-mono" x-text="'Kode: ' + selectedMember.member_code + ' | Telp: ' + (selectedMember.user?.phone || '-')"></p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('attendance.manual') }}">
+                    <form method="POST" action="{{ route('admin.attendance.manual') }}">
                         @csrf
                         <input type="hidden" name="member_id" :value="selectedMember.id">
                         <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition">
@@ -131,12 +139,14 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-base">📅</span>
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                     <h3 class="font-display font-bold text-slate-900 text-sm" style="color: #0f172a !important;">Filter Tanggal Absensi</h3>
                 </div>
                 <p class="text-xs text-slate-500">Total: <strong class="text-slate-900">{{ $attendances->total() }}</strong> sesi presensi tercatat.</p>
             </div>
-            <form method="GET" action="{{ route('attendance.index') }}" class="flex items-center gap-2.5 mt-4">
+            <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex items-center gap-2.5 mt-4">
                 <input type="date" name="date" value="{{ $date }}" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-lime-500">
                 <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition shadow-sm shrink-0">
                     Tampilkan
@@ -176,11 +186,11 @@
                     <div>
                         <span class="text-slate-500">Metode: </span>
                         @if ($a->method === 'rfid')
-                            <span class="font-bold text-lime-700">⚡ RFID Tap</span>
+                            <span class="font-bold text-lime-700">RFID Tap</span>
                         @elseif ($a->method === 'qr')
-                            <span class="font-bold text-lime-700">📱 QR E-Card</span>
+                            <span class="font-bold text-lime-700">QR E-Card</span>
                         @else
-                            <span class="font-semibold text-slate-700">✍️ Manual</span>
+                            <span class="font-semibold text-slate-700">Manual</span>
                         @endif
                     </div>
                     <div>
@@ -232,11 +242,11 @@
                         </td>
                         <td class="px-5 py-3.5">
                             @if ($a->method === 'rfid')
-                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-lime-100 text-lime-800">⚡ RFID: {{ $a->rfidCard->uid ?? 'Card' }}</span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-lime-100 text-lime-800">RFID: {{ $a->rfidCard->uid ?? 'Card' }}</span>
                             @elseif ($a->method === 'qr')
-                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-lime-100 text-lime-800">📱 QR E-Card</span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-lime-100 text-lime-800">QR E-Card</span>
                             @else
-                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600">✍️ Manual</span>
+                                <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-600">Manual</span>
                             @endif
                         </td>
                         <td class="px-5 py-3.5 text-slate-900 font-mono font-bold" style="color: #0f172a !important;">{{ $a->check_in_at->format('H:i:s') }} WIB</td>
@@ -297,7 +307,7 @@ function adminQuickAttendanceApp() {
             
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = "{{ route('attendance.manual') }}";
+            form.action = "{{ route('admin.attendance.manual') }}";
             
             const csrf = document.createElement('input');
             csrf.type = 'hidden';
@@ -333,7 +343,7 @@ function adminQuickAttendanceApp() {
             if (!this.searchQuery.trim()) return;
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = "{{ route('attendance.manual') }}";
+            form.action = "{{ route('admin.attendance.manual') }}";
             
             const csrf = document.createElement('input');
             csrf.type = 'hidden';

@@ -177,4 +177,45 @@ class MemberPhotoAndSecurityUiTest extends TestCase
         $this->assertEquals(1, $response->json('today_checkins'));
         $this->assertNotEmpty($response->json('recent_checkins'));
     }
+
+    /**
+     * Test admin dapat membuka halaman absensi dan mencatat checkin manual tanpa RouteNotFoundException.
+     */
+    public function test_admin_can_view_attendance_page_and_perform_manual_checkin(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $memberUser = User::factory()->create(['role' => 'member']);
+        $package = MembershipPackage::create([
+            'name' => 'Paket Bulanan',
+            'duration_months' => 1,
+            'price' => 150000,
+            'is_active' => true,
+        ]);
+
+        $member = Member::create([
+            'user_id' => $memberUser->id,
+            'membership_package_id' => $package->id,
+            'member_code' => 'GYM-2609-0099',
+            'status' => 'active',
+            'join_date' => now(),
+            'expire_date' => now()->addMonth(),
+        ]);
+
+        // 1. Render halaman index absensi admin
+        $viewResponse = $this->actingAs($admin)->get(route('admin.attendance.index'));
+        $viewResponse->assertStatus(200);
+        $viewResponse->assertSee('Absensi / Check-in');
+        $viewResponse->assertSee(route('admin.attendance.manual'), false);
+
+        // 2. Submit check-in manual oleh admin
+        $manualResponse = $this->actingAs($admin)->post(route('admin.attendance.manual'), [
+            'member_id' => $member->id,
+        ]);
+        $manualResponse->assertRedirect();
+        $this->assertDatabaseHas('attendances', [
+            'member_id' => $member->id,
+            'method' => 'manual',
+        ]);
+    }
 }
+
