@@ -68,6 +68,19 @@ class DashboardController extends Controller
     }
     public function latestRfidCheckin()
     {
+        $recentCheckins = Attendance::with('member.user')->latest('check_in_at')->limit(8)->get()->map(function ($a) {
+            return [
+                'id' => $a->id,
+                'name' => $a->member->user->name ?? 'Member',
+                'member_code' => $a->member->member_code ?? '-',
+                'photo' => $a->member?->photo ? route('admin.members.photo', $a->member) : null,
+                'initial' => strtoupper(substr($a->member->user->name ?? '?', 0, 1)),
+                'time' => $a->check_in_at ? $a->check_in_at->format('H:i') . ' WIB' : '-',
+                'checkout_time' => $a->check_out_at ? $a->check_out_at->format('H:i') . ' WIB' : null,
+            ];
+        });
+        $todayCheckins = Attendance::whereDate('check_in_at', today())->count();
+
         /*
         |--------------------------------------------------------------------------
         | 1. AMBIL UID TERBARU DARI scan_uids
@@ -78,7 +91,6 @@ class DashboardController extends Controller
             ->latest('id')
             ->first();
 
-
         /*
         |--------------------------------------------------------------------------
         | Tidak ada scan
@@ -88,13 +100,14 @@ class DashboardController extends Controller
         if (!$scan || !$scan->uid) {
             return response()->json([
                 'exists' => false,
+                'recent_checkins' => $recentCheckins,
+                'today_checkins' => $todayCheckins,
             ]);
         }
 
         // Dipakai frontend untuk dedup polling (supaya pesan peringatan
         // tidak "nempel" terus dan bisa reset kalau kartu yang sama di-tap ulang).
         $scanAt = $scan->updated_at ?? $scan->created_at;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -103,7 +116,6 @@ class DashboardController extends Controller
         */
 
         $uid = trim($scan->uid);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -117,7 +129,6 @@ class DashboardController extends Controller
             ->where('uid', $uid)
             ->first();
 
-
         /*
         |--------------------------------------------------------------------------
         | UID BELUM TERDAFTAR / KARTU BELUM TERHUBUNG DENGAN MEMBER
@@ -130,9 +141,10 @@ class DashboardController extends Controller
                 'reason' => 'unregistered',
                 'uid' => $uid,
                 'scan_at' => $scanAt,
+                'recent_checkins' => $recentCheckins,
+                'today_checkins' => $todayCheckins,
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -148,9 +160,10 @@ class DashboardController extends Controller
                 'name' => $card->member->user->name,
                 'member_code' => $card->member->member_code,
                 'scan_at' => $scanAt,
+                'recent_checkins' => $recentCheckins,
+                'today_checkins' => $todayCheckins,
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -159,7 +172,6 @@ class DashboardController extends Controller
         */
 
         $member = $card->member;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -175,9 +187,10 @@ class DashboardController extends Controller
                 'name' => $member->user->name,
                 'member_code' => $member->member_code,
                 'scan_at' => $scanAt,
+                'recent_checkins' => $recentCheckins,
+                'today_checkins' => $todayCheckins,
             ]);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -201,12 +214,12 @@ class DashboardController extends Controller
 
         if (!$attendance) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Data presensi hari ini tidak ditemukan.'
-            ], 404);
+                'exists' => false,
+                'recent_checkins' => $recentCheckins,
+                'today_checkins' => $todayCheckins,
+            ]);
         }
 
-            
         /*
         |--------------------------------------------------------------------------
         | 9. SIAPKAN FOTO MEMBER
@@ -218,7 +231,6 @@ class DashboardController extends Controller
         if ($attendance->member?->photo) {
             $photo = route('admin.members.photo', $attendance->member);
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -233,22 +245,20 @@ class DashboardController extends Controller
             'member_code' => $attendance->member->member_code,
             'uid' => $attendance->rfidCard->uid ?? '-',
             'photo' => $photo,
-        
             'time' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('H:i:s')
                 : '-',
-        
             'checkout_time' => $attendance->check_out_at
                 ? $attendance->check_out_at->format('H:i:s')
                 : null,
-        
             'date' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('d M Y')
                 : '-',
-        
             'action' => $attendance->check_out_at
                 ? 'checkout'
                 : 'checkin',
+            'recent_checkins' => $recentCheckins,
+            'today_checkins' => $todayCheckins,
         ]);
     }
 }

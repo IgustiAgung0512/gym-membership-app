@@ -150,10 +150,10 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     @php
         $stats = [
-            ['label' => 'Member Aktif', 'value' => $totalActive, 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700'],
-            ['label' => 'Member Baru Bulan Ini', 'value' => $newThisMonth, 'icon' => 'M12 4v16m8-8H4', 'bg' => 'bg-blue-50', 'text' => 'text-blue-700'],
-            ['label' => 'Check-in Hari Ini', 'value' => $todayCheckins, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-lime-50', 'text' => 'text-lime-700'],
-            ['label' => 'Segera Berakhir (7hr)', 'value' => $expiringSoon, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-rose-50', 'text' => 'text-rose-700'],
+            ['id' => 'stat-active-members', 'label' => 'Member Aktif', 'value' => $totalActive, 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-8a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 11-8 0 4 4 0 018 0z', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700'],
+            ['id' => 'stat-new-members', 'label' => 'Member Baru Bulan Ini', 'value' => $newThisMonth, 'icon' => 'M12 4v16m8-8H4', 'bg' => 'bg-blue-50', 'text' => 'text-blue-700'],
+            ['id' => 'stat-today-checkins', 'label' => 'Check-in Hari Ini', 'value' => $todayCheckins, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-lime-50', 'text' => 'text-lime-700'],
+            ['id' => 'stat-expiring-soon', 'label' => 'Segera Berakhir (7hr)', 'value' => $expiringSoon, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', 'bg' => 'bg-rose-50', 'text' => 'text-rose-700'],
         ];
     @endphp
     @foreach ($stats as $s)
@@ -163,7 +163,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/>
                 </svg>
             </div>
-            <p class="text-2xl lg:text-3xl font-display font-extrabold text-slate-900">{{ $s['value'] }}</p>
+            <p id="{{ $s['id'] }}" class="text-2xl lg:text-3xl font-display font-extrabold text-slate-900">{{ $s['value'] }}</p>
             <p class="text-xs text-slate-500 font-medium mt-1">{{ $s['label'] }}</p>
         </div>
     @endforeach
@@ -253,7 +253,7 @@
             <span>Check-in Terbaru</span>
             <span class="text-xs font-normal text-slate-400">Hari ini</span>
         </h2>
-        <div class="space-y-3">
+        <div id="recent-checkins-container" class="space-y-3">
             @forelse ($recentCheckins as $a)
                 <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
                     @if ($a->member?->photo)
@@ -335,6 +335,53 @@ document.addEventListener('DOMContentLoaded', function () {
     const liveIndicator = document.getElementById('rfid-live-indicator');
     const liveDot = document.getElementById('rfid-live-dot');
 
+    const recentCheckinsContainer = document.getElementById('recent-checkins-container');
+    const todayCheckinsStat = document.getElementById('stat-today-checkins');
+    let lastCheckinsSignature = '';
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function updateRecentCheckins(items) {
+        if (!recentCheckinsContainer || !Array.isArray(items)) return;
+
+        const currentSignature = items.map(i => `${i.id}_${i.time}_${i.checkout_time || ''}`).join('|');
+        if (currentSignature === lastCheckinsSignature) return;
+        lastCheckinsSignature = currentSignature;
+
+        if (items.length === 0) {
+            recentCheckinsContainer.innerHTML = '<p class="text-sm text-slate-400 py-4 text-center">Belum ada aktivitas check-in hari ini.</p>';
+            return;
+        }
+
+        recentCheckinsContainer.innerHTML = items.map(item => {
+            const photoEl = item.photo
+                ? `<img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)}" class="w-9 h-9 rounded-full object-cover shrink-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                   <div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 hidden items-center justify-center font-bold text-sm shrink-0">${escapeHtml(item.initial)}</div>`
+                : `<div class="w-9 h-9 rounded-full bg-lime-100 text-lime-800 flex items-center justify-center font-bold text-sm shrink-0">${escapeHtml(item.initial)}</div>`;
+
+            return `
+                <div class="flex items-center gap-3 text-sm p-2 rounded-xl hover:bg-slate-50 transition">
+                    ${photoEl}
+                    <div class="min-w-0 flex-1">
+                        <p class="text-slate-900 font-semibold truncate">${escapeHtml(item.name)}</p>
+                        <p class="text-xs text-slate-400 font-mono">${escapeHtml(item.member_code)}</p>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-md shrink-0">
+                        ${escapeHtml(item.time)}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    }
+
     let lastAttendanceId = null;
     let lastCheckoutTime = null;
     let lastWarningKey = null;
@@ -374,6 +421,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (!response.ok) throw new Error('Gagal mengambil data check-in.');
             const data = await response.json();
+
+            // Selalu perbarui riwayat check-in & hitungan hari ini secara live
+            if (data.recent_checkins) {
+                updateRecentCheckins(data.recent_checkins);
+            }
+            if (data.today_checkins !== undefined && todayCheckinsStat) {
+                todayCheckinsStat.textContent = data.today_checkins;
+            }
 
             if (!data.exists) {
                 if (data.reason && warningMessages[data.reason]) {

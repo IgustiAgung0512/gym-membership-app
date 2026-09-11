@@ -91,4 +91,90 @@ class MemberPhotoAndSecurityUiTest extends TestCase
         $guestResponse = $this->get(route('cashier.members.photo', $member));
         $guestResponse->assertRedirect('/login');
     }
+
+    /**
+     * Test tampilan member dashboard memuat check-in & check-out pada kartu hitam dan endpoint polling berjalan.
+     */
+    public function test_member_dashboard_displays_checkin_and_checkout_with_polling(): void
+    {
+        $memberUser = User::factory()->create(['role' => 'member']);
+        $package = MembershipPackage::create([
+            'name' => 'Paket Bulanan',
+            'duration_months' => 1,
+            'price' => 150000,
+            'is_active' => true,
+        ]);
+
+        $member = Member::create([
+            'user_id' => $memberUser->id,
+            'membership_package_id' => $package->id,
+            'member_code' => 'GYM-2609-0001',
+            'status' => 'active',
+            'join_date' => now(),
+            'expire_date' => now()->addMonth(),
+        ]);
+
+        // Simpan riwayat absensi check-in hari ini (sedang latihan)
+        $attendance = \App\Models\Attendance::create([
+            'member_id' => $member->id,
+            'check_in_at' => now()->subMinutes(30),
+            'method' => 'rfid',
+        ]);
+
+        $response = $this->actingAs($memberUser)->get(route('member.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Check-In');
+        $response->assertSee('Check-Out');
+        $response->assertSee('Sedang Latihan');
+
+        // Test endpoint polling kehadiran
+        $pollResponse = $this->actingAs($memberUser)->get(route('member.latest-attendance'));
+        $pollResponse->assertStatus(200);
+        $pollResponse->assertJson([
+            'success' => true,
+            'has_attendance' => true,
+            'is_today' => true,
+            'is_training' => true,
+        ]);
+    }
+
+    /**
+     * Test admin dashboard latest rfid polling response menyertakan recent_checkins dan today_checkins untuk auto-refresh.
+     */
+    public function test_admin_dashboard_latest_rfid_returns_recent_checkins_for_auto_refresh(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $memberUser = User::factory()->create(['role' => 'member']);
+        $package = MembershipPackage::create([
+            'name' => 'Paket Bulanan',
+            'duration_months' => 1,
+            'price' => 150000,
+            'is_active' => true,
+        ]);
+
+        $member = Member::create([
+            'user_id' => $memberUser->id,
+            'membership_package_id' => $package->id,
+            'member_code' => 'GYM-2609-0002',
+            'status' => 'active',
+            'join_date' => now(),
+            'expire_date' => now()->addMonth(),
+        ]);
+
+        \App\Models\Attendance::create([
+            'member_id' => $member->id,
+            'check_in_at' => now()->subMinutes(15),
+            'method' => 'manual',
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard.latest-rfid-checkin'));
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'exists',
+            'recent_checkins',
+            'today_checkins',
+        ]);
+        $this->assertEquals(1, $response->json('today_checkins'));
+        $this->assertNotEmpty($response->json('recent_checkins'));
+    }
 }

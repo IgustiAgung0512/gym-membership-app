@@ -427,18 +427,52 @@
 
         </div>
 
+        @php
+            $latestAttendance = $attendances->first();
+        @endphp
         {{-- Meta Info --}}
-        <div class="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+        <div class="mt-7 pt-5 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-xs">
             <div>
-                <p class="text-slate-400 text-[11px] uppercase font-semibold">Paket Keanggotaan</p>
+                <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Paket Keanggotaan</p>
                 <p class="text-white font-bold text-sm sm:text-base mt-0.5">{{ $member->package->name ?? '-' }}</p>
             </div>
             <div>
-                <p class="text-slate-400 text-[11px] uppercase font-semibold">UID Kartu RFID</p>
+                <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">UID Kartu RFID</p>
                 <p class="text-lime-400 font-mono font-bold text-sm sm:text-base mt-0.5">{{ $member->rfidCard->uid ?? 'Belum terhubung' }}</p>
             </div>
-            <div class="col-span-2 sm:col-span-1 sm:text-right">
-                <p class="text-slate-400 text-[11px] uppercase font-semibold">Masa Berlaku</p>
+            <div>
+                <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Check-In</p>
+                <p id="member-card-checkin" class="text-white font-bold text-sm sm:text-base mt-0.5">
+                    @if ($latestAttendance)
+                        {{ $latestAttendance->check_in_at->format('H:i') }} WIB
+                        @if (!$latestAttendance->check_in_at->isToday())
+                            <span class="text-[10px] text-slate-400 font-normal">({{ $latestAttendance->check_in_at->format('d/m') }})</span>
+                        @endif
+                    @else
+                        <span class="text-slate-500 font-normal">-</span>
+                    @endif
+                </p>
+            </div>
+            <div>
+                <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Check-Out</p>
+                <p id="member-card-checkout" class="text-white font-bold text-sm sm:text-base mt-0.5">
+                    @if ($latestAttendance && $latestAttendance->check_out_at)
+                        {{ $latestAttendance->check_out_at->format('H:i') }} WIB
+                        @if (!$latestAttendance->check_out_at->isToday())
+                            <span class="text-[10px] text-slate-400 font-normal">({{ $latestAttendance->check_out_at->format('d/m') }})</span>
+                        @endif
+                    @elseif ($latestAttendance && !$latestAttendance->check_out_at && $latestAttendance->check_in_at->isToday())
+                        <span class="text-lime-400 font-bold text-xs inline-flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>
+                            Sedang Latihan
+                        </span>
+                    @else
+                        <span class="text-slate-500 font-normal">-</span>
+                    @endif
+                </p>
+            </div>
+            <div class="col-span-2 sm:col-span-1 lg:text-right">
+                <p class="text-slate-400 text-[11px] uppercase font-semibold tracking-wider">Masa Berlaku</p>
                 <p class="text-white font-bold text-sm sm:text-base mt-0.5">{{ optional($member->expire_date)->translatedFormat('d M Y') }}</p>
             </div>
         </div>
@@ -1634,4 +1668,55 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkinEl = document.getElementById('member-card-checkin');
+    const checkoutEl = document.getElementById('member-card-checkout');
+    let lastAttendanceState = '';
+
+    async function pollMemberAttendance() {
+        if (document.hidden) return;
+
+        try {
+            const response = await fetch('{{ route('member.latest-attendance') }}', {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) return;
+            const data = await response.json();
+
+            if (!data.success || !data.has_attendance) return;
+
+            const stateKey = `${data.check_in_time}_${data.check_out_time || ''}_${data.is_training ? '1' : '0'}`;
+            if (stateKey === lastAttendanceState) return;
+            lastAttendanceState = stateKey;
+
+            if (checkinEl) {
+                let text = data.check_in_time;
+                if (!data.is_today && data.check_in_date) {
+                    text += ` <span class="text-[10px] text-slate-400 font-normal">(${data.check_in_date})</span>`;
+                }
+                checkinEl.innerHTML = text;
+            }
+
+            if (checkoutEl) {
+                if (data.check_out_time) {
+                    let text = data.check_out_time;
+                    if (!data.is_today && data.check_in_date) {
+                        text += ` <span class="text-[10px] text-slate-400 font-normal">(${data.check_in_date})</span>`;
+                    }
+                    checkoutEl.innerHTML = text;
+                } else if (data.is_training) {
+                    checkoutEl.innerHTML = `<span class="text-lime-400 font-bold text-xs inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse"></span>Sedang Latihan</span>`;
+                } else {
+                    checkoutEl.innerHTML = `<span class="text-slate-500 font-normal">-</span>`;
+                }
+            }
+        } catch (e) {}
+    }
+
+    setInterval(pollMemberAttendance, 3000);
+});
+</script>
 @endsection

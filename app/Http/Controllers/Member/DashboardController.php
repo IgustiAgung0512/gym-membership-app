@@ -279,4 +279,32 @@ class DashboardController extends Controller
         return redirect()->route('member.dashboard')
             ->with('success', "Pembayaran berhasil! Membership {$package->name} Anda aktif s/d " . $member->fresh()->expire_date->translatedFormat('d F Y') . ".");
     }
+
+    /**
+     * Polling kehadiran / check-in terkini member untuk live update portal member
+     */
+    public function latestAttendance(Request $request)
+    {
+        $member = $request->user()->member;
+        if (!$member) {
+            return response()->json(['success' => false], 404);
+        }
+
+        $latest = $member->attendances()->latest('check_in_at')->first();
+        $visitsThisMonth = $member->attendances()->whereMonth('check_in_at', now()->month)->count();
+        $totalVisits = $member->attendances()->count();
+
+        return response()->json([
+            'success' => true,
+            'has_attendance' => (bool) $latest,
+            'check_in_time' => $latest ? $latest->check_in_at->format('H:i') . ' WIB' : '-',
+            'check_in_date' => $latest ? $latest->check_in_at->format('d/m') : '',
+            'is_today' => $latest ? $latest->check_in_at->isToday() : false,
+            'check_out_time' => ($latest && $latest->check_out_at) ? $latest->check_out_at->format('H:i') . ' WIB' : null,
+            'is_training' => ($latest && !$latest->check_out_at && $latest->check_in_at->isToday()),
+            'duration_formatted' => $latest ? $latest->duration_formatted : '-',
+            'visits_this_month' => $visitsThisMonth,
+            'total_visits' => $totalVisits,
+        ]);
+    }
 }

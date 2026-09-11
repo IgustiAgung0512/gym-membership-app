@@ -144,6 +144,7 @@ Route::middleware(['auth', 'role:cashier,admin'])->prefix('cashier')->name('cash
 
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/latest-attendance', [MemberDashboardController::class, 'latestAttendance'])->name('latest-attendance');
     Route::post('/renew', [MemberDashboardController::class, 'renew'])->name('renew');
     Route::post('/renew/initiate', [MemberDashboardController::class, 'initiateRenewal'])->name('renew.initiate')->middleware('throttle:checkout');
     Route::get('/renew/{payment}/status', [MemberDashboardController::class, 'renewalStatus'])->name('renew.status');
