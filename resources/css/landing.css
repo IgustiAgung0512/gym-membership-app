@@ -48,7 +48,6 @@ body.landing-page {
 h1, h2, h3, h4, h5, h6, .font-display {
     font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     letter-spacing: -0.02em;
-    color: var(--gp-primary);
 }
 
 /* Crisp Clean Panels */
