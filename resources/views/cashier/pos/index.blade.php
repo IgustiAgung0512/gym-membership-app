@@ -606,8 +606,8 @@ window.cashierPosApp = cashierPosApp;
                         {{-- Bottom Row: Big Bold Price & Prominent Lime Add Button --}}
                         <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none mb-0.5">Harga</span>
-                                <span class="font-display font-black text-base text-slate-900">
+                                <span class="text-[10px] text-slate-500 uppercase font-bold block leading-none mb-0.5" style="color: #64748b !important;">Harga</span>
+                                <span class="pos-price font-display font-black text-base lg:text-lg text-slate-950" style="color: #0f172a !important; font-weight: 900 !important;">
                                     Rp<span x-text="Number(p.price).toLocaleString('id-ID')"></span>
                                 </span>
                             </div>
@@ -644,7 +644,7 @@ window.cashierPosApp = cashierPosApp;
                             🛒
                         </div>
                         <div>
-                            <h2 class="font-display font-bold text-slate-900 text-base">Keranjang Kasir</h2>
+                            <h2 class="font-display font-bold text-slate-900 text-base" style="color: #0f172a !important;">Keranjang Kasir</h2>
                             <p class="text-[11px] text-slate-400" x-text="cart.length + ' item dipilih'"></p>
                         </div>
                     </div>
@@ -680,8 +680,8 @@ window.cashierPosApp = cashierPosApp;
                     <template x-for="item in cart" :key="item.product_id">
                         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
                             <div class="min-w-0 flex-1 pr-2">
-                                <p class="font-bold text-slate-900 truncate" x-text="item.name"></p>
-                                <p class="text-[11px] text-slate-500 font-mono">
+                                <p class="font-bold text-slate-900 truncate" style="color: #0f172a !important;" x-text="item.name"></p>
+                                <p class="text-[11px] text-slate-600 font-mono" style="color: #475569 !important;">
                                     Rp<span x-text="item.price.toLocaleString('id-ID')"></span> × <span x-text="item.quantity"></span>
                                 </p>
                             </div>
@@ -694,7 +694,7 @@ window.cashierPosApp = cashierPosApp;
                                 >
                                     -
                                 </button>
-                                <span class="font-bold text-xs w-5 text-center" x-text="item.quantity"></span>
+                                <span class="font-bold text-xs w-5 text-center text-slate-900" style="color: #0f172a !important;" x-text="item.quantity"></span>
                                 <button 
                                     type="button" 
                                     @click="updateQuantity(item, 1)" 
@@ -725,27 +725,27 @@ window.cashierPosApp = cashierPosApp;
 
             {{-- PAYMENT SUMMARY & BUTTON (Pinned to bottom) --}}
             <div class="mt-3 pt-3 border-t border-slate-200 space-y-2 shrink-0">
-                <div class="flex justify-between text-xs text-slate-500">
+                <div class="flex justify-between text-xs text-slate-600" style="color: #475569 !important;">
                     <span>Subtotal</span>
-                    <span class="font-mono font-semibold text-slate-800">
+                    <span class="font-mono font-bold text-slate-900" style="color: #0f172a !important;">
                         Rp<span x-text="subtotal.toLocaleString('id-ID')"></span>
                     </span>
                 </div>
 
-                <div class="flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center justify-between text-xs text-slate-600" style="color: #475569 !important;">
                     <span>Diskon (Rp)</span>
                     <input 
                         type="number" 
                         x-model="discount" 
                         min="0" 
-                        class="w-24 px-2 py-1 text-right bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-lime-500"
+                        class="w-24 px-2 py-1 text-right bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-lime-500 text-rose-600"
                         placeholder="0"
                     >
                 </div>
 
                 <div class="flex justify-between text-base font-display font-extrabold text-slate-900 pt-1.5 border-t border-slate-100">
-                    <span>Total Tagihan</span>
-                    <span class="text-lime-700 font-mono text-lg">
+                    <span style="color: #0f172a !important;">Total Tagihan</span>
+                    <span class="pos-price font-display font-black text-lg text-slate-950" style="color: #0f172a !important; font-weight: 900 !important;">
                         Rp<span x-text="totalAmount.toLocaleString('id-ID')"></span>
                     </span>
                 </div>

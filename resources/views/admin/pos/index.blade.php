@@ -579,8 +579,8 @@ window.adminPosApp = adminPosApp;
                         {{-- Bottom Row: Big Bold Price & Prominent Lime Add Button --}}
                         <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block leading-none mb-0.5">Harga</span>
-                                <span class="font-display font-black text-base lg:text-lg text-slate-900" x-text="formatRupiah(p.price)"></span>
+                                <span class="text-[10px] text-slate-500 uppercase font-bold block leading-none mb-0.5" style="color: #64748b !important;">Harga</span>
+                                <span class="pos-price font-display font-black text-base lg:text-lg text-slate-950 tracking-tight" style="color: #0f172a !important; font-weight: 900 !important;" x-text="formatRupiah(p.price)"></span>
                             </div>
                             
                             <button 
@@ -616,7 +616,7 @@ window.adminPosApp = adminPosApp;
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">🛒</span>
-                            <h3 class="font-display font-bold text-base text-slate-900">Keranjang Kasir</h3>
+                            <h3 class="font-display font-bold text-base text-slate-900" style="color: #0f172a !important;">Keranjang Kasir</h3>
                         </div>
                         <button 
                             x-show="cart.length > 0"
@@ -629,7 +629,7 @@ window.adminPosApp = adminPosApp;
 
                     {{-- Customer Selector --}}
                     <div class="py-2.5 border-b border-slate-100 shrink-0">
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Customer / Pembeli</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1" style="color: #64748b !important;">Customer / Pembeli</label>
                         <select 
                             x-model="memberId" 
                             @change="onMemberChange()"
@@ -642,41 +642,46 @@ window.adminPosApp = adminPosApp;
                         </select>
                     </div>
 
-                    {{-- Cart Items List (Dynamic Scrollable Area) --}}
-                    <div class="py-2.5 flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
+                    {{-- Cart Items List (Scrollable) --}}
+                    <div class="flex-1 min-h-0 overflow-y-auto py-3 space-y-2 pr-1">
                         <template x-for="item in cart" :key="item.product_id">
-                            <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs">
+                            <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 text-xs">
                                 <div class="flex-1 min-w-0">
-                                    <h5 class="font-bold text-slate-900 truncate" x-text="item.name"></h5>
-                                    <p class="text-slate-500 mt-0.5" x-text="formatRupiah(item.price)"></p>
+                                    <p class="font-bold text-xs text-slate-900 truncate" style="color: #0f172a !important;" x-text="item.name"></p>
+                                    <p class="text-slate-600 mt-0.5" style="color: #475569 !important;" x-text="formatRupiah(item.price)"></p>
                                 </div>
-
-                                {{-- Quantity Controls --}}
-                                <div class="flex items-center gap-1.5 shrink-0 bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
+                                <div class="flex items-center gap-1.5 shrink-0">
                                     <button 
-                                        @click="updateQuantity(item, -1)" 
-                                        class="w-5 h-5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold"
+                                        type="button" 
+                                        @click="updateQuantity(item, -1)"
+                                        class="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition"
                                     >
                                         -
                                     </button>
-                                    <span class="w-6 text-center font-bold font-mono text-slate-900" x-text="item.quantity"></span>
+                                    <span class="w-6 text-center font-mono font-bold text-slate-900" style="color: #0f172a !important;" x-text="item.quantity"></span>
                                     <button 
-                                        @click="updateQuantity(item, 1)" 
-                                        class="w-5 h-5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold"
+                                        type="button" 
+                                        @click="updateQuantity(item, 1)"
+                                        class="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition"
                                     >
                                         +
                                     </button>
+                                    <button 
+                                        type="button" 
+                                        @click="removeFromCart(item)"
+                                        class="text-slate-400 hover:text-rose-600 ml-1 p-1 text-base transition"
+                                    >
+                                        ×
+                                    </button>
                                 </div>
-
-                                <div class="text-right shrink-0 min-w-[70px]">
-                                    <p class="font-bold font-mono text-slate-900" x-text="formatRupiah(item.price * item.quantity)"></p>
-                                    <button @click="removeFromCart(item)" class="text-[10px] text-slate-400 hover:text-rose-500 mt-0.5">Hapus</button>
+                                <div class="text-right">
+                                    <p class="font-bold font-mono text-slate-900" style="color: #0f172a !important;" x-text="formatRupiah(item.price * item.quantity)"></p>
                                 </div>
                             </div>
                         </template>
 
                         <template x-if="cart.length === 0">
-                            <div class="py-10 text-center text-slate-400 text-xs">
+                            <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-8 text-xs">
                                 <p class="text-2xl mb-1">🛍️</p>
                                 <p>Keranjang masih kosong</p>
                                 <p class="text-[11px] text-slate-400 mt-0.5">Klik produk di panel sebelah kiri untuk menambahkan.</p>
@@ -688,11 +693,11 @@ window.adminPosApp = adminPosApp;
                 {{-- Cart Summary & Action Buttons (Pinned to bottom) --}}
                 <div class="pt-3 border-t border-slate-100 space-y-2.5 shrink-0">
                     <div class="space-y-1 text-xs">
-                        <div class="flex justify-between text-slate-500">
+                        <div class="flex justify-between text-slate-600" style="color: #475569 !important;">
                             <span>Subtotal</span>
-                            <span class="font-mono font-bold text-slate-800" x-text="formatRupiah(subtotal)"></span>
+                            <span class="font-mono font-bold text-slate-900" style="color: #0f172a !important;" x-text="formatRupiah(subtotal)"></span>
                         </div>
-                        <div class="flex justify-between items-center text-slate-500">
+                        <div class="flex justify-between items-center text-slate-600" style="color: #475569 !important;">
                             <span>Diskon (Rp)</span>
                             <input 
                                 type="number" 
@@ -704,8 +709,8 @@ window.adminPosApp = adminPosApp;
                             >
                         </div>
                         <div class="flex justify-between text-base pt-1.5 border-t border-slate-100">
-                            <span class="font-display font-bold text-slate-900">Total Tagihan</span>
-                            <span class="font-display font-extrabold text-xl text-slate-900" x-text="formatRupiah(totalAmount)"></span>
+                            <span class="font-display font-bold text-slate-900" style="color: #0f172a !important;">Total Tagihan</span>
+                            <span class="pos-price font-display font-black text-xl text-slate-950" style="color: #0f172a !important; font-weight: 900 !important;" x-text="formatRupiah(totalAmount)"></span>
                         </div>
                     </div>
 
@@ -959,18 +964,18 @@ window.adminPosApp = adminPosApp;
             </div>
 
             <div>
-                <h3 class="font-display font-bold text-xl text-slate-900">Transaksi Berhasil!</h3>
-                <p class="text-xs text-slate-500 mt-1" x-text="'No. Invoice: ' + (lastOrder ? lastOrder.invoice_number : '-')"></p>
-                <p class="font-display font-extrabold text-2xl text-slate-900 mt-2" x-text="formatRupiah(lastOrder ? lastOrder.total_amount : 0)"></p>
+                <h3 class="font-display font-bold text-xl text-slate-900" style="color: #0f172a !important;">Transaksi Berhasil!</h3>
+                <p class="text-xs text-slate-500 mt-1" style="color: #64748b !important;" x-text="'No. Invoice: ' + (lastOrder ? lastOrder.invoice_number : '-')"></p>
+                <p class="pos-price font-display font-extrabold text-2xl text-slate-950 mt-2" style="color: #0f172a !important; font-weight: 900 !important;" x-text="formatRupiah(lastOrder ? lastOrder.total_amount : 0)"></p>
             </div>
 
             <template x-if="lastOrder && lastOrder.payment_method === 'cash'">
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
                     <div class="flex justify-between">
-                        <span class="text-slate-500">Tunai Diterima:</span>
-                        <strong class="font-mono text-slate-800" x-text="formatRupiah(lastOrder.cash_received)"></strong>
+                        <span class="text-slate-600" style="color: #475569 !important;">Tunai Diterima:</span>
+                        <strong class="font-mono text-slate-900" style="color: #0f172a !important;" x-text="formatRupiah(lastOrder.cash_received)"></strong>
                     </div>
-                    <div class="flex justify-between text-emerald-700 font-bold">
+                    <div class="flex justify-between text-emerald-700 font-bold" style="color: #047857 !important;">
                         <span>Kembalian:</span>
                         <span class="font-mono" x-text="formatRupiah(lastOrder.cash_change)"></span>
                     </div>

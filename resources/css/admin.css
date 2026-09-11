@@ -97,12 +97,38 @@ main .border-base-line {
 }
 
 /* Headings & Text Overrides in Main */
-main h1, main h2, main h3, main h4 {
+main h1, main h2, main h3, main h4, main h5, main h6 {
     color: #0F172A !important;
 }
 
 main .text-white {
     color: #0F172A !important;
+}
+
+/* Explicit high-contrast text rules */
+main .text-slate-950,
+main .text-slate-900,
+main .text-slate-800,
+main .font-display,
+main strong,
+main b {
+    color: #0F172A !important;
+}
+
+main .text-slate-700 {
+    color: #334155 !important;
+}
+
+main .text-slate-600 {
+    color: #475569 !important;
+}
+
+main .text-slate-500 {
+    color: #64748B !important;
+}
+
+main .text-slate-400 {
+    color: #64748B !important;
 }
 
 /* Preserve text-white for elements with explicit dark background */
@@ -123,12 +149,16 @@ main .text-slate-300 {
     color: #334155 !important;
 }
 
-main .text-slate-400 {
-    color: #64748B !important;
-}
-
-main .text-slate-500 {
-    color: #64748B !important;
+/* POS Price & Numeric values guarantee high visibility */
+.pos-price,
+[x-text*="formatRupiah"],
+[x-text*="toLocaleString"],
+[x-text*="p.price"],
+[x-text*="item.price"],
+[x-text*="totalAmount"],
+[x-text*="subtotal"] {
+    color: #0F172A !important;
+    font-weight: 800;
 }
 
 /* Number Values & Stat Accents */
