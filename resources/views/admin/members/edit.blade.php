@@ -213,8 +213,8 @@
                 .catch(err => console.error(err));
         });
 
-        // Polling scan kartu setiap 1 detik
-        setInterval(pollLatestRfid, 1000);
+        // Polling scan kartu setiap 500ms agar respon instan
+        setInterval(pollLatestRfid, 500);
     });
 </script>
 @endsection

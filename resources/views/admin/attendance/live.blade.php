@@ -104,7 +104,8 @@ function liveCheckin() {
             } catch (e) { this.lastId = 0; }
 
             lucide.createIcons();
-            setInterval(() => this.poll(), 3000);
+            // Polling setiap 1 detik agar absensi langsung muncul di layar live monitor
+            setInterval(() => this.poll(), 1000);
         },
 
         tickClock() {

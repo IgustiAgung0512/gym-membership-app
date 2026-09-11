@@ -239,8 +239,8 @@
             uidInput.focus();
         });
 
-        // Polling setiap 1 detik untuk mendeteksi tap kartu baru dari reader
-        setInterval(pollLatestRfid, 1000);
+        // Polling setiap 500ms untuk mendeteksi tap kartu baru dari reader secara instan
+        setInterval(pollLatestRfid, 500);
     });
 </script>
 @endsection

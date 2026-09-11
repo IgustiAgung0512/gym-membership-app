@@ -197,7 +197,8 @@
             }
         }
 
-        setInterval(fetchLatestRfid, 1000);
+        // Polling setiap 500ms agar deteksi tap kartu instan
+        setInterval(fetchLatestRfid, 500);
     });
 </script>
 @endsection

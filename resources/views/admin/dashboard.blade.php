@@ -495,7 +495,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    setInterval(checkLatestRfidCheckin, 1000);
+    // Polling setiap 500ms agar kartu yang di-tap langsung muncul di dashboard
+    setInterval(checkLatestRfidCheckin, 500);
     checkLatestRfidCheckin();
 });
 </script>
