@@ -76,12 +76,10 @@ class MemberController extends Controller
                 $photoValue = $disk === 's3' ? Storage::disk('s3')->url($path) : $path;
             }
 
-            $memberCode = 'GYM-' . now()->format('ym') . '-' . str_pad(Member::count() + 1, 4, '0', STR_PAD_LEFT);
-
             $member = Member::create([
                 'user_id' => $user->id,
                 'membership_package_id' => $package->id,
-                'member_code' => $memberCode,
+                'member_code' => Member::generateUniqueMemberCode(),
                 'join_date' => now(),
                 'expire_date' => now()->addMonths($package->duration_months),
                 'status' => 'active',

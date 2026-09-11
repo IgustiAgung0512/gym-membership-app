@@ -296,13 +296,10 @@ class OnlineRegistrationController extends Controller
             // 2. Cek apakah member sudah ada
             $member = Member::where('user_id', $user->id)->first();
             if (!$member) {
-                $count = Member::count() + 1;
-                $memberCode = 'GYM-' . now()->format('ym') . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
-
                 $member = Member::create([
                     'user_id'               => $user->id,
                     'membership_package_id' => $package->id,
-                    'member_code'           => $memberCode,
+                    'member_code'           => Member::generateUniqueMemberCode(),
                     'gender'                => $pending->gender,
                     'birth_date'            => $pending->birth_date,
                     'address'               => $pending->address,

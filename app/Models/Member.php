@@ -67,4 +67,33 @@ class Member extends Model
 
         return (int) now()->startOfDay()->diffInDays($this->expire_date, false);
     }
+
+    /**
+     * Generate Nomor Member Unik & Anti-Duplikat (GYM-YYMM-XXXX)
+     */
+    public static function generateUniqueMemberCode(): string
+    {
+        $prefix = 'GYM-' . now()->format('ym') . '-';
+        
+        $lastMember = self::where('member_code', 'LIKE', "{$prefix}%")
+            ->orderBy('member_code', 'desc')
+            ->first();
+
+        $nextNumber = 1;
+        if ($lastMember && preg_match('/-(\d+)$/', $lastMember->member_code, $matches)) {
+            $nextNumber = ((int) $matches[1]) + 1;
+        } else {
+            $nextNumber = self::count() + 1;
+        }
+
+        $code = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        // Fail-safe jika kode sudah terpakai
+        while (self::where('member_code', $code)->exists()) {
+            $nextNumber++;
+            $code = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        return $code;
+    }
 }

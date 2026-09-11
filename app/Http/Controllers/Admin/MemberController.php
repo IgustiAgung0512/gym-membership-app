@@ -136,7 +136,7 @@ class MemberController extends Controller
             $member = Member::create([
                 'user_id' => $user->id,
                 'membership_package_id' => $package->id,
-                'member_code' => 'GYM-' . now()->format('ym') . '-' . str_pad(Member::count() + 1, 4, '0', STR_PAD_LEFT),
+                'member_code' => Member::generateUniqueMemberCode(),
                 'address' => $data['address'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'] ?? null,
