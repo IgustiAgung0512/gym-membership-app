@@ -6,15 +6,12 @@ $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $g.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::AntiAliasGridFit
 
-# Bright Lime Green gradient background
-$rect = [System.Drawing.Rectangle]::new(0, 0, $size, $size)
-$c1 = [System.Drawing.ColorTranslator]::FromHtml('#BEF264')
-$c2 = [System.Drawing.ColorTranslator]::FromHtml('#84CC16')
-$brushBg = [System.Drawing.Drawing2D.LinearGradientBrush]::new($rect, $c1, $c2, 45)
+# Background dark slate (#0F172A = bg-slate-900)
+$brushBg = [System.Drawing.SolidBrush]::new([System.Drawing.ColorTranslator]::FromHtml('#0F172A'))
 
 # Rounded rectangle
 $path = [System.Drawing.Drawing2D.GraphicsPath]::new()
-$radius = 14
+$radius = 16
 $diameter = $radius * 2
 $arcRect = [System.Drawing.Rectangle]::new(0, 0, $diameter, $diameter)
 $path.AddArc($arcRect, 180, 90)
@@ -28,18 +25,14 @@ $path.CloseFigure()
 
 $g.FillPath($brushBg, $path)
 
-# Draw bold black/dark slate 'G'
-$font = [System.Drawing.Font]::new('Arial Black', [float]34, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
-$brushText = [System.Drawing.SolidBrush]::new([System.Drawing.ColorTranslator]::FromHtml('#0F172A'))
+# Draw bold 'G' in text-lime-400 (#A3E635)
+$font = [System.Drawing.Font]::new('Arial Black', [float]35, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
+$brushText = [System.Drawing.SolidBrush]::new([System.Drawing.ColorTranslator]::FromHtml('#A3E635'))
 $format = [System.Drawing.StringFormat]::new()
 $format.Alignment = [System.Drawing.StringAlignment]::Center
 $format.LineAlignment = [System.Drawing.StringAlignment]::Center
-$textRect = [System.Drawing.RectangleF]::new(0, 2, $size, $size)
+$textRect = [System.Drawing.RectangleF]::new(0, 3, $size, $size)
 $g.DrawString('G', $font, $brushText, $textRect, $format)
-
-# Draw small accent dot
-$brushDot = [System.Drawing.SolidBrush]::new([System.Drawing.ColorTranslator]::FromHtml('#0F172A'))
-$g.FillEllipse($brushDot, 48, 10, 7, 7)
 
 # Save high-res PNG
 $bmp.Save('public/favicon.png', [System.Drawing.Imaging.ImageFormat]::Png)
@@ -54,4 +47,4 @@ $fs.Close()
 
 $g.Dispose()
 $bmp.Dispose()
-Write-Output 'Bright high-contrast favicon generated successfully'
+Write-Output 'Logo matched favicon generated successfully'

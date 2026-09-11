@@ -1,16 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="limeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#BEF264"/>
-      <stop offset="100%" stop-color="#84CC16"/>
-    </linearGradient>
-  </defs>
-  <!-- Bright Lime Green Background -->
-  <rect width="64" height="64" rx="14" fill="url(#limeGrad)"/>
+  <!-- Dark Slate Background (bg-slate-900: #0F172A) with rounded corners -->
+  <rect width="64" height="64" rx="16" fill="#0F172A"/>
   
-  <!-- Bold Dark Slate Letter 'G' with max contrast -->
-  <text x="32" y="47" font-family="'Space Grotesk', 'Inter', Arial, sans-serif" font-size="46" font-weight="900" fill="#0F172A" text-anchor="middle">G</text>
-  
-  <!-- Small dark accent dot -->
-  <circle cx="51" cy="14" r="3.5" fill="#0F172A"/>
+  <!-- Bold Lime Green 'G' (text-lime-400: #A3E635) centered & thick -->
+  <text x="32" y="48" font-family="'Space Grotesk', 'Inter', 'Arial Black', Impact, system-ui, sans-serif" font-size="44" font-weight="900" fill="#A3E635" text-anchor="middle">G</text>
 </svg>
