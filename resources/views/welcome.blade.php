@@ -129,11 +129,24 @@
                 <!-- Auth CTA Buttons (Optimized for Mobile & Desktop) -->
                 <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                     @auth
-                        <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard') }}" 
-                           class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition whitespace-nowrap shadow-sm">
+                        @php
+                            $dashboardRoute = Auth::user()->isAdmin() 
+                                ? route('admin.dashboard') 
+                                : (Auth::user()->isCashier() 
+                                    ? route('cashier.dashboard') 
+                                    : route('member.dashboard'));
+                            $dashboardLabel = Auth::user()->isAdmin() 
+                                ? 'Dashboard Admin' 
+                                : (Auth::user()->isCashier() 
+                                    ? 'Dashboard Kasir' 
+                                    : 'Dashboard Member');
+                        @endphp
+                        <a href="{{ $dashboardRoute }}" 
+                           class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 transition whitespace-nowrap shadow-sm"
+                           style="color: #ffffff; font-size: 0.8125rem; font-weight: 700;">
                             <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse" aria-hidden="true"></span>
-                            <span class="max-w-[120px] truncate">Dashboard</span>
-                            <svg class="w-3.5 h-3.5 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            <span style="color: #ffffff;">{{ $dashboardLabel }}</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" style="color: #84cc16;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @else
                         <a href="{{ route('login') }}" 
@@ -173,8 +186,10 @@
             <a href="#faq" class="block py-2 text-slate-700 hover:text-lime-700 font-semibold">FAQ & Lokasi Gym</a>
             <div class="pt-2">
                 @auth
-                    <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('member.dashboard') }}" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-sm">
-                        Buka Dashboard
+                    <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : (Auth::user()->isCashier() ? route('cashier.dashboard') : route('member.dashboard')) }}" 
+                       class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-900 font-bold text-sm hover:bg-slate-800 transition"
+                       style="color: #ffffff;">
+                        {{ Auth::user()->isAdmin() ? 'Dashboard Admin' : (Auth::user()->isCashier() ? 'Dashboard Kasir' : 'Dashboard Member') }}
                     </a>
                 @else
                     <div class="grid grid-cols-2 gap-2">
