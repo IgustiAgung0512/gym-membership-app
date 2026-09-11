@@ -118,5 +118,12 @@ class RfidScanSpeedTest extends TestCase
             'uid' => 'C1:B8:C8:A3',
         ], $headers);
         $res3->assertStatus(200);
+
+        // 4. Test scan via /v1/members/add menggunakan form-data (seperti di Thunder Client)
+        $res4 = $this->post('/v1/members/add', [
+            'uid' => 'C1:B8:C8:A3',
+            'device_key' => config('services.rfid.device_key') ?: '',
+        ]);
+        $res4->assertStatus(200);
     }
 }

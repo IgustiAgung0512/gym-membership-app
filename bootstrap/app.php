@@ -19,6 +19,24 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->append(SecurityHeaders::class);
 
+        // Kecualikan endpoint hardware RFID reader dan Webhook dari proteksi CSRF Token (agar tidak error 419 Page Expired)
+        $middleware->validateCsrfTokens(except: [
+            'rfid/scan',
+            'api/rfid/scan',
+            'scan_uid',
+            'api/scan_uid',
+            'members/add',
+            'api/members/add',
+            'scan',
+            'api/scan',
+            'v1/*',
+            'api/*',
+            'payment/webhook',
+            'api/payment/webhook',
+            'midtrans/notification',
+            'api/midtrans/notification',
+        ]);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'force-password-change' => ForcePasswordChange::class,
